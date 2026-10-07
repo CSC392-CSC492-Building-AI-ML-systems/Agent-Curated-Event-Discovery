@@ -3,4 +3,6 @@ export interface EventideEvent {
   id: number;
   title: string;
   description: string;
+  longitude?: number;
+  latitude?: number;
 }
