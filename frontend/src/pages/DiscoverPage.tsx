@@ -6,7 +6,7 @@ function DiscoverPage() {
     const [events, setEvents] = useState<EventideEvent[]>([]);
     useEffect(() => {
         //all the initial fetches would go here
-        setEvents([{ key: 1, id: 1, title: "Event 1", description: "This is the first event." }]);
+        setEvents([{ key: 1, id: 1, title: "Event 1", description: "This is the first event.", categories: ['tech'] }]);
       }, []
     )
     return <div>

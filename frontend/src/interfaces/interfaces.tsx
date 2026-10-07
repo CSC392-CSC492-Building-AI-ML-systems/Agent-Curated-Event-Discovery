@@ -5,4 +5,5 @@ export interface EventideEvent {
   description: string;
   longitude?: number;
   latitude?: number;
+  categories: string[];
 }
