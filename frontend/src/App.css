@@ -185,6 +185,9 @@
 
 /* THIS IS WHERE BY STYLES ACTUALLY START */
 
+h1 {
+  border: 1px solid var(--border);
+}
 .events{
   border: 1px solid var(--border);
   display: flex;
@@ -206,4 +209,20 @@
   gap: 10px;
   border: 1px solid var(--border);
   padding: 10px 20px;
+}
+
+.mapContainer{
+  display: flex;
+  flex: 1;
+  height: 500px;
+  width: 100%;
+  background-color: rgb(175, 175, 175);
+}
+
+.container{
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100vh;
+  border: 1px solid var(--border);
 }
