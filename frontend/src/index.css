@@ -1,6 +1,6 @@
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
+  --text: #08060d;
+  --text-h: #6b6375;
   --bg: #fff;
   --border: #e5e4e7;
   --code-bg: #f4f3ec;
@@ -80,6 +80,7 @@ h2 {
   }
 }
 p {
+  color: var(--text);
   margin: 0;
 }
 

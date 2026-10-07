@@ -83,11 +83,6 @@
     }
   }
 
-  .icon {
-    margin-bottom: 16px;
-    width: 22px;
-    height: 22px;
-  }
 
   @media (max-width: 1024px) {
     flex-direction: column;
@@ -244,12 +239,16 @@ h1 {
   align-items: center;
   justify-content: flex-start;
   box-sizing: border-box;
+  border-radius: 0 50px 50px 0;
+  gap:10px;
 }
 .mapSideBar{
   position: absolute;
   top: 0;
   left: 0;
   height: 100%;
+  border-radius: 0 50px 50px 0;
+  background: var(--bg);
 }
 .eventsSmall {
   width: 80%;
@@ -273,6 +272,8 @@ h1 {
   padding: 5px 15px;
   border: 1px solid black;
   display: flex;
+  gap:10px;
+  background: var(--bg);
 }
 
 .searchBarInput{
@@ -284,10 +285,13 @@ h1 {
 }
 
 .icon{
-  width: 28px;
+  width: 25px;
   display: flex;
 }
-
+.close-icon{
+  width: 22px;
+  display: flex;
+}
 .page {
   display: flex;
   flex-direction: column;
@@ -324,6 +328,11 @@ h1 {
   flex-direction: row;
 }
 
+.column{
+  display: flex;
+  flex-direction: column;
+}
+
 .justify-end{
   justify-content: flex-end;
   width: 100%;
@@ -335,4 +344,18 @@ h1 {
   position: absolute;
   top: 30px;
   left: 30px;
+}
+.searchAndFilters{
+  width: 100%;
+}
+
+.filtersRow {
+  gap: 10px;
+  padding: 5px;
+}
+
+.dropdownContent{
+  display: flex;
+  flex-direction: column;
+  gap:5px;
 }

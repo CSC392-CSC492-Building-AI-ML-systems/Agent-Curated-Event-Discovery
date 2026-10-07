@@ -1,5 +1,5 @@
 import NavBar from '../components/NavBar';
-import EventModule from '../components/EventModule';
+import EventModule from '../components/EventModules';
 import type { EventideEvent } from '../interfaces/interfaces';
 import {useEffect, useState} from 'react';
 function DiscoverPage() {

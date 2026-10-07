@@ -2,11 +2,13 @@ import { useEffect, useState, useRef } from "react";
 import NavBar from "../components/NavBar";
 import SearchBar from "../components/SearchBar";
 import Marker from "../components/Marker";
-import type { EventideEvent } from "../interfaces/interfaces";
+import type { EventideEvent, EventideFilters } from "../interfaces/interfaces";
+import { INITIAL_FILTERS } from "../interfaces/constants";
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css';
-import {EventModuleSmall, EventInfoModule} from "../components/EventModule";
-import closeIcon from '../assets/images/plus.svg';
+import {EventModuleSmall, EventInfoModule} from "../components/EventModules";
+import closeIcon from '../assets/images/close-icon.svg';
+import Filters, {FilterRow} from "../components/Filters";
 
 const getLocation = (setLocation: Function) => {
     if (!navigator.geolocation){ console.log("Geolocation API not supported."); return;}
@@ -25,10 +27,12 @@ const getLocation = (setLocation: Function) => {
 
 function MapPage(){
     //data states
+    const [location, setLocation] = useState<[number, number]>([-79.34, 43.64]);
     const [events, setEvents] = useState<EventideEvent[]>([]);
     const [selectedEventId, setSelectedEventId] = useState<number>(0);
     const [filteredEventIds, setFilteredEventIds] = useState<number[]>([])
-    const [location, setLocation] = useState<[number, number]>([-79.34, 43.64]);
+    const [filters, setFilters] = useState<EventideFilters>(INITIAL_FILTERS);
+    //setFilters({...filters, attribute_name: new_value}); for setting specific filter
 
     //UI states
     const mapRef = useRef<mapboxgl.Map | null>(null);
@@ -81,20 +85,22 @@ function MapPage(){
                         />)
                     })}
 
-                    {!listOpen && <div className="floatingSearchBar"><SearchBar items={filteredEventIds} setItems={setFilteredEventIds} onSearch={()=>{setListOpen(true);}}/></div>}
+                    {!listOpen && <div className="floatingSearchBar"><SearchBar search={filters.search} setSearch={(new_search: string) => setFilters({...filters, search: new_search})} items={filteredEventIds} setItems={setFilteredEventIds} onSearch={()=>{setListOpen(true);}}/><FilterRow filters={filters} setFilters={setFilters}/></div>}
                     {(listOpen || infoOpen) && <div className="container-row mapSideBar" style={{flex: 0}}>
                         {listOpen && <div className="eventsSideBar events">
-                            <SearchBar items={filteredEventIds} setItems={setFilteredEventIds} onClose={() => setListOpen(false)}/>
+                            <div className="searchAndFilters">
+                                <SearchBar search={filters.search} setSearch={(new_search: string) => setFilters({...filters, search: new_search})} items={filteredEventIds} setItems={setFilteredEventIds} onClose={() => setListOpen(false)}/>
+                                <Filters filters={filters} setFilters={setFilters}/>   
+                            </div>
                             <div className="events eventsSmall">
                                 {events.map((event) => (<EventModuleSmall onClick={() => {setSelectedEventId(event.id); setInfoOpen(true); event.longitude && event.latitude && mapRef.current?.getBounds() && !mapRef.current.getBounds()?.contains(new mapboxgl.LngLat(event.longitude, event.latitude)) && setLocation([event.longitude, event.latitude])}} eventTitle={event.title} eventDescription={event.description} />))}
                             </div>
                         </div>}
                         {infoOpen && <div className="eventsSideBar">
-                            <div className="row justify-end"><img className="icon"src={closeIcon} alt="Close" onClick={() =>{setInfoOpen(false);}} /></div>
+                            <div className="row justify-end"><img className="close-icon"src={closeIcon} alt="Close" onClick={() =>{setInfoOpen(false);}} /></div>
                             {selectedEventId && events.find((e) => e.id === selectedEventId) && 
-                            <div className="events eventsSmall">
                                 <EventInfoModule event={events.find((e) => e.id === selectedEventId)!} />
-                            </div>}
+                            }
                         </div>}
                     </div>}
                 </div>
