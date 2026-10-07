@@ -1,11 +1,14 @@
 import NavBar from '../components/NavBar';
 import EventModule from '../components/EventModule';
 import type { EventideEvent } from '../interfaces/interfaces';
-
-type props = {
-    events: EventideEvent[]
-}
-function DiscoverPage({events}: props) {
+import {useEffect, useState} from 'react';
+function DiscoverPage() {
+    const [events, setEvents] = useState<EventideEvent[]>([]);
+    useEffect(() => {
+        //all the initial fetches would go here
+        setEvents([{ key: 1, id: 1, title: "Event 1", description: "This is the first event." }]);
+      }, []
+    )
     return <div>
         <NavBar/>
         <h1>
