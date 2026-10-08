@@ -6,7 +6,7 @@ export const INITIAL_ORDER_BY = "upcoming"
 
 export const INITIAL_FILTERS: EventideFilters = {
     search: "",
-    categories: [],
+    categories: new Set(),
     date: [null, null], //tuple of form [datestart, dateend]
     order: INITIAL_ORDER_BY, //order by: datetime, distance, popularity, cost
     cost: [0, 0], //tuple of form [mincost, maxcost]

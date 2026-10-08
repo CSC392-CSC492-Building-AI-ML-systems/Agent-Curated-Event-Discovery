@@ -88,7 +88,7 @@ function MapPage(){
                     {!listOpen && <div className="floatingSearchBar"><SearchBar search={filters.search} setSearch={(new_search: string) => setFilters({...filters, search: new_search})} items={filteredEventIds} setItems={setFilteredEventIds} onSearch={()=>{setListOpen(true);}}/><FilterRow filters={filters} setFilters={setFilters}/></div>}
                     {(listOpen || infoOpen) && <div className="container-row mapSideBar" style={{flex: 0}}>
                         {listOpen && <div className="eventsSideBar events">
-                            <div className="searchAndFilters">
+                            <div className="searchAndFilters column small-gap">
                                 <SearchBar search={filters.search} setSearch={(new_search: string) => setFilters({...filters, search: new_search})} items={filteredEventIds} setItems={setFilteredEventIds} onClose={() => setListOpen(false)}/>
                                 <Filters filters={filters} setFilters={setFilters}/>   
                             </div>

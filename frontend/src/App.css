@@ -333,6 +333,9 @@ h1 {
   flex-direction: column;
 }
 
+.small-gap {
+  gap: 10px;
+}
 .justify-end{
   justify-content: flex-end;
   width: 100%;
@@ -352,10 +355,13 @@ h1 {
 .filtersRow {
   gap: 10px;
   padding: 5px;
+  width: 500px;
 }
 
 .dropdownContent{
   display: flex;
   flex-direction: column;
   gap:5px;
+  background: var(--bg);
+  width: 100%;
 }
