@@ -1,3 +1,4 @@
+import TagLink from './TagLink';
 import { useEffect, useRef } from 'react';
 import type { EventideEvent } from '../interfaces/interfaces';
 import { formatEventDate } from '../utils/eventDate';
@@ -17,7 +18,7 @@ export default function EventDetails({ event, saved, onSave, onClose }: {
         <h2 id="discover-detail-title">{event.title}</h2>
         <p className="discover-date">{formatEventDate(event.startDate)} · {event.address}</p>
         <p>{event.description}</p>
-        <div className="discover-tags">{event.categories.map(category => <span key={category} className="discover-chip">#{category}</span>)}</div>
+        <div className="discover-tags">{event.categories.map(category => <TagLink key={category} tag={category} onNavigate={onClose} />)}</div>
         <button className="discover-pill" aria-pressed={saved} onClick={() => onSave(event.id)}>{saved ? '★ Saved' : '☆ Save event'}</button>
     </dialog>;
 }

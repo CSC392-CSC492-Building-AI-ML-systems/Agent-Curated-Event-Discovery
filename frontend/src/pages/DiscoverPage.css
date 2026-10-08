@@ -18,6 +18,7 @@
 .discover-page :focus-visible, .discover-dialog :focus-visible { outline: 3px solid #f6545c; outline-offset: 4px; }
 .discover-page h2 { font-size: 38px; line-height: 1.2; font-weight: 400; color: inherit; margin: 36px 0 16px; display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
 .discover-page h2 > span { font-size: 16px; color: #d63a45; }
+.discover-page #discover-following > .discover-tags { position: relative; top: 4px; }
 .discover-page p, .discover-dialog p { color: inherit; }
 .discover-header { display: flex; align-items: center; gap: 32px; flex-wrap: wrap; }
 .discover-header + main > .searchBarContainer { margin-top: 16px; }
@@ -91,3 +92,11 @@
   .discover-card-compact img, .discover-card-compact .discover-image-placeholder { width: 80px; }
 }
 @media (prefers-reduced-motion: reduce) { .discover-card { transition: none; } .discover-card:hover { transform: none; } }
+
+.discover-tag-link { text-decoration: none; display: inline-block; }
+.discover-tag-link:hover { text-decoration: underline; }
+.tag-page-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 16px; margin: 32px 0 24px; }
+.discover-page .tag-page-heading h1 { border: 0; color: inherit; font-size: 36px; margin: 0; letter-spacing: 0; }
+.tag-page-count { margin-left: auto; font-size: 14px; color: var(--discover-muted); }
+.discover-card-large > .discover-card-footer { padding: 0 20px 16px; }
+.discover-dialog .discover-tag-link { color: #2a1f33; }

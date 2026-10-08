@@ -17,8 +17,9 @@ export function createDiscoverEvents(): EventideEvent[] {
     ] as const;
     return samples.map(([title, description, address, categories], index) => {
         const date = new Date();
-        date.setDate(date.getDate() + index + 1);
-        date.setHours(18, 0, 0, 0);
+        // Six events tomorrow demonstrate calendar overflow; the others stay on separate days.
+        date.setDate(date.getDate() + (index < 6 ? 1 : index - 4));
+        date.setHours(index < 6 ? 9 + index * 2 : 18, 0, 0, 0);
         return { key: index + 1, id: index + 1, title, description, address, categories: [...categories], startDate: date.toISOString(), imageUrl: index % 2 ? shapes : skyline };
     });
 }

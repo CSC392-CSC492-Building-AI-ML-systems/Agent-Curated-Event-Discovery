@@ -1,3 +1,4 @@
+import TagLink from './TagLink';
 import type { EventideEvent } from '../interfaces/interfaces';
 
 import { formatEventDate } from '../utils/eventDate';
@@ -20,12 +21,12 @@ export default function DiscoverEventCard({ event, compact = false, saved, onOpe
                 {!compact && <p>{event.description}</p>}
                 {compact && <span className="discover-location">{event.address || 'Location to be announced'}</span>}
             </div>
+        </button>
             {!compact && <div className="discover-card-footer">
                 <span>{formatEventDate(event.startDate)}</span>
                 <span>{event.address || 'Location to be announced'}</span>
-                <span className="discover-tags">{event.categories.map(category => <span className="discover-chip" key={category}>#{category}</span>)}</span>
+                <span className="discover-tags">{event.categories.map(category => <TagLink key={category} tag={category} />)}</span>
             </div>}
-        </button>
         <button className="discover-save" aria-label={`${saved ? 'Unsave' : 'Save'} ${event.title}`} aria-pressed={saved} onClick={() => onSave(event.id)}>{saved ? '★' : '☆'}</button>
     </article>;
 }
