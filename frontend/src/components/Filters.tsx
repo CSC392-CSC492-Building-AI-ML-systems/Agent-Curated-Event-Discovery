@@ -1,4 +1,4 @@
-import {useState, useRef} from 'react';
+import {useEffect, useState, useRef} from 'react';
 import type {EventideFilters} from '../interfaces/interfaces';
 import {ORDER_BY, CATEGORIES} from '../interfaces/constants'
 type props = {
@@ -16,24 +16,24 @@ type props = {
 function Filters({filters, setFilters}: props) {
     const [tagsDropdown, setTagsDropdown] = useState(false);
     const [tagInput, setTagInput] = useState("");
-    const dropdownRef = useRef(null);
+    const dropdownRef = useRef<HTMLDivElement | null>(null);
 
-    useState(() => {
-        const handleClickOutside = (e) => {
-        if (
-            dropdownRef.current &&
-            !dropdownRef.current.contains(e.target)
-        ) {
-            setTagsDropdown(false);
-        }
-    };
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (
+                dropdownRef.current &&
+                event.target instanceof Node &&
+                !dropdownRef.current.contains(event.target)
+            ) {
+                setTagsDropdown(false);
+            }
+        };
 
-    document.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-        document.removeEventListener("mousedown", handleClickOutside);
-    };
-    })
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
     return <div className="column small-gap"> 
               <div key="order" className="row small-gap"><p>order by</p><select value={filters.order} onChange={(e)=>setFilters({...filters, order: e.target.value})}>{ORDER_BY.map((option) => (<option value={option}>{option}</option>))}</select></div>
               <div key="cost" className="row small-gap"><p>cost: </p><label htmlFor="startCost">$<input id="startCost" size={1} type='number' style={{width: "30px"}}/></label><p>to </p><label htmlFor="endCost">$<input size={1} type='number' id="endCost" style={{width: "30px"}}/></label></div>
