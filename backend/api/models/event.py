@@ -21,3 +21,13 @@ class Event(Base):
     price: Mapped[Decimal | None] = mapped_column(Numeric(6, 2))
     link: Mapped[str] = mapped_column(Text)
     eighteenplus: Mapped[bool] = mapped_column(Boolean)
+
+class TogatherEvent(Base):
+    __tablename__ = "togatherevent"
+    id: Mapped[str] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String)
+    description: Mapped[str] = mapped_column(Text)
+    startdate: Mapped[str] = mapped_column(Text)
+    enddate: Mapped[str] = mapped_column(Text)
+    locationname: Mapped[str] = mapped_column(Text)
+    inserteddatetime: Mapped[datetime] = mapped_column(DateTime)
