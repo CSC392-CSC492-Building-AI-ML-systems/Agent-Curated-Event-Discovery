@@ -60,7 +60,7 @@ export default function YourEventsPage({ events, saved, onSave, view, setView, c
                         })}
                     </div>
                     </div>
-                    {!monthEvents.length && <p className="your-events-calendar-note" role="status">No saved events this month. Try another month or save more events in Discover.</p>}
+                    {!monthEvents.length && <p className="your-events-calendar-note" role="status">No saved events this month.</p>}
                 </section>}
             </main>
             {selectedDay && <CalendarDayDialog dayKey={selectedDay} events={mine.filter(event => event.startDate && eventDayKey(event.startDate) === selectedDay)} onSave={onSave} onClose={() => setSelectedDay(null)} onOpen={event => { setSelectedDay(null); setSelected(event); }} />}
