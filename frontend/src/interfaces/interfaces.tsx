@@ -6,6 +6,9 @@ export interface EventideEvent {
   longitude?: number;
   latitude?: number;
   categories: string[];
+  startDate?: string;
+  address?: string;
+  imageUrl?: string;
 }
 
 export interface EventideFilters {
