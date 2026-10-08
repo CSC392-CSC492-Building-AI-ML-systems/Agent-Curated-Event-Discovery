@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useState, useRef} from 'react';
 import type {EventideFilters} from '../interfaces/interfaces';
 import {ORDER_BY, CATEGORIES} from '../interfaces/constants'
 type props = {
@@ -16,19 +16,37 @@ type props = {
 function Filters({filters, setFilters}: props) {
     const [tagsDropdown, setTagsDropdown] = useState(false);
     const [tagInput, setTagInput] = useState("");
+    const dropdownRef = useRef(null);
+
+    useState(() => {
+        const handleClickOutside = (e) => {
+        if (
+            dropdownRef.current &&
+            !dropdownRef.current.contains(e.target)
+        ) {
+            setTagsDropdown(false);
+        }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+    };
+    })
     return <div className="column small-gap"> 
               <div key="order" className="row small-gap"><p>order by</p><select value={filters.order} onChange={(e)=>setFilters({...filters, order: e.target.value})}>{ORDER_BY.map((option) => (<option value={option}>{option}</option>))}</select></div>
-              <div key="cost" className="row small-gap"><p>cost: </p><label htmlFor="startCost">$<input id="startCost" size={1} type='number' style={{width: "20px"}}/></label><p>to </p><label htmlFor="endCost">$<input size={1} type='number' id="endCost" style={{width: "20px"}}/></label></div>
+              <div key="cost" className="row small-gap"><p>cost: </p><label htmlFor="startCost">$<input id="startCost" size={1} type='number' style={{width: "30px"}}/></label><p>to </p><label htmlFor="endCost">$<input size={1} type='number' id="endCost" style={{width: "30px"}}/></label></div>
               <div key="date" className="row small-gap"><p>date</p><input type="date"/><p>to</p><input type="date"/></div>
-              <div key="categories" onBlur={()=>setTagsDropdown(false)} className="column">
-                <div className="row small-gap" style={{position: "relative"}}>
+              <div key="categories" className="column">
+                <div ref={dropdownRef} className="row small-gap" style={{position: "relative"}}>
                     <p>tags</p>
                     <input value={tagInput} onFocus={()=>setTagsDropdown(true)} onChange={(e)=>setTagInput(e.target.value)} onKeyDown={(e)=>{const new_filters = new Set(filters.categories); if(e.key == "Enter" && tagInput){new_filters.add(tagInput); setFilters({...filters, categories: new_filters}); setTagsDropdown(false); setTagInput("")}}}/>
-                    <div className="multiselect" style={{position: "absolute", top: "25px", left: "35px", width: '90%'}}>
+                    <div className="multiselect" >
                         {tagsDropdown && <div id="checkboxes" className="dropdownContent">
                             {CATEGORIES.map((tag)=> (
                             <label htmlFor={tag}>
-                                <input type="checkbox" id={tag} value={tag} onChange={(e)=>{const new_filters = new Set(filters.categories); if (e.target.checked){new_filters.add(tag);}else{new_filters.delete(tag)} setFilters({...filters, categories: new_filters})}} />
+                                <input type="checkbox" id={tag} value={tag} onChange={(e)=>{const new_filters = new Set(filters.categories); if (e.target.checked){new_filters.add(tag);}else{new_filters.delete(tag)} setFilters({...filters, categories: new_filters}); ()=>setTagsDropdown(false); console.log("set false")} } />
                                 {tag}
                             </label>
                             ))}                        

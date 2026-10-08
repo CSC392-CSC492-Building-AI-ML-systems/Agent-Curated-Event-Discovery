@@ -33,7 +33,7 @@ function MapPage(){
     const [filteredEventIds, setFilteredEventIds] = useState<number[]>([])
     const [filters, setFilters] = useState<EventideFilters>(INITIAL_FILTERS);
     //setFilters({...filters, attribute_name: new_value}); for setting specific filter
-
+    
     //UI states
     const mapRef = useRef<mapboxgl.Map | null>(null);
     const mapContainerRef = useRef<HTMLDivElement | null>(null);
@@ -68,9 +68,6 @@ function MapPage(){
             <div className="page">
                 <NavBar/>
                 <div className="container">
-                    <h1>
-                        Map Page
-                    </h1>
                     <div ref={mapContainerRef} className="mapContainer" />
                     {mapRef.current && events && events.map((event) => {
                         return (event.longitude && event.latitude && mapRef.current && <Marker

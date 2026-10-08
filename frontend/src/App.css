@@ -230,7 +230,7 @@ h1 {
 }
 
 .eventsSideBar{
-  width: 350px;
+  width: 375px;
   height: 100%;
   background: white;
   padding: 30px;
@@ -353,9 +353,8 @@ h1 {
 }
 
 .filtersRow {
-  gap: 10px;
+  gap: 5px;
   padding: 5px;
-  width: 500px;
 }
 
 .dropdownContent{
@@ -364,4 +363,34 @@ h1 {
   gap:5px;
   background: var(--bg);
   width: 100%;
+}
+
+input{
+  min-width: 0;
+  display: flex;
+  flex: 1;
+}
+select{
+  min-width: 0;
+  display: flex;
+  flex: 1;
+}
+
+label {
+  display: flex;
+}
+
+#checkboxes label {
+  display: inline;
+}
+
+#checkboxes input {
+  display: inline;
+}
+
+.multiselect {
+  position: absolute;
+  top: 25px;
+  left: 40px;
+  width: 275px;
 }
