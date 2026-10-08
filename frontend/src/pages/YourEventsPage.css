@@ -1,0 +1,33 @@
+.your-events-switch { display: flex; gap: 8px; margin-top: 20px; }
+.your-events-empty { margin-top: 32px; }
+.your-events-empty h2 { margin-top: 0; justify-content: center; }
+.your-events-calendar-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin: 28px 0 16px; }
+.your-events-calendar-heading h2 { margin: 0; }
+.your-events-month-controls { display: flex; gap: 8px; }
+.your-events-calendar-scroll { overflow-x: auto; padding: 4px; margin: -4px; }
+.your-events-calendar { min-width: 770px; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 1px; border: 1px solid var(--discover-line); border-radius: 20px; overflow: hidden; background: var(--discover-line); }
+.your-events-weekday { background: #ffe3e6; text-align: center; padding: 12px 4px; font-size: 14px; }
+.your-events-day { container-type: inline-size; box-sizing: border-box; aspect-ratio: 1; min-width: 0; min-height: 0; overflow: hidden; background: #fffaf7; padding: clamp(4px, .6vw, 8px); }
+.your-events-day-blank { background: #ffffff70; }
+.your-events-day-number { display: inline-grid; place-items: center; width: clamp(18px, 15cqw, 24px); height: clamp(18px, 15cqw, 24px); font-size: clamp(11px, 9cqw, 14px); line-height: 1; }
+.your-events-today .your-events-day-number { background: #f6545c; color: white; border-radius: 50%; }
+.your-events-day-items { display: flex; flex-direction: column; gap: clamp(2px, 2cqw, 4px); margin-top: 3px; }
+.your-events-calendar-event { display: flex; align-items: center; gap: 4px; width: 100%; min-width: 0; height: clamp(18px, 18cqw, 28px); padding: 0 clamp(4px, 4cqw, 8px); overflow: hidden; color: #2a1f33 !important; border: 0; border-radius: 99px; text-align: left; font-size: clamp(10px, 8cqw, 13px) !important; }
+.your-events-calendar-event:hover { box-shadow: inset 0 0 0 1px #6d5a7859; }
+.your-events-calendar-event time { white-space: nowrap; flex: none; font-size: clamp(9px, 7cqw, 11px); }
+.your-events-event-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.your-events-more { align-self: flex-start; background: transparent; border: 0; padding: 0; line-height: 16px; text-align: left; font-size: clamp(10px, 8cqw, 13px) !important; }
+.your-events-more:hover { text-decoration: underline; }
+.your-events-day-dialog h2 { padding-right: 40px; }
+.your-events-day-dialog .discover-card { border-color: #f2cdd2; }
+.your-events-day-dialog .discover-card-copy { color: #2a1f33; }
+.your-events-day-dialog .discover-card-open { display: flex; gap: 14px; min-height: 120px; padding-right: 44px; }
+.your-events-day-dialog .discover-card-open img { width: 90px; height: 90px; object-fit: cover; border-radius: 12px; }
+.your-events-day-dialog .discover-card-copy { display: flex; flex-direction: column; text-align: left; }
+.your-events-day-dialog .discover-card-copy h3 { font-size: 20px; margin: 6px 0; }
+.your-events-calendar-note { margin-top: 16px; font-size: 14px; }
+@media (max-width: 650px) {
+  .your-events-calendar { border-radius: 12px; }
+  .your-events-weekday { font-size: 12px; }
+
+}

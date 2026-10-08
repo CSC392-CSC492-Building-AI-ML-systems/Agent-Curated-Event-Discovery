@@ -67,7 +67,7 @@ export function FilterRow({filters, setFilters}: props) {
     return <div className="row filtersRow">
         <div className="row" style={{gap: "10px"}}>
             <p>order by</p>
-            <select value={filters.order}>
+            <select value={filters.order} onChange={(event) => setFilters({...filters, order: event.target.value})}>
                 {ORDER_BY.map((option) => (<option value={option}>{option}</option>))}
             </select>
         </div>
