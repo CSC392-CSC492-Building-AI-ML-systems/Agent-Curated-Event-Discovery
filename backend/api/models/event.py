@@ -1,6 +1,6 @@
-from sqlalchemy import Boolean, DateTime, Numeric, String, Text
+from sqlalchemy import Boolean, DateTime, Numeric, String, Text, Date
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-from datetime import datetime
+from datetime import datetime, date
 from decimal import Decimal
 
 
@@ -30,4 +30,4 @@ class TogatherEvent(Base):
     startdate: Mapped[str] = mapped_column(Text)
     enddate: Mapped[str] = mapped_column(Text)
     locationname: Mapped[str] = mapped_column(Text)
-    inserteddatetime: Mapped[datetime] = mapped_column(DateTime)
+    inserteddate: Mapped[date] = mapped_column(Date)
