@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS TogatherEvent (
 	startDate TEXT,
 	endDate TEXT,
 	locationName TEXT,
-	insertedDateTime TIMESTAMP DEFAULT now(),
+	insertedDate DATE DEFAULT CURRENT_DATE,
 	PRIMARY KEY (id)
 );
 
