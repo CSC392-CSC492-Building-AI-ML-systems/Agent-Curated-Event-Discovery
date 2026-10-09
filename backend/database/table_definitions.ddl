@@ -23,8 +23,14 @@ CREATE TABLE IF NOT EXISTS Venue (
 CREATE TABLE IF NOT EXISTS Organizer (
 	id SERIAL,
 	name TEXT NOT NULL,
-	contact TEXT,
-	socials TEXT,
+	email TEXT,
+	phone TEXT,
+	website TEXT,
+	instagram TEXT,
+	facebook TEXT,
+	twitter TEXT,
+	linkedin TEXT,
+	tiktok TEXT,
 	PRIMARY KEY(id)
 );
 
