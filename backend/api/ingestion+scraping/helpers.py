@@ -26,8 +26,9 @@ def enhance_description(original_event, page_content, link):
     Return a JSON object with the following keys:
     - "name": Event name.
     - "description": A 3-5 sentence summary of the event. (Use data from the original event and websearch and create the summary yourself. DO NOT copy directly from the page).
-    - "startDateTime": ISO 8601 string. If an explicit start time is provided use that, otherwise if an event is all day, then choose the day found and pick the time as 12:00AM.
-    - "endDateTime": ISO 8601 string. If the end time is explicitly mentioned choose that, otherwise if an event is all day then choose the day found and pick the time as 11:59PM, OR null.
+    - "dates": Return a list of dictionaries where each dictionary includes the explicitly mentioned start date and end date of the event. Each dictionary only include 1 start date and 1 end date. If the same event is taking place on multiple different dates, which require seperate registration, then include additional dictionary elements to the list.
+    - "startTime": If an explicit start time is provided use that OR null (not an ISO 8601 string, only the time).
+    - "endTime": If the end time is explicitly mentioned choose that that OR null (not an ISO 8601 string, only the time)..
     - "venue": Name of the event venue.
     - "address": Event venue full street address, OR "online" for virtual events.
     - "price": The event ticket cost as a number (if there are multiple tiers of cost, choose the lowest price), OR 0 if the event is free, OR null if the price is unknown.
