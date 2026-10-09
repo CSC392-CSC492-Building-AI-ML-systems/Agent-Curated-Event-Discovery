@@ -4,11 +4,11 @@ import DiscoverPage from './pages/DiscoverPage';
 import YourEventsPage from './pages/YourEventsPage';
 import TagPage from './pages/TagPage';
 import MapPage from './pages/MapPage';
-import { createDiscoverEvents } from './data/discoverEvents';
+import useEvents from './hooks/useEvents';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 function App() {
-  const [events] = useState(createDiscoverEvents);
+  const { events, loading, error, retry } = useEvents();
   const [calendarView, setCalendarView] = useState<'list' | 'calendar'>('list');
   const [calendarMonth, setCalendarMonth] = useState<Date | null>(null);
   const [followed, setFollowed] = useState<string[]>([]);
@@ -16,7 +16,7 @@ function App() {
   const onFollow = (tag: string) => setFollowed(current => current.includes(tag) ? current.filter(value => value !== tag) : [...current, tag]);
   const [saved, setSaved] = useState<number[]>([]);
   const onSave = (id: number) => setSaved(current => current.includes(id) ? current.filter(value => value !== id) : [...current, id]);
-  const eventProps = { events, saved, onSave, followed, onFollow };
+  const eventProps = { events, saved, onSave, followed, onFollow, loading, error, retry };
   return (
     <BrowserRouter>
       <Routes>

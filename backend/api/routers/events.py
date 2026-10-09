@@ -13,7 +13,7 @@ router = APIRouter(prefix="/events")
 async def get_events(skip: int = Query(0, ge=0),
                      limit: int = Query(50, ge=1, le=100),
                      db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(Event).options(selectinload(Event.tags)).offset(skip).limit(limit))
+    result = await db.execute(select(Event).options(selectinload(Event.tags)).order_by(Event.id).offset(skip).limit(limit))
     return result.scalars().all()
 
 

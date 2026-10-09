@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import NavBar from '../components/NavBar';
 import DiscoverEventCard from '../components/DiscoverEventCard';
 import EventDetails from '../components/EventDetails';
+import EventRequestState from '../components/EventRequestState';
 import CalendarDayEvents from '../components/CalendarDayEvents';
 import CalendarDayDialog from '../components/CalendarDayDialog';
 import type { EventPageProps } from './DiscoverPage';
@@ -11,7 +12,7 @@ import { calendarDays, eventDayKey } from '../utils/calendar';
 import './DiscoverPage.css';
 import './YourEventsPage.css';
 
-export default function YourEventsPage({ events, saved, onSave, view, setView, calendarMonth, setCalendarMonth }: EventPageProps & {
+export default function YourEventsPage({ events, saved, onSave, view, setView, calendarMonth, setCalendarMonth, loading, error, retry }: EventPageProps & {
     view: 'list' | 'calendar'; setView: (view: 'list' | 'calendar') => void;
     calendarMonth: Date | null; setCalendarMonth: (month: Date) => void;
 }) {
@@ -40,7 +41,8 @@ export default function YourEventsPage({ events, saved, onSave, view, setView, c
                     <button className={`discover-pill ${view === 'list' ? 'active' : ''}`} aria-pressed={view === 'list'} onClick={() => setView('list')}>List View</button>
                     <button className={`discover-pill ${view === 'calendar' ? 'active' : ''}`} aria-pressed={view === 'calendar'} onClick={() => setView('calendar')}>Calendar View</button>
                 </div>
-                {!mine.length ? <section className="discover-empty your-events-empty"><h2>Your Events</h2><p>Nothing saved yet. Tap ☆ on any event in Discover to keep it here.</p><Link className="discover-pill" to="/">Discover events</Link></section> : view === 'list' ? <section aria-labelledby="your-events-list-title">
+                <EventRequestState loading={loading} error={error} retry={retry} />
+                {!loading && !error && (!mine.length ? <section className="discover-empty your-events-empty"><h2>Your Events</h2><p>Nothing saved yet. Tap ☆ on any event in Discover to keep it here.</p><Link className="discover-pill" to="/">Discover events</Link></section> : view === 'list' ? <section aria-labelledby="your-events-list-title">
                     <div className="discover-section-heading"><h2 id="your-events-list-title">Upcoming</h2><span role="status">{mine.length} saved {mine.length === 1 ? 'event' : 'events'}</span></div>
                     <div className="discover-list">{mine.map(event => <DiscoverEventCard key={event.id} event={event} saved onSave={onSave} onOpen={setSelected} />)}</div>
                 </section> : <section aria-labelledby="your-events-month">
@@ -61,7 +63,7 @@ export default function YourEventsPage({ events, saved, onSave, view, setView, c
                     </div>
                     </div>
                     {!monthEvents.length && <p className="your-events-calendar-note" role="status">No saved events this month.</p>}
-                </section>}
+                </section>)}
             </main>
             {selectedDay && <CalendarDayDialog dayKey={selectedDay} events={mine.filter(event => event.startDate && eventDayKey(event.startDate) === selectedDay)} onSave={onSave} onClose={() => setSelectedDay(null)} onOpen={event => { setSelectedDay(null); setSelected(event); }} />}
             {selected && <EventDetails event={selected} saved={saved.includes(selected.id)} onSave={onSave} onClose={() => setSelected(null)} />}
