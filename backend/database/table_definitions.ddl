@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS Organizer (
 
 CREATE TABLE IF NOT EXISTS Tag (
 	id SERIAL,
-	name TEXT, 
+	name TEXT,
 	PRIMARY KEY(id)
 );
 
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS Event (
 	name TEXT NOT NULL,
 	description TEXT NOT NULL,
 	startDateTime TIMESTAMP NOT NULL,
-	endDateTime TIMESTAMP NOT NULL,
+	endDateTime TIMESTAMP,
 	venue INTEGER NOT NULL,
 	organizer INTEGER,
 	price DECIMAL(6, 2),
