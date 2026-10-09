@@ -30,7 +30,7 @@ def enhance_description(original_event, page_content, link):
                Each dictionary only includes 1 key value for each start date, end date, start time, and end time. 
                If an explicit start time is provided use that (formated as HH:MM:00 not an ISO 8601 string), OTHERWISE null
                If the end time is explicitly mentioned choose that that (formated as HH:MM:00 not an ISO 8601 string), OTHERWISE null (not an ISO 8601 string, only the time).
-               Format start date and end date as YYYY:MM:DD.
+               Format start date and end date as YYYY-MM-DD.
                If the same event is taking place on multiple different dates, which require seperate registration, then include additional dictionary elements to the list (following the same rules as outlined above).
     - "venue": Name of the event venue.
     - "address": Event venue full street address, OR "online" for virtual events.
@@ -58,6 +58,8 @@ def enhance_description(original_event, page_content, link):
         contents=prompt,
         config=types.GenerateContentConfig(response_mime_type="application/json")
     )
+    if response.text == {}:
+        return None
     try:
         dictionary = json.loads(response.text)
         dictionary['link'] = link
