@@ -6,6 +6,7 @@ from sqlalchemy import select, func
 from datetime import date
 from database import SessionLocal
 from event_insertion import insert_event
+from helpers import enhance_description
 
 load_dotenv()
 bb = Browserbase(api_key=os.environ["BROWSERBASE_API_KEY"])
@@ -29,12 +30,13 @@ def get_events():
 
 def scrape():
     events = get_events()
+    i = 0
     for event in events:
         if event["locationname"] is None:
             event["locationname"] = ""
 
         search_response = bb.search.web(
-            query=f"{event["name"]}, {event["locationName"]}",
+            query=f"{event["name"]}, {event["locationname"]}",
             num_results=5,
         )
 
@@ -43,7 +45,13 @@ def scrape():
             if fetch_response.status_code == 200:
                 # TODO: send the response and event to the llm
                 # TODO: if the llm is able to generate the event object, then break out of the loop
-                pass
+                cleaned_event = enhance_description(event, fetch_response.content, result.url)
+                print(cleaned_event)
+                break
+        if i == 5:
+            break
+        i += 1
+
 
 if __name__ == "__main__":
     scrape()
