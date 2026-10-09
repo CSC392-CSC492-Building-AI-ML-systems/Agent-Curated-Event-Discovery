@@ -26,9 +26,12 @@ def enhance_description(original_event, page_content, link):
     Return a JSON object with the following keys:
     - "name": Event name.
     - "description": A 3-5 sentence summary of the event. (Use data from the original event and websearch and create the summary yourself. DO NOT copy directly from the page).
-    - "dates": Return a list of dictionaries where each dictionary includes the explicitly mentioned start date and end date of the event. Each dictionary only include 1 start date and 1 end date. If the same event is taking place on multiple different dates, which require seperate registration, then include additional dictionary elements to the list.
-    - "startTime": If an explicit start time is provided use that OR null (not an ISO 8601 string, only the time).
-    - "endTime": If the end time is explicitly mentioned choose that that OR null (not an ISO 8601 string, only the time)..
+    - "dates": Return a list of dictionaries where each dictionary includes the explicitly mentioned start date, end date (which can be infered as the same as the start date if not specified), explicitly mentioned start time, and explicitly mentioned end time of the event.
+               Each dictionary only includes 1 key value for each start date, end date, start time, and end time. 
+               If an explicit start time is provided use that (formated as HH:MM:00 not an ISO 8601 string), OTHERWISE null
+               If the end time is explicitly mentioned choose that that (formated as HH:MM:00 not an ISO 8601 string), OTHERWISE null (not an ISO 8601 string, only the time).
+               Format start date and end date as YYYY:MM:DD.
+               If the same event is taking place on multiple different dates, which require seperate registration, then include additional dictionary elements to the list (following the same rules as outlined above).
     - "venue": Name of the event venue.
     - "address": Event venue full street address, OR "online" for virtual events.
     - "price": The event ticket cost as a number (if there are multiple tiers of cost, choose the lowest price), OR 0 if the event is free, OR null if the price is unknown.
@@ -44,8 +47,9 @@ def enhance_description(original_event, page_content, link):
 	- "tiktok": The organization TikTok account/page link OR null.
 	            
 	NOTE: If any of the following JSON object keys from the following list are null RETURN AN EMPTY JSON. 
-    List of required non-null keys: 
-    "name", "descriptions", "startDateTime", "address", "price", "eighteenPlus", "venue"
+	DO NOT INTERPRET FIELDS THAT ARE NOT EXPLICITLY MENTIONED UNLESS STATED OTHERWISE FOR A FIELD.
+    List of required non-null values for the corresponding keys: 
+    "name", "descriptions", , "address", "price", "eighteenPlus", "venue", "dates"
     """
 
     # argument 3 forces gemini to return a valid and parseable JSON string over text or markdown
