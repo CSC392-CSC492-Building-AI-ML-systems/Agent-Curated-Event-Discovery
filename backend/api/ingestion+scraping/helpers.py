@@ -3,9 +3,23 @@ import json
 
 from google import genai
 from google.genai import types
+import googlemaps
 
-# Globals for Gemini calls
 gemini = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+maps = googlemaps.Client(key=os.environ["GOOGLE_MAPS_API_KEY"])
+
+def get_coordinates(address: str):
+    if not address or not address.strip():
+        return None
+    try:
+        result = maps.geocode(address.strip())
+        if not result:
+            return None
+        location = result[0]["geometry"]["location"]
+        return location["lng"], location["lat"]
+    except Exception as e:
+        print(f"Google Maps HTTP error for address {address!r}: {e}")
+        return None
 
 def enhance_description(original_event, page_content, link):
     """
@@ -27,7 +41,7 @@ def enhance_description(original_event, page_content, link):
     - "name": Event name.
     - "description": A 3-5 sentence summary of the event. (Use data from the original event and websearch and create the summary yourself. DO NOT copy directly from the page).
     - "dates": Return a list of dictionaries where each dictionary includes the explicitly mentioned start date, end date (which can be infered as the same as the start date if not specified), explicitly mentioned start time, and explicitly mentioned end time of the event.
-               Each dictionary only includes 1 key value for each start date, end date, start time, and end time. 
+               Each dictionary only includes 1 key value for each startdate, enddate, starttime, and endtime. 
                If an explicit start time is provided use that (formated as HH:MM:00 not an ISO 8601 string), OTHERWISE null
                If the end time is explicitly mentioned choose that that (formated as HH:MM:00 not an ISO 8601 string), OTHERWISE null (not an ISO 8601 string, only the time).
                Format start date and end date as YYYY-MM-DD.
@@ -49,7 +63,7 @@ def enhance_description(original_event, page_content, link):
 	NOTE: If any of the following JSON object keys from the following list are null RETURN AN EMPTY JSON. 
 	DO NOT INTERPRET FIELDS THAT ARE NOT EXPLICITLY MENTIONED UNLESS STATED OTHERWISE FOR A FIELD.
     List of required non-null values for the corresponding keys: 
-    "name", "descriptions", , "address", "price", "eighteenPlus", "venue", "dates"
+    "name", "description", "address", "venue", "dates"
     """
 
     # argument 3 forces gemini to return a valid and parseable JSON string over text or markdown
@@ -58,13 +72,14 @@ def enhance_description(original_event, page_content, link):
         contents=prompt,
         config=types.GenerateContentConfig(response_mime_type="application/json")
     )
-    if response.text == {}:
+    print(response.text)
+    if response.text == '{}':
         return None
     try:
         dictionary = json.loads(response.text)
+        if dictionary.get("name") is None or dictionary.get("description") is None or dictionary.get("address") is None or dictionary.get("venue") is None:
+            return None
         dictionary['link'] = link
         return dictionary  # returns the json as a python dictionary
     except (json.JSONDecodeError, TypeError):
         return None
-
-

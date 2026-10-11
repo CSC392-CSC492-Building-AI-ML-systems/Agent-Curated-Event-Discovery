@@ -30,7 +30,6 @@ def get_events():
 
 def scrape():
     events = get_events()
-    i = 0
     for event in events:
         if event["locationname"] is None:
             event["locationname"] = ""
@@ -41,16 +40,16 @@ def scrape():
         )
 
         for result in search_response.results:
-            fetch_response = bb.fetch_api.create(url=result.url, format='markdown')
-            if fetch_response.status_code == 200:
-                # TODO: send the response and event to the llm
-                # TODO: if the llm is able to generate the event object, then break out of the loop
-                cleaned_event = enhance_description(event, fetch_response.content, result.url)
-                print(cleaned_event)
-                break
-        if i == 5:
-            break
-        i += 1
+            try:
+                fetch_response = bb.fetch_api.create(url=result.url, format='markdown')
+                if fetch_response.status_code == 200:
+                    cleaned_event = enhance_description(event, fetch_response.content, result.url)
+                    if cleaned_event is not None:
+                        insert_event(cleaned_event)
+                        break
+            except Exception as e:
+                print(result)
+                print(e)
 
 
 if __name__ == "__main__":
