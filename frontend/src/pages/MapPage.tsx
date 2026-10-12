@@ -9,7 +9,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import {EventModuleSmall, EventInfoModule} from "../components/EventModules";
 import closeIcon from '../assets/images/close-icon.svg';
 import Filters, {FilterRow} from "../components/Filters";
-
+import type { EventRequestProps } from '../components/EventRequestState';
 const getLocation = (setLocation: Function) => {
     if (!navigator.geolocation){ console.log("Geolocation API not supported."); return;}
     if (!navigator.permissions || !navigator.permissions.query){ console.log("Permissions API not supported, cannot get geolocation"); return; }
@@ -25,10 +25,17 @@ const getLocation = (setLocation: Function) => {
     }).catch((err) => {console.error("Error asking for geolocation perms:" + err)})
 }
 
-function MapPage(){
+export type EventPageProps = EventRequestProps & {
+    events: EventideEvent[];
+    saved: number[];
+    onSave: (id: number) => void;
+    followed: string[];
+    onFollow: (tag: string) => void;
+};
+
+function MapPage({ events, saved, onSave, followed, loading, error, retry }: EventPageProps){
     //data states
     const [location, setLocation] = useState<[number, number]>([-79.34, 43.64]);
-    const [events, setEvents] = useState<EventideEvent[]>([]);
     const [selectedEventId, setSelectedEventId] = useState<number>(0);
     const [filteredEventIds, setFilteredEventIds] = useState<number[]>([])
     const [filters, setFilters] = useState<EventideFilters>(INITIAL_FILTERS);
@@ -42,7 +49,6 @@ function MapPage(){
 
     useEffect(() => {
         //all the initial fetches would go here
-        setEvents([{ key: 1, id: 1, title: "Event 1", description: "This is the first event.", longitude: -79.34, latitude: 43.64, categories: ['tech'] }, { key: 2, id: 2, title: "Event 2", description: "This is the second event.", longitude: -79.34, latitude: 43.7, categories: ['food'] }]);
         
         //next check for location permissions
         getLocation(setLocation);
