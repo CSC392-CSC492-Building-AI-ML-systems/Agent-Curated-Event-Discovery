@@ -3,6 +3,31 @@ export interface EventideTag {
   name: string;
 }
 
+export interface EventideCoordinates {
+  type: "Point";
+  coordinates: [number, number];
+}
+
+export interface EventideOrganizer {
+  id: number;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  website: string | null;
+  instagram: string | null;
+  facebook: string | null;
+  twitter: string | null;
+  linkedin: string | null;
+  tiktok: string | null;
+}
+
+export interface EventideVenue {
+  id: number;
+  name: string;
+  address: string;
+  coordinates: EventideCoordinates | null;
+}
+
 export interface EventideEvent {
   key: number;
   id: number;
@@ -21,8 +46,8 @@ export interface EventideEvent {
   // False when only a calendar date is supplied, rather than an actual time.
   startTimeKnown?: boolean;
   endTimeKnown?: boolean;
-  venueId?: number;
-  organizerId?: number | null;
+  venue: EventideVenue;
+  organizer?: EventideOrganizer | null;
   // Preserve the API's numeric or decimal-string representation.
   price?: number | string | null;
   link?: string;
@@ -32,11 +57,11 @@ export interface EventideEvent {
 }
 
 export interface EventideFilters {
-    search: string,
-    categories: Set<string>,
-    date: [Date | null, Date | null], //tuple of form [datestart, dateend]
-    order: string, //order by: datetime, distance, popularity, cost
-    cost: [number, number], //tuple of form [mincost, maxcost]
-    location: string, //either "", "online" or "inperson"
-    host: string, //either "username" or ""
+  search: string;
+  categories: Set<string>;
+  date: [Date | null, Date | null]; //tuple of form [datestart, dateend]
+  order: string; //order by: datetime, distance, popularity, cost
+  cost: [number, number]; //tuple of form [mincost, maxcost]
+  location: string; //either "", "online" or "inperson"
+  host: string; //either "username" or ""
 }
