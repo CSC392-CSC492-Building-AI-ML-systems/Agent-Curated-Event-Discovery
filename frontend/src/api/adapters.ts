@@ -33,6 +33,8 @@ export function toEventideEvent(event: ApiEvent): EventideEvent {
     eighteenPlus: event.eighteenplus,
     tags,
     categories: [...new Set((tags ?? []).map((tag) => tag.name))],
+    latitude: event.venue.coordinates?.coordinates[1],
+    longitude: event.venue.coordinates?.coordinates[0],
     // Address, image, and coordinates aren't supplied by these endpoints yet.
   };
 }
