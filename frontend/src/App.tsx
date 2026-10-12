@@ -23,7 +23,7 @@ function App() {
         <Route path="/" element={<DiscoverPage {...eventProps} browse={browse} setBrowse={setBrowse} />} />
         <Route path="/your-events" element={<YourEventsPage {...eventProps} view={calendarView} setView={setCalendarView} calendarMonth={calendarMonth} setCalendarMonth={setCalendarMonth} />} />
         <Route path="/tags/:tag" element={<TagPage {...eventProps} />} />
-        <Route path="/map" element={<MapPage />} />
+        <Route path="/map" element={<MapPage {...eventProps} />} />
       </Routes>
     </BrowserRouter>
   );
