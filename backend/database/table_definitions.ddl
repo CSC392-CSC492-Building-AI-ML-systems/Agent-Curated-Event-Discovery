@@ -8,9 +8,12 @@ CREATE TABLE IF NOT EXISTS TogatherEvent (
 	endDate TEXT,
 	locationName TEXT,
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 	insertedDate DATE DEFAULT CURRENT_DATE,
 >>>>>>> origin/database
+=======
+>>>>>>> origin/EVT-20-ingestion-and-scraping
 	PRIMARY KEY (id)
 );
 
@@ -20,16 +23,21 @@ CREATE TABLE IF NOT EXISTS Venue (
 	name TEXT NOT NULL,
 	address TEXT NOT NULL,
 <<<<<<< HEAD
+<<<<<<< HEAD
 	coordinates GEOGRAPHY NOT NULL,
 =======
 	coordinates GEOGRAPHY,
 >>>>>>> origin/database
+=======
+	coordinates GEOGRAPHY NOT NULL,
+>>>>>>> origin/EVT-20-ingestion-and-scraping
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE IF NOT EXISTS Organizer (
 	id SERIAL,
 	name TEXT NOT NULL,
+<<<<<<< HEAD
 <<<<<<< HEAD
 	contact TEXT,
 	socials TEXT,
@@ -43,16 +51,24 @@ CREATE TABLE IF NOT EXISTS Organizer (
 	linkedin TEXT,
 	tiktok TEXT,
 >>>>>>> origin/database
+=======
+	contact TEXT,
+	socials TEXT,
+>>>>>>> origin/EVT-20-ingestion-and-scraping
 	PRIMARY KEY(id)
 );
 
 CREATE TABLE IF NOT EXISTS Tag (
 	id SERIAL,
 <<<<<<< HEAD
+<<<<<<< HEAD
 	name TEXT, 
 =======
 	name TEXT,
 >>>>>>> origin/database
+=======
+	name TEXT,
+>>>>>>> origin/EVT-20-ingestion-and-scraping
 	PRIMARY KEY(id)
 );
 
@@ -60,6 +76,7 @@ CREATE TABLE IF NOT EXISTS Event (
 	id SERIAL,
 	name TEXT NOT NULL,
 	description TEXT NOT NULL,
+<<<<<<< HEAD
 <<<<<<< HEAD
 	startDateTime TIMESTAMP NOT NULL,
 	endDateTime TIMESTAMP NOT NULL,
@@ -69,6 +86,10 @@ CREATE TABLE IF NOT EXISTS Event (
 	startTime TIME,
 	endTime TIME,
 >>>>>>> origin/database
+=======
+	startDateTime TIMESTAMP NOT NULL,
+	endDateTime TIMESTAMP,
+>>>>>>> origin/EVT-20-ingestion-and-scraping
 	venue INTEGER NOT NULL,
 	organizer INTEGER,
 	price DECIMAL(6, 2),
@@ -86,8 +107,13 @@ CREATE TABLE IF NOT EXISTS EventTags (
 	FOREIGN KEY (eventId) REFERENCES Event(id) ON DELETE CASCADE,
 	FOREIGN KEY (tagId) REFERENCES Tag(id) ON DELETE CASCADE
 <<<<<<< HEAD
+<<<<<<< HEAD
 );
 
 =======
 );
 >>>>>>> origin/database
+=======
+);
+
+>>>>>>> origin/EVT-20-ingestion-and-scraping
