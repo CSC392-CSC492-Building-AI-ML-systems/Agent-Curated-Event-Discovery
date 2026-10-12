@@ -8,6 +8,7 @@ import EventDetails from '../components/EventDetails';
 import EventRequestState from '../components/EventRequestState';
 import type { EventRequestProps } from '../components/EventRequestState';
 import type { EventideEvent } from '../interfaces/interfaces';
+import { eventDayKey } from '../utils/calendar';
 import './DiscoverPage.css';
 
 export type EventPageProps = EventRequestProps & {
@@ -36,7 +37,8 @@ export default function DiscoverPage({ events, saved, onSave, followed, browse, 
     const query = search.trim().toLowerCase();
     const visible = events.filter(event => {
         const date = event.startDate ? new Date(event.startDate).getTime() : null;
-        return (range === 'all-dates' || date === null || (date >= now && (range === 'all' || date <= now + Number(range) * 86400000)))
+        const isTodayWithoutTime = event.startTimeKnown === false && event.startDate && eventDayKey(event.startDate) === eventDayKey(new Date(now).toISOString());
+        return (range === 'all-dates' || date === null || ((date >= now || isTodayWithoutTime) && (range === 'all' || date <= now + Number(range) * 86400000)))
             && (!query || [event.title, event.description, event.address, ...event.categories].join(' ').toLowerCase().includes(query))
             && (!categories.length || event.categories.some(category => categories.includes(category)));
     }).sort((a, b) => sort === 'title' ? a.title.localeCompare(b.title) : (Date.parse(a.startDate || '') || 0) - (Date.parse(b.startDate || '') || 0));

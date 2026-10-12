@@ -17,6 +17,9 @@ function offsetMinutes(timestamp: number): number {
 
 /** Normalize API dates to an instant, independent of the browser's timezone. */
 export function toTorontoTimestamp(value: string): string {
+    if (typeof value !== 'string' || !value.trim()) {
+        throw new Error('Event timestamp must be a non-empty string');
+    }
     if (/(?:Z|[+-]\d{2}:?\d{2})$/i.test(value)) {
         const timestamp = Date.parse(value);
         if (!Number.isFinite(timestamp)) throw new Error(`Invalid event timestamp: ${value}`);

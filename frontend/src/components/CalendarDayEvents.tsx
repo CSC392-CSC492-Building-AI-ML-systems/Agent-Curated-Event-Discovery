@@ -11,9 +11,9 @@ export default function CalendarDayEvents({ events, dayKey, onOpen, onMore }: {
     const sorted = [...events].sort((a, b) => Date.parse(a.startDate || '') - Date.parse(b.startDate || ''));
     return <div className="your-events-day-items">
         {sorted.slice(0, 3).map(event => {
-            const time = new Intl.DateTimeFormat('en-CA', { hour: 'numeric', minute: '2-digit', timeZone: 'America/Toronto' }).format(new Date(event.startDate!));
+            const time = event.startTimeKnown === false ? 'Time to be announced' : new Intl.DateTimeFormat('en-CA', { hour: 'numeric', minute: '2-digit', timeZone: 'America/Toronto' }).format(new Date(event.startDate!));
             return <button className="your-events-calendar-event" style={{ backgroundColor: colors[(event.id - 1) % colors.length] }} key={event.id} onClick={() => onOpen(event)} aria-label={`View ${event.title}, ${time}, on ${dayKey}`}>
-                <time dateTime={event.startDate}>{time}</time>
+                {event.startTimeKnown !== false && <time dateTime={event.startDate}>{time}</time>}
                 <span className="your-events-event-title">{event.title}</span>
             </button>;
         })}

@@ -8,8 +8,10 @@ export interface ApiEvent {
     id: number;
     name: string;
     description: string;
-    startdatetime: string;
-    enddatetime: string;
+    startdate: string | null;
+    starttime: string | null;
+    enddate: string | null;
+    endtime: string | null;
     venue: number;
     organizer: number | null;
     price: number | string | null;

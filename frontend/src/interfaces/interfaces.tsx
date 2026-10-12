@@ -18,6 +18,9 @@ export interface EventideEvent {
   // Toronto observes daylight saving time, so don't assume a fixed UTC offset.
   startDate?: string;
   endDate?: string;
+  // False when only a calendar date is supplied, rather than an actual time.
+  startTimeKnown?: boolean;
+  endTimeKnown?: boolean;
   venueId?: number;
   organizerId?: number | null;
   // Preserve the API's numeric or decimal-string representation.

@@ -16,10 +16,9 @@ export default function EventDetails({ event, saved, onSave, onClose }: {
         <button className="discover-dialog-close" aria-label="Close event details" onClick={onClose}>×</button>
         {event.imageUrl && <img src={event.imageUrl} alt="" />}
         <h2 id="discover-detail-title">{event.title}</h2>
-        <p className="discover-date">{formatEventDate(event.startDate)} · {event.address || 'Location to be announced'}</p>
+        <p className="discover-date">{formatEventDate(event.startDate, event.startTimeKnown)} · {event.address || 'Location to be announced'}</p>
         <p>{event.description}</p>
         <div className="discover-tags">{event.categories.map(category => <TagLink key={category} tag={category} onNavigate={onClose} />)}</div>
         <button className="discover-pill" aria-pressed={saved} onClick={() => onSave(event.id)}>{saved ? '★ Saved' : '☆ Save event'}</button>
     </dialog>;
 }
-
