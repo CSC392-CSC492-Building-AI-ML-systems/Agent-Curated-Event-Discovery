@@ -1,4 +1,6 @@
-from sqlalchemy import Boolean, Date, ForeignKey, Integer, Numeric, String, Text, Time
+from sqlalchemy import Boolean, Column, Date, ForeignKey, Integer, Numeric, \
+    String, \
+    Table, Text, Time
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from datetime import datetime, date
 from decimal import Decimal
@@ -49,13 +51,12 @@ class Organizer(Base):
     events: Mapped[list["Event"]] = relationship(back_populates="organizer_obj")
 
 
-class Tag(Base):
-    __tablename__ = "tag"
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    name: Mapped[Optional[str]] = mapped_column(Text)
-
-    event_links: Mapped[list["EventTags"]] = relationship(back_populates="tag")
+event_tags = Table(
+    "eventtags",
+    Base.metadata,
+    Column("eventid", ForeignKey("event.id"), primary_key=True),
+    Column("tagid", ForeignKey("tag.id"), primary_key=True),
+)
 
 
 class Event(Base):
@@ -82,24 +83,18 @@ class Event(Base):
     organizer_obj: Mapped[Optional["Organizer"]] = relationship(
         back_populates="events"
     )
-    tag_links: Mapped[list["EventTags"]] = relationship(
-        back_populates="event", cascade="all, delete-orphan"
+    tags: Mapped[list["Tag"]] = relationship(
+        secondary=event_tags,
+        back_populates="events",
     )
 
 
-class EventTags(Base):
-    __tablename__ = "eventtags"
+class Tag(Base):
+    __tablename__ = "tag"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String)
 
-    eventid: Mapped[int] = mapped_column(
-        Integer,
-        ForeignKey("event.id", ondelete="CASCADE"),
-        primary_key=True,
+    events: Mapped[list[Event]] = relationship(
+        secondary=event_tags,
+        back_populates="tags",
     )
-    tagid: Mapped[int] = mapped_column(
-        Integer,
-        ForeignKey("tag.id", ondelete="CASCADE"),
-        primary_key=True,
-    )
-
-    event: Mapped["Event"] = relationship(back_populates="tag_links")
-    tag: Mapped["Tag"] = relationship(back_populates="event_links")
