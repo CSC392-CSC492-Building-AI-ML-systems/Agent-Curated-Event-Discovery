@@ -7,6 +7,10 @@ CREATE TABLE IF NOT EXISTS TogatherEvent (
 	startDate TEXT,
 	endDate TEXT,
 	locationName TEXT,
+<<<<<<< HEAD
+=======
+	insertedDate DATE DEFAULT CURRENT_DATE,
+>>>>>>> origin/database
 	PRIMARY KEY (id)
 );
 
@@ -15,21 +19,40 @@ CREATE TABLE IF NOT EXISTS Venue (
 	id SERIAL,
 	name TEXT NOT NULL,
 	address TEXT NOT NULL,
+<<<<<<< HEAD
 	coordinates GEOGRAPHY NOT NULL,
+=======
+	coordinates GEOGRAPHY,
+>>>>>>> origin/database
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE IF NOT EXISTS Organizer (
 	id SERIAL,
 	name TEXT NOT NULL,
+<<<<<<< HEAD
 	contact TEXT,
 	socials TEXT,
+=======
+	email TEXT,
+	phone TEXT,
+	website TEXT,
+	instagram TEXT,
+	facebook TEXT,
+	twitter TEXT,
+	linkedin TEXT,
+	tiktok TEXT,
+>>>>>>> origin/database
 	PRIMARY KEY(id)
 );
 
 CREATE TABLE IF NOT EXISTS Tag (
 	id SERIAL,
+<<<<<<< HEAD
 	name TEXT, 
+=======
+	name TEXT,
+>>>>>>> origin/database
 	PRIMARY KEY(id)
 );
 
@@ -37,8 +60,15 @@ CREATE TABLE IF NOT EXISTS Event (
 	id SERIAL,
 	name TEXT NOT NULL,
 	description TEXT NOT NULL,
+<<<<<<< HEAD
 	startDateTime TIMESTAMP NOT NULL,
 	endDateTime TIMESTAMP NOT NULL,
+=======
+	startDate DATE NOT NULL,
+	endDate DATE NOT NULL,
+	startTime TIME,
+	endTime TIME,
+>>>>>>> origin/database
 	venue INTEGER NOT NULL,
 	organizer INTEGER,
 	price DECIMAL(6, 2),
@@ -55,5 +85,9 @@ CREATE TABLE IF NOT EXISTS EventTags (
 	PRIMARY KEY(eventId, tagId),
 	FOREIGN KEY (eventId) REFERENCES Event(id) ON DELETE CASCADE,
 	FOREIGN KEY (tagId) REFERENCES Tag(id) ON DELETE CASCADE
+<<<<<<< HEAD
 );
 
+=======
+);
+>>>>>>> origin/database
