@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .routers import events
 from .routers import tags
+from .routers import users
 
 app = FastAPI()
 
@@ -20,6 +21,7 @@ app.add_middleware(
 
 app.include_router(events.router)
 app.include_router(tags.router)
+app.include_router(users.router)
 
 
 @app.get("/")
