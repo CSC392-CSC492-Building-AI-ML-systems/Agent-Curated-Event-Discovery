@@ -46,7 +46,7 @@ export default function DiscoverPage({ events, saved, onSave, followed, browse, 
 
     return <div className="discover-page">
         <div className="discover-wrap">
-            <header className="discover-header"><Link className="discover-logo" to="/">even<i>tide</i><svg viewBox="0 0 100 12" preserveAspectRatio="none" aria-hidden="true"><path d="M2 9 L14 3 L26 9 L38 3 L50 9 L62 3 L74 9 L86 3 L98 9" /></svg></Link><NavBar savedCount={saved.length} /></header>
+            <header className="discover-header"><Link className="discover-logo" to="/">even<i>tide</i><svg viewBox="0 0 100 12" preserveAspectRatio="none" aria-hidden="true"><path d="M2 9 L14 3 L26 9 L38 3 L50 9 L62 3 L74 9 L86 3 L98 9" /></svg></Link><NavBar savedCount={saved.length} /> <Link className="discover-auth-button" to="/signup">Sign Up / Log In</Link> </header>
             <main>
                 <SearchBar search={search} setSearch={setSearch} placeholder="Search events, topics, places" />
                 <div className="discover-toolbar">

@@ -4,6 +4,8 @@ import DiscoverPage from './pages/DiscoverPage';
 import YourEventsPage from './pages/YourEventsPage';
 import TagPage from './pages/TagPage';
 import MapPage from './pages/MapPage';
+import SignupPage from './pages/SignupPage/SignupPage';
+import LoginPage from './pages/LoginPage/LoginPage';
 import useEvents from './hooks/useEvents';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
@@ -24,6 +26,8 @@ function App() {
         <Route path="/your-events" element={<YourEventsPage {...eventProps} view={calendarView} setView={setCalendarView} calendarMonth={calendarMonth} setCalendarMonth={setCalendarMonth} />} />
         <Route path="/tags/:tag" element={<TagPage {...eventProps} />} />
         <Route path="/map" element={<MapPage {...eventProps} />} />
+        <Route path="/signup" element={<SignupPage />} />
+        <Route path="/login" element={<LoginPage />} />
       </Routes>
     </BrowserRouter>
   );
