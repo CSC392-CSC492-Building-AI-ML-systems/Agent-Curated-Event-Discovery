@@ -5,7 +5,7 @@
 .your-events-calendar-heading h2 { margin: 0; }
 .your-events-month-controls { display: flex; gap: 8px; }
 .your-events-calendar-scroll { overflow-x: auto; padding: 4px; margin: -4px; }
-.your-events-calendar { min-width: 770px; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 1px; border: 1px solid var(--discover-line); border-radius: 20px; overflow: hidden; background: var(--discover-line); }
+.your-events-calendar { min-width: 770px; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 1px; border: 1px solid var(--line); border-radius: 20px; overflow: hidden; background: var(--discover-line); }
 .your-events-weekday { background: #ffe3e6; text-align: center; padding: 12px 4px; font-size: 14px; }
 .your-events-day { container-type: inline-size; box-sizing: border-box; aspect-ratio: 1; min-width: 0; min-height: 0; overflow: hidden; background: #fffaf7; padding: clamp(4px, .6vw, 8px); }
 .your-events-day-blank { background: #ffffff70; }
@@ -19,12 +19,12 @@
 .your-events-more { align-self: flex-start; background: transparent; border: 0; padding: 0; line-height: 16px; text-align: left; font-size: clamp(10px, 8cqw, 13px) !important; }
 .your-events-more:hover { text-decoration: underline; }
 .your-events-day-dialog h2 { padding-right: 40px; }
-.your-events-day-dialog .discover-card { border-color: #f2cdd2; }
-.your-events-day-dialog .discover-card-copy { color: #2a1f33; }
-.your-events-day-dialog .discover-card-open { display: flex; gap: 14px; min-height: 120px; padding-right: 44px; }
-.your-events-day-dialog .discover-card-open img { width: 90px; height: 90px; object-fit: cover; border-radius: 12px; }
-.your-events-day-dialog .discover-card-copy { display: flex; flex-direction: column; text-align: left; }
-.your-events-day-dialog .discover-card-copy h3 { font-size: 20px; margin: 6px 0; }
+.your-events-day-dialog .event--card { border-color: #f2cdd2; }
+.your-events-day-dialog .event--card-copy { color: #2a1f33; }
+.your-events-day-dialog .event--card-open { display: flex; gap: 14px; min-height: 120px; padding-right: 44px; }
+.your-events-day-dialog .event--card-open img { width: 90px; height: 90px; object-fit: cover; border-radius: 12px; }
+.your-events-day-dialog .event--card-copy { display: flex; flex-direction: column; text-align: left; }
+.your-events-day-dialog .event--card-copy h3 { font-size: 20px; margin: 6px 0; }
 .your-events-calendar-note { margin-top: 16px; font-size: 14px; }
 @media (max-width: 650px) {
   .your-events-calendar { border-radius: 12px; }

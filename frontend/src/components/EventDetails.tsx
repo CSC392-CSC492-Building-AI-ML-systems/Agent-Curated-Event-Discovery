@@ -1,10 +1,10 @@
 import TagLink from './TagLink';
-import { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import type { EventideEvent } from '../interfaces/interfaces';
 import { formatEventDate } from '../utils/eventDate';
 
-export default function EventDetails({ event, saved, onSave, onClose }: {
-    event: EventideEvent; saved: boolean; onSave: (id: number) => void; onClose: () => void;
+export default function EventDetails({ event, saved, onSave, onClose, popup=true, style }: {
+    event: EventideEvent; saved: boolean; onSave: (id: number) => void; onClose: () => void; popup?: boolean; style?: React.CSSProperties;
 }) {
     const dialog = useRef<HTMLDialogElement>(null);
     useEffect(() => {
@@ -12,13 +12,21 @@ export default function EventDetails({ event, saved, onSave, onClose }: {
         element?.showModal();
         return () => element?.close();
     }, []);
-    return <dialog className="discover-dialog" ref={dialog} aria-labelledby="discover-detail-title" onCancel={onClose} onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
+    return popup? <dialog className="discover-dialog" ref={dialog} aria-labelledby="discover-detail-title" onCancel={onClose} onClick={e => { if (e.target === e.currentTarget) onClose(); }} style={style??{}}>
         <button className="discover-dialog-close" aria-label="Close event details" onClick={onClose}>×</button>
         {event.imageUrl && <img src={event.imageUrl} alt="" />}
         <h2 id="discover-detail-title">{event.title}</h2>
-        <p className="discover-date">{formatEventDate(event.startDate, event.startTimeKnown)} · {event.address || 'Location to be announced'}</p>
+        <p className="event-date">{formatEventDate(event.startDate, event.startTimeKnown)} · {event.address || 'Location to be announced'}</p>
+        <p>{event.description}</p>
+        <div className="discover-tags">{event.categories.map(category => <TagLink key={category} tag={category} onNavigate={onClose} />)} </div>
+        <button className="pill" aria-pressed={saved} onClick={() => onSave(event.id)}>{saved ? '★ Saved' : '☆ Save event'}</button>
+    </dialog>:<div style={style??{}} className="discover-dialog" aria-labelledby="discover-detail-title" onClick={e => { if (e.target === e.currentTarget) onClose(); }} >
+        {event.imageUrl && <img src={event.imageUrl} alt="" />}
+        <h2 id="discover-detail-title">{event.title}</h2>
+        <p className="event-date">{formatEventDate(event.startDate, event.startTimeKnown)} · {event.address || 'Location to be announced'}</p>
         <p>{event.description}</p>
         <div className="discover-tags">{event.categories.map(category => <TagLink key={category} tag={category} onNavigate={onClose} />)}</div>
-        <button className="discover-pill" aria-pressed={saved} onClick={() => onSave(event.id)}>{saved ? '★ Saved' : '☆ Save event'}</button>
-    </dialog>;
+        <button className="pill" aria-pressed={saved} onClick={() => onSave(event.id)}>{saved ? '★ Saved' : '☆ Save event'}</button>
+    </div>
+    ;
 }

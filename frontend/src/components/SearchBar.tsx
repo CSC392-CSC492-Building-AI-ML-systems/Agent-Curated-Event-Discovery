@@ -9,13 +9,14 @@ type Props = {
     onClose?: () => void;
     onSearch?: () => void;
     placeholder?: string;
+    clearSearch?: boolean;
 };
 
-export default function SearchBar({ search, setSearch, onClose, onSearch, placeholder = 'Search...' }: Props) {
+export default function SearchBar({ search, setSearch, onClose, onSearch, placeholder = 'Search...', clearSearch=true }: Props) {
     return <form className="searchBarContainer" role="search" onSubmit={event => { event.preventDefault(); onSearch?.(); }}>
         <div className="searchBar">
             <input className="searchBarInput" aria-label="Search events" placeholder={placeholder} value={search} onChange={event => setSearch(event.target.value)} />
-            {search && <button type="button" className="searchBarButton" aria-label="Clear search" onClick={() => setSearch('')}>×</button>}
+            {clearSearch && search && <button type="button" className="searchBarButton" aria-label="Clear search" onClick={() => setSearch('')}>×</button>}
             <button type="submit" className="searchBarButton" aria-label="Search"><img className="icon" src={searchIcon} alt="" /></button>
             {onClose && <button type="button" className="searchBarButton" aria-label="Close event list" onClick={onClose}><img className="close-icon" src={closeIcon} alt="" /></button>}
         </div>

@@ -14,23 +14,26 @@ type props = {
 const Marker = ({ map, id, long, lati, category, isActive, onClick }: props) => {
 
     const markerRef = useRef<mapboxgl.Marker | null>(null)
-    const contentRef = useRef(document.createElement("div"));
     useEffect(() => {
-        markerRef.current = new mapboxgl.Marker(contentRef.current)
+        markerRef.current = new mapboxgl.Marker()
             .setLngLat([long, lati])
             .addTo(map)
-
+        markerRef.current.getElement().addEventListener("click", () => {onClick?onClick(id):()=>{}})
+        const svg = markerRef.current.getElement().querySelector("svg");
+        if(svg){
+            svg.style.transition = "width 0.3s ease, height 0.3s ease";
+        }
         return () => {
-             markerRef.current?.remove()
+            markerRef.current?.remove()
         }
     }, [])
-    return (<>
-        {createPortal(
-            <div className={isActive? "eventMarker active": "eventMarker"} onClick={onClick?()=>{onClick(id)}: ()=>{}}>
-                #{category}
-            </div>, contentRef.current
-        )}
-    </>)
+    useEffect(()=>{
+        const svg = markerRef.current?.getElement().querySelector("svg");
+        if (!svg) return
+        svg.style.width = isActive? "50px": "40px";
+        svg.style.height = isActive? "50px": "40px";
+    }, [isActive])
+    return <></>
 }
 
 export default Marker

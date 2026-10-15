@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import TagLink from '../components/TagLink';
-import NavBar from '../components/NavBar';
+import { Header } from '../components/NavBar';
 import SearchBar from '../components/SearchBar';
 import DiscoverEventCard from '../components/DiscoverEventCard';
 import EventDetails from '../components/EventDetails';
@@ -46,20 +46,20 @@ export default function DiscoverPage({ events, saved, onSave, followed, browse, 
 
     return <div className="discover-page">
         <div className="discover-wrap">
-            <header className="discover-header"><Link className="discover-logo" to="/">even<i>tide</i><svg viewBox="0 0 100 12" preserveAspectRatio="none" aria-hidden="true"><path d="M2 9 L14 3 L26 9 L38 3 L50 9 L62 3 L74 9 L86 3 L98 9" /></svg></Link><NavBar savedCount={saved.length} /></header>
+            <Header savedCount={saved.length}/>
             <main>
                 <SearchBar search={search} setSearch={setSearch} placeholder="Search events, topics, places" />
                 <div className="discover-toolbar">
                     <label>Dates <select value={range} onChange={e => setBrowse({ ...browse, range: e.target.value })}><option value="7">Next 7 days</option><option value="30">Next 30 days</option><option value="all">All upcoming</option><option value="all-dates">All dates</option></select></label>
                     <label>Sort by <select value={sort} onChange={e => setBrowse({ ...browse, sort: e.target.value })}><option value="upcoming">Upcoming</option><option value="title">Title A–Z</option></select></label>
-                    <div className="discover-view"><span className="discover-pill active" aria-current="page">List</span><Link className="discover-pill" to="/map">Map</Link></div>
+                    <div className="discover-view"><span className={"pill active"} aria-current="page">List</span><Link className="pill" to="/map">Map</Link></div>
                 </div>
                 <div className="discover-topics" role="group" aria-label="Filter by topic"><span>Include</span>{allCategories.map(category => <button key={category} className={`discover-chip ${categories.includes(category) ? 'active' : ''}`} aria-pressed={categories.includes(category)} onClick={() => setBrowse({ ...browse, categories: categories.includes(category) ? categories.filter(value => value !== category) : [...categories, category] })}>#{category}</button>)}</div>
                 <EventRequestState loading={loading} error={error} retry={retry} />
                 {!loading && !error && <>
                 {!query && visible.length > 0 && <section aria-labelledby="discover-for-you"><h2 id="discover-for-you">For You <span>✦ Curated events</span></h2><div className="discover-grid">{visible.slice(0, 6).map(event => renderCard(event, true))}</div></section>}
                 <section aria-labelledby="discover-upcoming"><div className="discover-section-heading"><h2 id="discover-upcoming">{query ? `Results for “${search.trim()}”` : range === 'all-dates' ? 'All events' : 'Upcoming'}</h2><span role="status">{visible.length} {visible.length === 1 ? 'event' : 'events'}</span></div>
-                    {visible.length ? <div className="discover-list">{visible.map(event => renderCard(event))}</div> : <div className="discover-empty"><h3>{events.length ? 'No events match' : 'No events available'}</h3><p>{events.length ? 'Try a wider date range, a different search, or fewer topics.' : 'There are no events to display yet.'}</p><button className="discover-pill" onClick={() => { setBrowse({ search: '', categories: [], range: 'all-dates', sort: 'upcoming' }); }}>Browse all events</button></div>}
+                    {visible.length ? <div className="discover-list">{visible.map(event => renderCard(event))}</div> : <div className="discover-empty"><h3>{events.length ? 'No events match' : 'No events available'}</h3><p>{events.length ? 'Try a wider date range, a different search, or fewer topics.' : 'There are no events to display yet.'}</p><button className="pill" onClick={() => { setBrowse({ search: '', categories: [], range: 'all-dates', sort: 'upcoming' }); }}>Browse all events</button></div>}
                 </section>
                 {!query && <section aria-labelledby="discover-following"><h2 id="discover-following">Following <span className="discover-tags">{followed.map(category => <TagLink key={category} tag={category} />)}</span></h2>{followed.length ? followed.map(category => {
                     const matches = visible.filter(event => event.categories.includes(category));
