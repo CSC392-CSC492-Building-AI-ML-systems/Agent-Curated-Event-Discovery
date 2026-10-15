@@ -6,6 +6,9 @@ on:
     branches: [ EVT-23-Github-Actions ]
 jobs:
   test:
+    defaults:
+      run:
+        working-directory: ./frontend
     timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
@@ -14,9 +17,7 @@ jobs:
       with:
         node-version: lts/*
     - name: Install dependencies
-      run: |
-        cd frontend
-        npm install
+      run: npm install
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
     - name: Run Playwright tests
@@ -27,3 +28,4 @@ jobs:
         name: playwright-report
         path: playwright-report/
         retention-days: 30
+  
