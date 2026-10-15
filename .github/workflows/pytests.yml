@@ -5,9 +5,9 @@ name: Python application
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "EVT-23-Github-Actions" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "EVT-23-Github-Actions" ]
 
 permissions:
   contents: read
