@@ -16,23 +16,25 @@ function combineDateAndTime(
 }
 
 export function toEventideEvent(event: ApiEvent): EventideEvent {
-  const tags = event.tags?.map((tag) => ({ id: tag.id, name: tag.name }));
   return {
     key: event.id,
     id: event.id,
     title: event.name,
     description: event.description,
+
     startDate: combineDateAndTime(event.startdate, event.starttime),
     endDate: combineDateAndTime(event.enddate, event.endtime),
     startTimeKnown: event.starttime != null,
     endTimeKnown: event.endtime != null,
+
     venue: event.venue,
     organizer: event.organizer,
     price: event.price,
     link: event.link,
     eighteenPlus: event.eighteenplus,
-    tags,
-    categories: [...new Set((tags ?? []).map((tag) => tag.name))],
+
+    tags: event.tags,
+
     latitude: event.venue.coordinates?.coordinates[1],
     longitude: event.venue.coordinates?.coordinates[0],
     // Address, image, and coordinates aren't supplied by these endpoints yet.
