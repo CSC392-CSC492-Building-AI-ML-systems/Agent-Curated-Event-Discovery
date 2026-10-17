@@ -1,8 +1,4 @@
-export type EventRequestProps = {
-  loading: boolean;
-  error: string | null;
-  retry: () => void;
-};
+import type { EventRequestProps } from "../interfaces/interfaces";
 
 export default function EventRequestState({
   loading,

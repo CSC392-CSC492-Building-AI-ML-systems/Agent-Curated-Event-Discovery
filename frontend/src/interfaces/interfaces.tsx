@@ -1,10 +1,3 @@
-export interface BrowseState {
-  search: string;
-  range: string;
-  sort: string;
-  tags: EventideTag[];
-}
-
 export interface EventideTag {
   id: number;
   name: string;
@@ -70,3 +63,26 @@ export interface EventideFilters {
   location: string; //either "", "online" or "inperson"
   host: string; //either "username" or ""
 }
+
+export interface BrowseState {
+  search: string;
+  range: string;
+  sort: string;
+  tags: EventideTag[];
+}
+
+export type EventRequestProps = {
+  loading: boolean;
+  error: string | null;
+  retry: () => void;
+};
+
+export type EventPageProps = EventRequestProps & {
+  events: EventideEvent[];
+  saved: number[];
+  onSave: (id: number) => void;
+  followed: EventideTag[];
+  onFollow: (tag: EventideTag) => void;
+  browse: BrowseState;
+  setBrowse: (state: BrowseState) => void;
+};

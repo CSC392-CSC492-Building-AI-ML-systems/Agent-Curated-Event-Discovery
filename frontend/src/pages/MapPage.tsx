@@ -3,71 +3,19 @@ import { Link } from "react-router-dom";
 import { Header } from "../components/NavBar";
 import SearchBar from "../components/SearchBar";
 import Marker from "../components/Marker";
-import type { EventideEvent, EventideFilters } from "../interfaces/interfaces";
-import { INITIAL_FILTERS } from "../interfaces/constants";
+import type { EventPageProps } from "../interfaces/interfaces";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import closeIcon from "../assets/images/close-icon.svg";
-import Filters, { FilterRow } from "../components/Filters";
-import type { EventRequestProps } from "../components/EventRequestState";
 import DiscoverEventCard from "../components/DiscoverEventCard";
 import EventDetails from "../components/EventDetails";
 import { eventDayKey } from "../utils/calendar";
+import EventRequestState from "../components/EventRequestState";
 
-const getLocation = (setLocation: Function) => {
-  if (!navigator.geolocation) {
-    console.log("Geolocation API not supported.");
-    return;
-  }
-  if (!navigator.permissions || !navigator.permissions.query) {
-    console.log("Permissions API not supported, cannot get geolocation");
-    return;
-  }
-  navigator.permissions
-    .query({ name: "geolocation" })
-    .then((result) => {
-      if (result.state === "granted") {
-        navigator.geolocation.getCurrentPosition((position) => {
-          setLocation([position.coords.longitude, position.coords.latitude]);
-        });
-      } else if (result.state === "prompt") {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            setLocation([position.coords.longitude, position.coords.latitude]);
-          },
-          (err) => {
-            console.error("Error prompting for geolocation: " + err.message);
-          },
-        );
-      } else if (result.state === "denied") {
-        console.log("User denied geolocation permissions.");
-        alert(
-          "Your location settings are off. Please turn on location, it makes our map easier to use!",
-        );
-      }
-    })
-    .catch((err) => {
-      console.error("Error asking for geolocation perms:" + err);
-    });
-};
+type MapCenter = [longitude: number, latitude: number];
 
-export type EventPageProps = EventRequestProps & {
-  events: EventideEvent[];
-  saved: number[];
-  onSave: (id: number) => void;
-  followed: string[];
-  onFollow: (tag: string) => void;
-};
-type BrowseState = {
-  search: string;
-  range: string;
-  sort: string;
-  categories: string[];
-};
-type MapPageProps = EventPageProps & {
-  browse: BrowseState;
-  setBrowse: (state: BrowseState) => void;
-};
+const DEFAULT_LOCATION: MapCenter = [-79.34, 43.64];
+
 function MapPage({
   events,
   saved,
@@ -78,21 +26,29 @@ function MapPage({
   retry,
   browse,
   setBrowse,
-}: MapPageProps) {
+}: EventPageProps) {
   //data states
-  const allCategories = [
-    ...new Set(events.flatMap((event) => event.categories)),
-  ].sort();
+  const allTags = [
+    ...new Map(
+      events.flatMap((event) => event.tags).map((tag) => [tag.id, tag]),
+    ).values(),
+  ].sort((a, b) => a.name.localeCompare(b.name));
+
   const [now] = useState(() => Date.now());
-  const [location, setLocation] = useState<[number, number]>([-79.34, 43.64]);
+
   const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
+
   // const [filteredEventIds, setFilteredEventIds] = useState<number[]>([])
   // const [filters, setFilters] = useState<EventideFilters>(INITIAL_FILTERS);
   //setFilters({...filters, attribute_name: new_value}); for setting specific filter
-  const { search, range, sort, categories } = browse;
-  const setSearch = (search: string) => setBrowse({ ...browse, search });
+
+  const { search, range, sort, tags } = browse;
+
+  //const setSearch = (search: string) => setBrowse({ ...browse, search });
+
   const query = search.trim().toLowerCase();
-  const filteredEvents = events
+
+  const visible = events
     .filter((event) => {
       const date = event.startDate ? new Date(event.startDate).getTime() : null;
       const isTodayWithoutTime =
@@ -100,19 +56,34 @@ function MapPage({
         event.startDate &&
         eventDayKey(event.startDate) ===
           eventDayKey(new Date(now).toISOString());
-      return (
-        (range === "all-dates" ||
-          date === null ||
-          ((date >= now || isTodayWithoutTime) &&
-            (range === "all" || date <= now + Number(range) * 86400000))) &&
-        (!query ||
-          [event.title, event.description, event.address, ...event.categories]
-            .join(" ")
-            .toLowerCase()
-            .includes(query)) &&
-        (!categories.length ||
-          event.categories.some((category) => categories.includes(category)))
-      );
+
+      const matchesDate =
+        range === "all-dates" ||
+        date === null ||
+        (date >= now &&
+          (range === "all" || date <= now + Number(range) * 86_400_000)) ||
+        isTodayWithoutTime;
+
+      const searchableText = [
+        event.title,
+        event.description,
+        event.venue.address,
+        event.venue.name,
+        event.organizer?.name,
+        ...event.tags.map((tag) => tag.name),
+      ]
+        .join(" ")
+        .toLowerCase();
+
+      const matchesSearch = !query || searchableText.includes(query);
+
+      const matchesTags =
+        tags.length === 0 ||
+        event.tags.some((tag) =>
+          tags.some((selectedTag) => selectedTag.id === tag.id),
+        );
+
+      return matchesDate && matchesSearch && matchesTags;
     })
     .sort((a, b) =>
       sort === "title"
@@ -124,31 +95,89 @@ function MapPage({
   //UI states
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
+
+  const [mapReady, setMapReady] = useState(false);
+  const [location, setLocation] = useState<MapCenter>(DEFAULT_LOCATION);
+
   const [listOpen, setListOpen] = useState<boolean>(true);
   const [infoOpen, setInfoOpen] = useState<boolean>(false);
 
+  const selectedEvent =
+    selectedEventId === null
+      ? undefined
+      : events.find((event) => event.id === selectedEventId);
+
+  const getLocation = () => {
+    // TODO: fix this function
+    if (!navigator.geolocation) {
+      console.log("Geolocation API not supported.");
+      return;
+    }
+    if (!navigator.permissions || !navigator.permissions.query) {
+      console.log("Permissions API not supported, cannot get geolocation");
+      return;
+    }
+    navigator.permissions
+      .query({ name: "geolocation" })
+      .then((result) => {
+        if (result.state === "granted") {
+          navigator.geolocation.getCurrentPosition((position) => {
+            setLocation([position.coords.longitude, position.coords.latitude]);
+          });
+        } else if (result.state === "prompt") {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              setLocation([
+                position.coords.longitude,
+                position.coords.latitude,
+              ]);
+            },
+            (err) => {
+              console.error("Error prompting for geolocation: " + err.message);
+            },
+          );
+        } else if (result.state === "denied") {
+          console.log("User denied geolocation permissions.");
+          // alert(
+          //   "Your location settings are off. Please turn on location, it makes our map easier to use!",
+          // );
+        }
+      })
+      .catch((err) => {
+        console.error("Error asking for geolocation perms:" + err);
+      });
+  };
+
   useEffect(() => {
-    //all the initial fetches would go here
-
-    //next check for location permissions
-    getLocation(setLocation);
-
     //create map
     if (!mapContainerRef.current) return;
-    mapRef.current = new mapboxgl.Map({
+    const map = new mapboxgl.Map({
       accessToken: import.meta.env.VITE_MAPBOX_TOKEN,
       container: mapContainerRef.current,
-      center: location,
+      center: DEFAULT_LOCATION,
       zoom: 10.12,
     });
+    mapRef.current = map;
+    const handleLoad = () => {
+      setMapReady(true);
+    };
+    map.on("load", handleLoad);
+
     return () => {
-      mapRef.current?.remove();
+      map.off("load", handleLoad);
+      map.remove();
+      mapRef.current = null;
     };
   }, []);
 
   useEffect(() => {
+    getLocation();
+  }, []);
+
+  useEffect(() => {
     mapRef.current?.setCenter(location);
-  }, location);
+  }, [location]);
+
   return (
     <div
       className="map-page"
@@ -162,34 +191,23 @@ function MapPage({
       <div
         style={{
           padding: "20px",
-          display: "flex",
-          justifyContent: "space-between",
         }}
       >
         <Header savedCount={saved.length} />
-        <div className="discover-view">
-          <Link className="pill" aria-current="page" to="/">
-            List
-          </Link>
-          <span className="pill active">Map</span>
-        </div>
       </div>
       <div className="map">
         <div ref={mapContainerRef} className="mapContainer" />
-        {mapRef.current &&
-          events &&
-          filteredEvents.map(
+        {mapReady &&
+          visible.map(
             (event) =>
               event.longitude != null &&
-              event.latitude != null &&
-              mapRef.current && (
+              event.latitude != null && (
                 <Marker
                   key={event.id}
                   id={event.id}
-                  map={mapRef.current}
+                  map={mapRef.current!}
                   long={event.longitude}
                   lati={event.latitude}
-                  category={event.categories[0]}
                   isActive={event.id == selectedEventId}
                   onClick={(id: number) => {
                     setSelectedEventId(id);
@@ -199,80 +217,48 @@ function MapPage({
               ),
           )}
 
-        {!listOpen && (
-          <div className="floatingSearchBar">
-            <SearchBar
-              search={search}
-              setSearch={(new_search: string) => setSearch(new_search)}
-              onSearch={() => {
-                setListOpen(true);
-              }}
-            />
-            <div className="map-toolbar">
-              <label>
-                Dates{" "}
-                <select
-                  value={range}
-                  onChange={(e) =>
-                    setBrowse({ ...browse, range: e.target.value })
-                  }
-                >
-                  <option value="7">Next 7 days</option>
-                  <option value="30">Next 30 days</option>
-                  <option value="all">All upcoming</option>
-                  <option value="all-dates">All dates</option>
-                </select>
-              </label>
-              <label>
-                Sort by{" "}
-                <select
-                  value={sort}
-                  onChange={(e) =>
-                    setBrowse({ ...browse, sort: e.target.value })
-                  }
-                >
-                  <option value="upcoming">Upcoming</option>
-                  <option value="title">Title A–Z</option>
-                </select>
-              </label>
-              <div
-                className="map-topics"
-                role="group"
-                aria-label="Filter by topic"
-              >
-                <span>Include</span>
-                {allCategories.map((category) => (
-                  <button
-                    key={category}
-                    className={`map-chip chip ${categories.includes(category) ? "active" : ""}`}
-                    aria-pressed={categories.includes(category)}
-                    onClick={() =>
-                      setBrowse({
-                        ...browse,
-                        categories: categories.includes(category)
-                          ? categories.filter((value) => value !== category)
-                          : [...categories, category],
-                      })
-                    }
-                  >
-                    #{category}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
         {(listOpen || infoOpen) && (
           <div className="container-row mapSideBar" style={{ flex: 0 }}>
+            {infoOpen && (
+              <div className="eventsSideBar">
+                <div className="row justify-end">
+                  <img
+                    className="close-icon"
+                    src={closeIcon}
+                    alt="Close"
+                    onClick={() => {
+                      setInfoOpen(false);
+                    }}
+                  />
+                </div>
+                {selectedEvent && (
+                  <EventDetails
+                    style={{ padding: 0, border: "none" }}
+                    popup={false}
+                    event={selectedEvent}
+                    saved={saved.includes(selectedEvent.id)}
+                    onSave={onSave}
+                    onClose={() => setSelectedEventId(null)}
+                  />
+                )}
+              </div>
+            )}
             {listOpen && (
               <div className="eventsSideBar events">
                 <div className="eventsSideBarScroll">
                   <div className="searchAndFilters column small-gap">
+                    <div className="discover-view">
+                      <Link className="pill" aria-current="page" to="/">
+                        List
+                      </Link>
+                      <span className="pill active">Map</span>
+                    </div>
                     <SearchBar
                       clearSearch={false}
                       search={search}
-                      setSearch={(new_search: string) => setSearch(new_search)}
+                      setSearch={(search: string) =>
+                        setBrowse({ ...browse, search })
+                      }
                       onClose={() => setListOpen(false)}
                     />
                     <div className="map-toolbar column align-start">
@@ -308,81 +294,66 @@ function MapPage({
                         aria-label="Filter by topic"
                       >
                         <span>Include</span>
-                        {allCategories.map((category) => (
+                        {allTags.map((tag) => (
                           <button
-                            key={category}
-                            className={`map-chip chip ${categories.includes(category) ? "active" : ""}`}
-                            aria-pressed={categories.includes(category)}
+                            key={tag.id}
+                            className={`map-chip chip ${tags.includes(tag) ? "active" : ""}`}
+                            aria-pressed={tags.includes(tag)}
                             onClick={() =>
                               setBrowse({
                                 ...browse,
-                                categories: categories.includes(category)
-                                  ? categories.filter(
-                                      (value) => value !== category,
+                                tags: browse.tags.some(
+                                  (selectedTag) => selectedTag.id === tag.id,
+                                )
+                                  ? browse.tags.filter(
+                                      (selectedTag) =>
+                                        selectedTag.id !== tag.id,
                                     )
-                                  : [...categories, category],
+                                  : [...browse.tags, tag],
                               })
                             }
                           >
-                            #{category}
+                            #{tag.name}
                           </button>
                         ))}
                       </div>
                     </div>
                   </div>
                   <div className="list">
-                    {filteredEvents.map((event) => (
-                      <DiscoverEventCard
-                        key={event.id}
-                        event={event}
-                        compact={true}
-                        saved={saved.includes(event.id)}
-                        onSave={onSave}
-                        onOpen={(eventideEvent) => {
-                          setSelectedEventId(eventideEvent.id);
-                          setInfoOpen(true);
-                          event.longitude &&
-                            event.latitude &&
-                            mapRef.current?.getBounds() &&
-                            !mapRef.current
-                              .getBounds()
-                              ?.contains(
-                                new mapboxgl.LngLat(
-                                  event.longitude,
-                                  event.latitude,
-                                ),
-                              ) &&
-                            setLocation([event.longitude, event.latitude]);
-                        }}
-                      />
-                    ))}
+                    <EventRequestState
+                      loading={loading}
+                      error={error}
+                      retry={retry}
+                    ></EventRequestState>
+                    {!loading &&
+                      !error &&
+                      visible.map((event) => (
+                        <DiscoverEventCard
+                          key={event.id}
+                          event={event}
+                          compact={true}
+                          saved={saved.includes(event.id)}
+                          onSave={onSave}
+                          onOpen={(eventideEvent) => {
+                            setSelectedEventId(eventideEvent.id);
+                            setInfoOpen(true);
+                            event.longitude &&
+                              event.latitude &&
+                              mapRef.current?.getBounds() &&
+                              !mapRef.current
+                                .getBounds()
+                                ?.contains(
+                                  new mapboxgl.LngLat(
+                                    event.longitude,
+                                    event.latitude,
+                                  ),
+                                ) &&
+                              setLocation([event.longitude, event.latitude]);
+                          }}
+                        />
+                      ))}
                   </div>
                 </div>
-              </div>
-            )}
-            {infoOpen && (
-              <div className="eventsSideBar">
-                <div className="row justify-end">
-                  <img
-                    className="close-icon"
-                    src={closeIcon}
-                    alt="Close"
-                    onClick={() => {
-                      setInfoOpen(false);
-                    }}
-                  />
-                </div>
-                {selectedEventId &&
-                  events.find((e) => e.id === selectedEventId) && (
-                    <EventDetails
-                      style={{ padding: 0, border: "none" }}
-                      popup={false}
-                      event={events.find((e) => e.id === selectedEventId)!}
-                      saved={saved.includes(selectedEventId)}
-                      onSave={onSave}
-                      onClose={() => setSelectedEventId(null)}
-                    />
-                  )}
               </div>
             )}
           </div>

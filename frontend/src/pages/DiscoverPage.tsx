@@ -6,24 +6,9 @@ import SearchBar from "../components/SearchBar";
 import DiscoverEventCard from "../components/DiscoverEventCard";
 import EventDetails from "../components/EventDetails";
 import EventRequestState from "../components/EventRequestState";
-import type { EventRequestProps } from "../components/EventRequestState";
-import type {
-  EventideEvent,
-  BrowseState,
-  EventideTag,
-} from "../interfaces/interfaces";
+import type { EventideEvent, EventPageProps } from "../interfaces/interfaces";
 import { eventDayKey } from "../utils/calendar";
 import "./DiscoverPage.css";
-
-export type EventPageProps = EventRequestProps & {
-  events: EventideEvent[];
-  saved: number[];
-  onSave: (id: number) => void;
-  followed: EventideTag[];
-  onFollow: (tag: EventideTag) => void;
-  browse: BrowseState;
-  setBrowse: (state: BrowseState) => void;
-};
 
 export default function DiscoverPage({
   events,
