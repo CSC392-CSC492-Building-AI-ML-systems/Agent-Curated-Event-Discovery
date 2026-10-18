@@ -19,7 +19,7 @@ function App() {
     search: "",
     range: "30",
     sort: "upcoming",
-    tags: [] as string[],
+    tags: [] as EventideTag[],
   });
 
   const onFollow = (tag: EventideTag) =>
@@ -44,6 +44,8 @@ function App() {
     loading,
     error,
     retry,
+    browse,
+    setBrowse,
   };
   return (
     <BrowserRouter>
@@ -53,8 +55,6 @@ function App() {
           element={
             <DiscoverPage
               {...eventProps}
-              browse={browse}
-              setBrowse={setBrowse}
             />
           }
         />
@@ -75,7 +75,7 @@ function App() {
         <Route
           path="/map"
           element={
-            <MapPage {...eventProps} browse={browse} setBrowse={setBrowse} />
+            <MapPage {...eventProps} />
           }
         />
         <Route path="/signup" element={<SignupPage />} />

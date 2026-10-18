@@ -84,5 +84,5 @@ export type EventPageProps = EventRequestProps & {
   followed: EventideTag[];
   onFollow: (tag: EventideTag) => void;
   browse: BrowseState;
-  setBrowse: (state: BrowseState) => void;
+  setBrowse: React.Dispatch<React.SetStateAction<BrowseState>>;
 };

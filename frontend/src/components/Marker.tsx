@@ -7,10 +7,11 @@ type props = {
   long: number;
   lati: number;
   isActive?: boolean;
-  onClick?: Function;
+  onClick?: (id: number) => void;
 };
-const Marker = ({ map, id, long, lati, isActive, onClick }: props) => {
+export default function Marker ({ map, id, long, lati, isActive, onClick }: props) {
   const markerRef = useRef<mapboxgl.Marker | null>(null);
+
   useEffect(() => {
     markerRef.current = new mapboxgl.Marker()
       .setLngLat([long, lati])
@@ -18,6 +19,7 @@ const Marker = ({ map, id, long, lati, isActive, onClick }: props) => {
     markerRef.current.getElement().addEventListener("click", () => {
       onClick ? onClick(id) : () => {};
     });
+    
     const svg = markerRef.current.getElement().querySelector("svg");
     if (svg) {
       svg.style.transition = "width 0.3s ease, height 0.3s ease";
@@ -35,4 +37,3 @@ const Marker = ({ map, id, long, lati, isActive, onClick }: props) => {
   return <></>;
 };
 
-export default Marker;

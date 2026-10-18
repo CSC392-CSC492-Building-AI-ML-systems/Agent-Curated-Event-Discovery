@@ -28,7 +28,7 @@ export default function DiscoverEventCard({
         aria-label={`View ${event.title}`}
       >
         {event.imageUrl ? (
-          <img src={event.imageUrl} alt="" />
+          <img src={event.imageUrl} alt="" loading="lazy" />
         ) : (
           <span className="event-image-placeholder" aria-hidden="true">
             ✦

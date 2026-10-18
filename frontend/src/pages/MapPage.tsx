@@ -38,13 +38,8 @@ function MapPage({
 
   const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
 
-  // const [filteredEventIds, setFilteredEventIds] = useState<number[]>([])
-  // const [filters, setFilters] = useState<EventideFilters>(INITIAL_FILTERS);
-  //setFilters({...filters, attribute_name: new_value}); for setting specific filter
 
   const { search, range, sort, tags } = browse;
-
-  //const setSearch = (search: string) => setBrowse({ ...browse, search });
 
   const query = search.trim().toLowerCase();
 
@@ -108,44 +103,24 @@ function MapPage({
       : events.find((event) => event.id === selectedEventId);
 
   const getLocation = () => {
-    // TODO: fix this function
     if (!navigator.geolocation) {
-      console.log("Geolocation API not supported.");
+      console.warn("Geolocation is not supported by this browser.");
       return;
     }
-    if (!navigator.permissions || !navigator.permissions.query) {
-      console.log("Permissions API not supported, cannot get geolocation");
-      return;
-    }
-    navigator.permissions
-      .query({ name: "geolocation" })
-      .then((result) => {
-        if (result.state === "granted") {
-          navigator.geolocation.getCurrentPosition((position) => {
-            setLocation([position.coords.longitude, position.coords.latitude]);
-          });
-        } else if (result.state === "prompt") {
-          navigator.geolocation.getCurrentPosition(
-            (position) => {
-              setLocation([
-                position.coords.longitude,
-                position.coords.latitude,
-              ]);
-            },
-            (err) => {
-              console.error("Error prompting for geolocation: " + err.message);
-            },
-          );
-        } else if (result.state === "denied") {
-          console.log("User denied geolocation permissions.");
-          // alert(
-          //   "Your location settings are off. Please turn on location, it makes our map easier to use!",
-          // );
-        }
-      })
-      .catch((err) => {
-        console.error("Error asking for geolocation perms:" + err);
-      });
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLocation([position.coords.longitude, position.coords.latitude]);
+      },
+      (error) => {
+        console.warn("Unable to get the user's location:", error.message);
+      },
+    );
+  };
+
+  const closeEventDetails = () => {
+    setInfoOpen(false);
+    setSelectedEventId(null);
   };
 
   useEffect(() => {
@@ -208,7 +183,7 @@ function MapPage({
                   map={mapRef.current!}
                   long={event.longitude}
                   lati={event.latitude}
-                  isActive={event.id == selectedEventId}
+                  isActive={event.id === selectedEventId}
                   onClick={(id: number) => {
                     setSelectedEventId(id);
                     setInfoOpen(true);
@@ -226,9 +201,7 @@ function MapPage({
                     className="close-icon"
                     src={closeIcon}
                     alt="Close"
-                    onClick={() => {
-                      setInfoOpen(false);
-                    }}
+                    onClick={closeEventDetails}
                   />
                 </div>
                 {selectedEvent && (
@@ -238,7 +211,7 @@ function MapPage({
                     event={selectedEvent}
                     saved={saved.includes(selectedEvent.id)}
                     onSave={onSave}
-                    onClose={() => setSelectedEventId(null)}
+                    onClose={closeEventDetails}
                   />
                 )}
               </div>
@@ -256,9 +229,7 @@ function MapPage({
                     <SearchBar
                       clearSearch={false}
                       search={search}
-                      setSearch={(search: string) =>
-                        setBrowse({ ...browse, search })
-                      }
+                      setSearch={(search) => setBrowse((previous) => ({ ...previous, search }))}
                       onClose={() => setListOpen(false)}
                     />
                     <div className="map-toolbar column align-start">
@@ -266,9 +237,7 @@ function MapPage({
                         Dates{" "}
                         <select
                           value={range}
-                          onChange={(e) =>
-                            setBrowse({ ...browse, range: e.target.value })
-                          }
+                          onChange={(e) => setBrowse((previous) => ({ ...previous, range: e.target.value }))}
                         >
                           <option value="7">Next 7 days</option>
                           <option value="30">Next 30 days</option>
@@ -280,9 +249,7 @@ function MapPage({
                         Sort by{" "}
                         <select
                           value={sort}
-                          onChange={(e) =>
-                            setBrowse({ ...browse, sort: e.target.value })
-                          }
+                          onChange={(e) => setBrowse((previous) => ({ ...previous, sort: e.target.value }))}
                         >
                           <option value="upcoming">Upcoming</option>
                           <option value="title">Title A–Z</option>
@@ -297,11 +264,11 @@ function MapPage({
                         {allTags.map((tag) => (
                           <button
                             key={tag.id}
-                            className={`map-chip chip ${tags.includes(tag) ? "active" : ""}`}
-                            aria-pressed={tags.includes(tag)}
-                            onClick={() =>
-                              setBrowse({
-                                ...browse,
+                            className={`map-chip chip ${tags.some((selectedTag) => selectedTag.id === tag.id) ? "active" : ""}`}
+                            aria-pressed={tags.some(
+                              (selectedTag) => selectedTag.id === tag.id,
+                            )}
+                            onClick={() => setBrowse((previous) => ({ ...previous,
                                 tags: browse.tags.some(
                                   (selectedTag) => selectedTag.id === tag.id,
                                 )
@@ -311,7 +278,7 @@ function MapPage({
                                     )
                                   : [...browse.tags, tag],
                               })
-                            }
+                        )}
                           >
                             #{tag.name}
                           </button>
@@ -337,8 +304,8 @@ function MapPage({
                           onOpen={(eventideEvent) => {
                             setSelectedEventId(eventideEvent.id);
                             setInfoOpen(true);
-                            event.longitude &&
-                              event.latitude &&
+                            event.longitude != null &&
+                              event.latitude != null &&
                               mapRef.current?.getBounds() &&
                               !mapRef.current
                                 .getBounds()
