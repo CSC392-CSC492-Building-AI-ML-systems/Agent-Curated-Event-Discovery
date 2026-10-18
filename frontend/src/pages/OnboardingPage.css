@@ -134,12 +134,16 @@
 .onboarding-page .onboarding-continue.active { background: var(--eventide-coral); color: var(--eventide-ink); }
 .onboarding-page .onboarding-continue:disabled { border-color: #e0dce2; background: #f1eff2; color: #746b7b; cursor: not-allowed; }
 .onboarding-finish { display: flex; flex: 1; flex-direction: column; justify-content: center; align-items: center; gap: 20px; text-align: center; }
-.onboarding-finish-curating { animation: onboarding-welcome 5s ease both; }
+.onboarding-finish-saving { animation: onboarding-appear 400ms ease both; }
 .onboarding-finish-complete { animation: onboarding-appear 400ms ease both; }
 .onboarding-finish p { color: var(--eventide-ink); font-size: clamp(17px, 2vw, 22px); line-height: 1.6; }
 .onboarding-dots { display: inline-block; width: 1em; text-align: left; white-space: nowrap; }
 .onboarding-dots span:nth-child(2) { animation: onboarding-dot-two 1.2s step-end infinite; }
 .onboarding-dots span:nth-child(3) { animation: onboarding-dot-three 1.2s step-end infinite; }
+.onboarding-notice { justify-content: center; align-items: center; gap: 24px; text-align: center; }
+.onboarding-notice p, .onboarding-feedback p { color: var(--eventide-ink); }
+.onboarding-feedback { text-align: center; }
+.onboarding-feedback .pill { margin-top: 12px; }
 
 @keyframes onboarding-welcome {
   0% { opacity: 0; }

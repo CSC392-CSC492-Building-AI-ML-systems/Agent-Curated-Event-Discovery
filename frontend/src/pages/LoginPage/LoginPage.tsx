@@ -1,5 +1,5 @@
 import { type SyntheticEvent, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { createClient } from "../../lib/supabase/client";
 import "../SignupPage/SignupPage.css";
 
@@ -13,6 +13,8 @@ type LoginPageProps = {
 
 export default function LoginPage({}: LoginPageProps) {
   const navigate = useNavigate();
+  const location = useLocation();
+  const returnTo = location.state?.returnTo;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -39,7 +41,7 @@ export default function LoginPage({}: LoginPageProps) {
 
       if (data.user) {
         setSuccess("You have been logged in successfully!");
-        navigate("/");
+        void navigate(returnTo === "/onboarding" || returnTo === "/profile" ? returnTo : "/", { replace: true });
       }
 
       setEmail("");

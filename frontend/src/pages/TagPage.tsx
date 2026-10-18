@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
-import NavBar, { Header } from "../components/NavBar";
+import { Header } from "../components/NavBar";
 import DiscoverEventCard from "../components/DiscoverEventCard";
 import EventDetails from "../components/EventDetails";
 import EventRequestState from "../components/EventRequestState";
@@ -26,14 +26,14 @@ export default function TagPage({
   const returnLabel =
     returnPath === "/your-events" ? "Your Events" : "Discover";
   const matches = events
-    .filter((event) => event.categories.includes(tag))
+    .filter((event) => event.tags.some(topic => topic.name === tag))
     .sort(
       (a, b) =>
         (Date.parse(a.startDate || "") || 0) -
         (Date.parse(b.startDate || "") || 0),
     );
-  const known = events.some((event) => event.categories.includes(tag));
-  const isFollowing = followed.includes(tag);
+  const known = events.flatMap(event => event.tags).find(topic => topic.name === tag);
+  const isFollowing = followed.some(topic => topic.id === known?.id);
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [tag]);
@@ -60,7 +60,7 @@ export default function TagPage({
                 className={`pill ${isFollowing ? "active" : ""}`}
                 aria-pressed={isFollowing}
                 aria-label={`${isFollowing ? "Unfollow" : "Follow"} ${tag}`}
-                onClick={() => onFollow(tag)}
+                onClick={() => onFollow(known)}
               >
                 {isFollowing ? "Following" : "Follow"}
               </button>

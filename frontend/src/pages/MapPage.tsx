@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Header } from "../components/NavBar";
 import SearchBar from "../components/SearchBar";
 import Marker from "../components/Marker";
-import type { EventPageProps } from "../interfaces/interfaces";
+import type { BrowsePageProps } from "../interfaces/interfaces";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import closeIcon from "../assets/images/close-icon.svg";
@@ -20,13 +20,12 @@ function MapPage({
   events,
   saved,
   onSave,
-  followed,
   loading,
   error,
   retry,
   browse,
   setBrowse,
-}: EventPageProps) {
+}: BrowsePageProps) {
   //data states
   const allTags = [
     ...new Map(

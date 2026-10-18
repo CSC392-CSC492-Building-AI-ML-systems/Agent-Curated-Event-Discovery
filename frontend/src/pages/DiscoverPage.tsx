@@ -6,7 +6,8 @@ import SearchBar from "../components/SearchBar";
 import DiscoverEventCard from "../components/DiscoverEventCard";
 import EventDetails from "../components/EventDetails";
 import EventRequestState from "../components/EventRequestState";
-import type { EventideEvent, EventPageProps } from "../interfaces/interfaces";
+import ForYouSection from "../components/ForYouSection";
+import type { EventideEvent, BrowsePageProps } from "../interfaces/interfaces";
 import { eventDayKey } from "../utils/calendar";
 import "./DiscoverPage.css";
 
@@ -20,7 +21,7 @@ export default function DiscoverPage({
   loading,
   error,
   retry,
-}: EventPageProps) {
+}: BrowsePageProps) {
   const { search, range, sort, tags } = browse;
   const location = useLocation();
 
@@ -135,7 +136,7 @@ export default function DiscoverPage({
               </select>
             </label>
             <div className="discover-view">
-              <span className={"pill active"} aria-browse="page">
+              <span className={"pill active"} aria-current="page">
                 List
               </span>
               <Link className="pill" to="/map">
@@ -172,14 +173,7 @@ export default function DiscoverPage({
             ))}
           </div>
 
-          <section aria-labelledby="discover-for-you">
-            <h2 id="discover-for-you">
-              For You <span>✦ Curated events</span>
-            </h2>
-            <Link className="discover-empty discover-onboarding-prompt" to="/onboarding">
-              Complete the onboarding for personalized recommendations.
-            </Link>
-          </section>
+          <ForYouSection />
 
           <EventRequestState loading={loading} error={error} retry={retry} />
 

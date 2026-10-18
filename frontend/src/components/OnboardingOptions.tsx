@@ -1,7 +1,7 @@
 type Props = {
   name: string;
   label: string;
-  options: readonly string[];
+  options: readonly { value: string; label: string }[];
   selected: readonly string[];
   multiple?: boolean;
   layout?: "age" | "budget" | "interests";
@@ -15,15 +15,15 @@ export default function OnboardingOptions({
     <fieldset className={`onboarding-options onboarding-options-${layout}`}>
       <legend className="onboarding-visually-hidden">{label}</legend>
       {options.map(option => (
-        <label className="onboarding-option" key={option}>
+        <label className="onboarding-option" key={option.value}>
           <input
             type={multiple ? "checkbox" : "radio"}
             name={name}
-            value={option}
-            checked={selected.includes(option)}
-            onChange={() => onChange(option)}
+            value={option.value}
+            checked={selected.includes(option.value)}
+            onChange={() => onChange(option.value)}
           />
-          <span className="onboarding-option-card">{option}</span>
+          <span className="onboarding-option-card">{option.label}</span>
         </label>
       ))}
     </fieldset>

@@ -83,6 +83,9 @@ export type EventPageProps = EventRequestProps & {
   onSave: (id: number) => void;
   followed: EventideTag[];
   onFollow: (tag: EventideTag) => void;
+};
+
+export type BrowsePageProps = EventPageProps & {
   browse: BrowseState;
   setBrowse: (state: BrowseState) => void;
 };

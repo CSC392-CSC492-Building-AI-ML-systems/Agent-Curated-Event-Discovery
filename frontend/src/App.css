@@ -615,6 +615,13 @@ label {
   margin: 0;
 }
 
+.event-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
 .map-topics,
 .discover-tags {
   left: 20px;
@@ -776,6 +783,11 @@ label {
 }
 
 @media (max-width: 650px) {
+  .event-card-large .event-save {
+    top: 18px;
+    right: 18px;
+  }
+
   .event-card-large .event-card-open {
     grid-template-columns: 1fr;
   }

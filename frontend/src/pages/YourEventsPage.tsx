@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import NavBar, { Header } from '../components/NavBar';
+import { Header } from '../components/NavBar';
 import DiscoverEventCard from '../components/DiscoverEventCard';
 import EventDetails from '../components/EventDetails';
 import EventRequestState from '../components/EventRequestState';
 import CalendarDayEvents from '../components/CalendarDayEvents';
 import CalendarDayDialog from '../components/CalendarDayDialog';
-import type { EventPageProps } from './DiscoverPage';
+import type { EventPageProps } from '../interfaces/interfaces';
 import type { EventideEvent } from '../interfaces/interfaces';
 import { calendarDays, eventDayKey } from '../utils/calendar';
 import './DiscoverPage.css';
