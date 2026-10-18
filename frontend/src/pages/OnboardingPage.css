@@ -1,0 +1,144 @@
+.onboarding-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
+  color-scheme: light;
+  font-family: var(--sans);
+}
+
+.onboarding-main {
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  padding-top: clamp(32px, 6vh, 72px);
+}
+
+.onboarding-panel {
+  display: flex;
+  flex-direction: column;
+  width: min(100%, 1000px);
+  min-height: min(760px, 76svh);
+  padding: clamp(24px, 4vw, 56px);
+  border: 1px solid var(--eventide-coral-soft);
+  border-radius: 24px;
+  background: white;
+  box-shadow: 0 18px 55px rgba(74, 45, 65, 0.06);
+}
+
+.onboarding-panel h1 {
+  margin: 0;
+  border: 0;
+  color: var(--eventide-ink);
+  font-size: clamp(26px, 3vw, 38px);
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: -0.6px;
+  text-align: center;
+}
+
+.onboarding-welcome {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  animation: onboarding-welcome 3.2s ease both;
+}
+
+.onboarding-welcome h1 { max-width: 620px; }
+.onboarding-page .pill { font-family: inherit; cursor: pointer; }
+
+.onboarding-age-step {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 40px;
+  animation: onboarding-appear 400ms ease both;
+}
+
+.onboarding-age-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(28px, 5vh, 56px);
+}
+
+.onboarding-age-options {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: clamp(14px, 2.5vw, 30px);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.onboarding-age-option { position: relative; grid-column: span 2; }
+.onboarding-age-option:nth-of-type(5) { grid-column: 2 / span 2; }
+
+.onboarding-age-option input,
+.onboarding-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.onboarding-age-card {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 1;
+  border: 2px solid var(--eventide-coral-soft);
+  border-radius: 12px;
+  background: white;
+  color: var(--eventide-ink);
+  font-size: clamp(18px, 2vw, 26px);
+  cursor: pointer;
+  transition: background-color 150ms, border-color 150ms;
+}
+
+.onboarding-age-option:hover .onboarding-age-card { border-color: var(--eventide-coral); }
+.onboarding-age-option input:checked + .onboarding-age-card {
+  border-color: var(--eventide-coral);
+  background: #fff0f2;
+}
+.onboarding-age-option input:focus-visible + .onboarding-age-card,
+.onboarding-page a:focus-visible,
+.onboarding-page button:focus-visible { outline: 3px solid var(--eventide-ink); outline-offset: 4px; }
+.onboarding-panel h1:focus { outline: none; }
+
+.onboarding-footer { display: grid; grid-template-columns: 1fr minmax(120px, 40%) 1fr; align-items: center; gap: 20px; }
+.onboarding-progress { grid-column: 2; height: 8px; border-radius: 99px; background: #e1eff9; overflow: hidden; }
+.onboarding-progress > span { display: block; width: 20%; height: 100%; background: var(--eventide-blue); }
+.onboarding-skip { justify-self: end; min-width: 92px; text-align: center; }
+
+@keyframes onboarding-welcome {
+  0% { opacity: 0; }
+  15%, 85% { opacity: 1; }
+  100% { opacity: 0; }
+}
+@keyframes onboarding-appear { from { opacity: 0; } to { opacity: 1; } }
+
+@media (max-width: 600px) {
+  .onboarding-page { padding: 24px 16px; }
+  .onboarding-main { padding-top: 28px; }
+  .onboarding-panel { min-height: 76svh; padding: 24px 18px; border-radius: 18px; }
+  .onboarding-age-options { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .onboarding-age-option, .onboarding-age-option:nth-of-type(5) { grid-column: auto; }
+  .onboarding-age-card { aspect-ratio: auto; min-height: 80px; }
+  .onboarding-footer { grid-template-columns: 1fr auto; }
+  .onboarding-progress { grid-column: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .onboarding-welcome, .onboarding-age-step { animation: none; }
+  .onboarding-age-card { transition: none; }
+}

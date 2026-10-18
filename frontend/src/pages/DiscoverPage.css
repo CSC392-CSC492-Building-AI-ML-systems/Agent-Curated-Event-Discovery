@@ -1,5 +1,18 @@
 @import url('https://fonts.googleapis.com/css2?family=ABeeZee:ital@0;1&display=swap');
 
+.discover-onboarding-prompt {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+.discover-onboarding-prompt:hover {
+  border-style: solid;
+}
+.discover-onboarding-prompt:focus-visible {
+  outline: 3px solid var(--discover-ink);
+  outline-offset: 4px;
+}
+
 .discover-page {
   --discover-ink: #2a1f33;
   --discover-muted: #6d5a78;

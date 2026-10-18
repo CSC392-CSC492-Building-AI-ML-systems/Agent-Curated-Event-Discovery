@@ -172,24 +172,19 @@ export default function DiscoverPage({
             ))}
           </div>
 
+          <section aria-labelledby="discover-for-you">
+            <h2 id="discover-for-you">
+              For You <span>✦ Curated events</span>
+            </h2>
+            <Link className="discover-empty discover-onboarding-prompt" to="/onboarding">
+              Complete the onboarding for personalized recommendations.
+            </Link>
+          </section>
+
           <EventRequestState loading={loading} error={error} retry={retry} />
 
           {!loading && !error && (
             <>
-              {!query && visible.length > 0 && (
-                // for now this isnt actually the "curated" events, its just the top of the events list
-                <section aria-labelledby="discover-for-you">
-                  <h2 id="discover-for-you">
-                    For You <span>✦ Curated events</span>
-                  </h2>
-
-                  <div className="discover-grid">
-                    {visible
-                      .slice(0, 6)
-                      .map((event) => renderCard(event, true))}
-                  </div>
-                </section>
-              )}
 
               <section aria-labelledby="discover-upcoming">
                 <div className="discover-section-heading">

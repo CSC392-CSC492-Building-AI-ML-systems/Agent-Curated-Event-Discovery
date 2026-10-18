@@ -6,6 +6,7 @@ import TagPage from "./pages/TagPage";
 import MapPage from "./pages/MapPage";
 import SignupPage from "./pages/SignupPage/SignupPage";
 import LoginPage from "./pages/LoginPage/LoginPage";
+import OnboardingPage from "./pages/OnboardingPage";
 import useEvents from "./hooks/useEvents";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import type { BrowseState, EventideTag } from "./interfaces/interfaces";
@@ -80,6 +81,7 @@ function App() {
         />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/onboarding" element={<OnboardingPage />} />
       </Routes>
     </BrowserRouter>
   );

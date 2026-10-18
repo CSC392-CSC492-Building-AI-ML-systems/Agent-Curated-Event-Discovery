@@ -108,7 +108,7 @@ export default function SignupPage({}: SignupPageProps) {
             <h1 id="signup-title">Find your kind of event.</h1>
             <p className="signup-subtitle">
               Create an account to see events curated for you, save your
-              favorites, and follow topics you care about.
+              favourites, and follow topics you care about.
             </p>
           </div>
 

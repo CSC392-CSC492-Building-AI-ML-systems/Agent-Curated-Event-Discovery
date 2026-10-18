@@ -71,7 +71,7 @@ export default function LoginPage({}: LoginPageProps) {
           <div className="signup-card-heading">
             <h1 id="signup-title">Find your kind of event.</h1>
             <p className="signup-subtitle">
-              Log in to see events curated for you, save your favorites, and
+              Log in to see events curated for you, save your favourites, and
               follow topics you care about.
             </p>
           </div>
