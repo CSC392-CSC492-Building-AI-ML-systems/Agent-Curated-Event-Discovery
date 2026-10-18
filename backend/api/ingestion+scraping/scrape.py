@@ -35,7 +35,7 @@ def scrape():
             event["locationname"] = ""
 
         search_response = bb.search.web(
-            query=f"{event["name"]}, {event["locationname"]}",
+            query=f"{event['name']}, {event['locationname']}",
             num_results=5,
         )
 

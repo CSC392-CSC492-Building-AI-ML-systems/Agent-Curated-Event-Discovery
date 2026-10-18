@@ -1,6 +1,6 @@
 from database import SessionLocal
 from sqlalchemy import insert, select, func, cast, Time
-from backend.api.models.event import Event, Venue, Organizer, Tag, EventTags
+from backend.api.models.event import Event, Venue, Organizer, Tag, event_tags
 from helpers import get_coordinates
 from typing import Optional
 
@@ -120,7 +120,7 @@ def insert_event_tags(event_id: int, tags: list[str]):
     tags = get_tags_by_names(tags)
     with SessionLocal() as session:
         for tag in tags:
-            stmt = insert(EventTags).values(eventid=event_id, tagid=tag)
+            stmt = insert(event_tags).values(eventid=event_id, tagid=tag)
             session.execute(stmt)
             session.commit()
 

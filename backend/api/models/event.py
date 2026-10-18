@@ -50,7 +50,8 @@ class Organizer(Base):
 
     events: Mapped[list["Event"]] = relationship(back_populates="organizer_obj")
 
-
+# SQLAlchemy convention for pure association table (a join table that holds
+# nothing but the two foreign keys.) Using Core table instead of ORM class
 event_tags = Table(
     "eventtags",
     Base.metadata,
