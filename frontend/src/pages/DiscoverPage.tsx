@@ -7,8 +7,8 @@ import DiscoverEventCard from "../components/DiscoverEventCard";
 import EventDetails from "../components/EventDetails";
 import EventRequestState from "../components/EventRequestState";
 import type { EventideEvent, EventPageProps } from "../interfaces/interfaces";
-import { eventDayKey } from "../utils/calendar";
 import "./DiscoverPage.css";
+import filterEvents from "../utils/filterEvents";
 
 export default function DiscoverPage({
   events,
@@ -43,50 +43,7 @@ export default function DiscoverPage({
 
   const query = search.trim().toLowerCase();
 
-  const visible = events
-    .filter((event) => {
-      const date = event.startDate ? new Date(event.startDate).getTime() : null;
-      const isTodayWithoutTime =
-        event.startTimeKnown === false &&
-        event.startDate &&
-        eventDayKey(event.startDate) ===
-          eventDayKey(new Date(now).toISOString());
-
-      const matchesDate =
-        range === "all-dates" ||
-        date === null ||
-        (date >= now &&
-          (range === "all" || date <= now + Number(range) * 86_400_000)) ||
-        isTodayWithoutTime;
-
-      const searchableText = [
-        event.title,
-        event.description,
-        event.venue.address,
-        event.venue.name,
-        event.organizer?.name,
-        ...event.tags.map((tag) => tag.name),
-      ]
-        .join(" ")
-        .toLowerCase();
-
-      const matchesSearch = !query || searchableText.includes(query);
-
-      const matchesTags =
-        tags.length === 0 ||
-        event.tags.some((tag) =>
-          tags.some((selectedTag) => selectedTag.id === tag.id),
-        );
-
-      return matchesDate && matchesSearch && matchesTags;
-    })
-
-    .sort((a, b) =>
-      sort === "title"
-        ? a.title.localeCompare(b.title)
-        : (Date.parse(a.startDate || "") || 0) -
-          (Date.parse(b.startDate || "") || 0),
-    );
+  const visible = filterEvents(events, browse, now);
 
   const renderCard = (event: EventideEvent, compact = false) => (
     <DiscoverEventCard
@@ -247,7 +204,7 @@ export default function DiscoverPage({
                     Following{" "}
                     <span className="discover-tags">
                       {followed.map((tag) => (
-                        <TagLink key={tag.id} tag={tag.name} />
+                        <TagLink key={tag.id} tag={tag} />
                       ))}
                     </span>
                   </h2>
@@ -263,7 +220,7 @@ export default function DiscoverPage({
                         matches.length > 0 && (
                           <div key={tag.name}>
                             <h3 className="discover-topic-heading">
-                              <TagLink tag={tag.name} />
+                              <TagLink tag={tag} />
                             </h3>
                             <div className="discover-grid">
                               {matches

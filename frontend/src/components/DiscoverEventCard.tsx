@@ -55,7 +55,7 @@ export default function DiscoverEventCard({
           <span>{event.venue.name || "Location to be announced"}</span>
           <span className="event-tags">
             {event.tags.map((tag) => (
-              <TagLink key={tag.id} tag={tag.name} />
+              <TagLink key={tag.id} tag={tag} />
             ))}
           </span>
         </div>

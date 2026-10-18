@@ -9,8 +9,8 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import closeIcon from "../assets/images/close-icon.svg";
 import DiscoverEventCard from "../components/DiscoverEventCard";
 import EventDetails from "../components/EventDetails";
-import { eventDayKey } from "../utils/calendar";
 import EventRequestState from "../components/EventRequestState";
+import filterEvents from "../utils/filterEvents";
 
 type MapCenter = [longitude: number, latitude: number];
 
@@ -38,54 +38,9 @@ function MapPage({
 
   const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
 
-
   const { search, range, sort, tags } = browse;
 
-  const query = search.trim().toLowerCase();
-
-  const visible = events
-    .filter((event) => {
-      const date = event.startDate ? new Date(event.startDate).getTime() : null;
-      const isTodayWithoutTime =
-        event.startTimeKnown === false &&
-        event.startDate &&
-        eventDayKey(event.startDate) ===
-          eventDayKey(new Date(now).toISOString());
-
-      const matchesDate =
-        range === "all-dates" ||
-        date === null ||
-        (date >= now &&
-          (range === "all" || date <= now + Number(range) * 86_400_000)) ||
-        isTodayWithoutTime;
-
-      const searchableText = [
-        event.title,
-        event.description,
-        event.venue.address,
-        event.venue.name,
-        event.organizer?.name,
-        ...event.tags.map((tag) => tag.name),
-      ]
-        .join(" ")
-        .toLowerCase();
-
-      const matchesSearch = !query || searchableText.includes(query);
-
-      const matchesTags =
-        tags.length === 0 ||
-        event.tags.some((tag) =>
-          tags.some((selectedTag) => selectedTag.id === tag.id),
-        );
-
-      return matchesDate && matchesSearch && matchesTags;
-    })
-    .sort((a, b) =>
-      sort === "title"
-        ? a.title.localeCompare(b.title)
-        : (Date.parse(a.startDate || "") || 0) -
-          (Date.parse(b.startDate || "") || 0),
-    );
+  const visible = filterEvents(events, browse, now);
 
   //UI states
   const mapRef = useRef<mapboxgl.Map | null>(null);
@@ -229,7 +184,9 @@ function MapPage({
                     <SearchBar
                       clearSearch={false}
                       search={search}
-                      setSearch={(search) => setBrowse((previous) => ({ ...previous, search }))}
+                      setSearch={(search) =>
+                        setBrowse((previous) => ({ ...previous, search }))
+                      }
                       onClose={() => setListOpen(false)}
                     />
                     <div className="map-toolbar column align-start">
@@ -237,7 +194,12 @@ function MapPage({
                         Dates{" "}
                         <select
                           value={range}
-                          onChange={(e) => setBrowse((previous) => ({ ...previous, range: e.target.value }))}
+                          onChange={(e) =>
+                            setBrowse((previous) => ({
+                              ...previous,
+                              range: e.target.value,
+                            }))
+                          }
                         >
                           <option value="7">Next 7 days</option>
                           <option value="30">Next 30 days</option>
@@ -249,7 +211,12 @@ function MapPage({
                         Sort by{" "}
                         <select
                           value={sort}
-                          onChange={(e) => setBrowse((previous) => ({ ...previous, sort: e.target.value }))}
+                          onChange={(e) =>
+                            setBrowse((previous) => ({
+                              ...previous,
+                              sort: e.target.value,
+                            }))
+                          }
                         >
                           <option value="upcoming">Upcoming</option>
                           <option value="title">Title A–Z</option>
@@ -268,7 +235,9 @@ function MapPage({
                             aria-pressed={tags.some(
                               (selectedTag) => selectedTag.id === tag.id,
                             )}
-                            onClick={() => setBrowse((previous) => ({ ...previous,
+                            onClick={() =>
+                              setBrowse((previous) => ({
+                                ...previous,
                                 tags: browse.tags.some(
                                   (selectedTag) => selectedTag.id === tag.id,
                                 )
@@ -277,8 +246,8 @@ function MapPage({
                                         selectedTag.id !== tag.id,
                                     )
                                   : [...browse.tags, tag],
-                              })
-                        )}
+                              }))
+                            }
                           >
                             #{tag.name}
                           </button>

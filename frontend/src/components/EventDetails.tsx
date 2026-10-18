@@ -1,7 +1,6 @@
 import TagLink from "./TagLink";
 import React, { useEffect, useRef } from "react";
 import type { EventideEvent } from "../interfaces/interfaces";
-import { formatEventDate } from "../utils/eventDate";
 
 export default function EventDetails({
   event,
@@ -22,9 +21,7 @@ export default function EventDetails({
 
   const content = (
     <>
-      {event.imageUrl && (
-        <img src={event.imageUrl} alt="" loading="lazy" />
-      )}
+      {event.imageUrl && <img src={event.imageUrl} alt="" loading="lazy" />}
 
       <h2 id="discover-detail-title">{event.title}</h2>
 
@@ -36,11 +33,7 @@ export default function EventDetails({
 
       <div className="discover-tags">
         {event.tags.map((tag) => (
-          <TagLink
-            key={tag.id}
-            tag={tag.name}
-            onNavigate={onClose}
-          />
+          <TagLink key={tag.id} tag={tag} onNavigate={onClose} />
         ))}
       </div>
 
@@ -60,7 +53,9 @@ export default function EventDetails({
     const element = dialog.current;
     if (!element) return;
     element.showModal();
-    return () => { if (element.open) element.close();};
+    return () => {
+      if (element.open) element.close();
+    };
   }, []);
 
   if (!popup) {

@@ -50,14 +50,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route
-          path="/"
-          element={
-            <DiscoverPage
-              {...eventProps}
-            />
-          }
-        />
+        <Route path="/" element={<DiscoverPage {...eventProps} />} />
         <Route
           path="/your-events"
           element={
@@ -70,14 +63,9 @@ function App() {
             />
           }
         />
-        <Route path="/tags/:tag" element={<TagPage {...eventProps} />} />
+        <Route path="/tags/:tagId" element={<TagPage {...eventProps} />} />
 
-        <Route
-          path="/map"
-          element={
-            <MapPage {...eventProps} />
-          }
-        />
+        <Route path="/map" element={<MapPage {...eventProps} />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/login" element={<LoginPage />} />
       </Routes>
