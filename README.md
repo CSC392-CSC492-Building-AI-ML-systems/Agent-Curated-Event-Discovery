@@ -102,4 +102,15 @@ And check out the following files:
   - .\tests\example.spec.ts - Example end-to-end test
   - .\playwright.config.ts - Playwright Test configuration
 
-Visit https://playwright.dev/docs/intro for more information. ✨
+Visit https://playwright.dev/docs/intro for more information.
+
+### Environment File Requirements Agent-Curated-Event-Discovery/.env 
+```ts
+GEMINI_API_KEY=
+GOOGLE_MAPS_API_KEY= 
+BB_API_KEY=
+DATABASE_URL=
+DATABASE_URL_SYNC=
+```
+
+✨
