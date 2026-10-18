@@ -49,23 +49,26 @@
 .onboarding-welcome h1 { max-width: 620px; }
 .onboarding-page .pill { font-family: inherit; cursor: pointer; }
 
-.onboarding-age-step {
+.onboarding-step {
   display: flex;
   flex: 1;
   flex-direction: column;
   gap: 40px;
-  animation: onboarding-appear 400ms ease both;
 }
 
-.onboarding-age-content {
+.onboarding-step-content {
   display: flex;
   flex: 1;
   flex-direction: column;
   justify-content: center;
   gap: clamp(28px, 5vh, 56px);
+  animation: onboarding-appear 400ms ease both;
 }
 
-.onboarding-age-options {
+.onboarding-question { display: grid; gap: 12px; text-align: center; }
+.onboarding-question p { color: var(--eventide-ink); font-size: 16px; }
+
+.onboarding-options {
   display: grid;
   grid-template-columns: repeat(8, minmax(0, 1fr));
   gap: clamp(14px, 2.5vw, 30px);
@@ -74,10 +77,12 @@
   border: 0;
 }
 
-.onboarding-age-option { position: relative; grid-column: span 2; }
-.onboarding-age-option:nth-of-type(5) { grid-column: 2 / span 2; }
+.onboarding-option { position: relative; grid-column: span 2; }
+.onboarding-options-age .onboarding-option:nth-of-type(5) { grid-column: 2 / span 2; }
+.onboarding-options-budget { grid-template-columns: repeat(6, minmax(0, 1fr)); max-width: 740px; width: 100%; align-self: center; }
+.onboarding-options-interests { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; max-width: 760px; align-self: center; }
 
-.onboarding-age-option input,
+.onboarding-option input,
 .onboarding-visually-hidden {
   position: absolute;
   width: 1px;
@@ -90,10 +95,12 @@
   border: 0;
 }
 
-.onboarding-age-card {
+.onboarding-option-card {
   position: relative;
   display: grid;
   place-items: center;
+  padding: 14px;
+  text-align: center;
   width: 100%;
   aspect-ratio: 1;
   border: 2px solid var(--eventide-coral-soft);
@@ -105,20 +112,34 @@
   transition: background-color 150ms, border-color 150ms;
 }
 
-.onboarding-age-option:hover .onboarding-age-card { border-color: var(--eventide-coral); }
-.onboarding-age-option input:checked + .onboarding-age-card {
+.onboarding-options-budget .onboarding-option-card { font-size: clamp(17px, 2vw, 23px); }
+.onboarding-options-interests .onboarding-option-card { aspect-ratio: auto; min-height: 40px; border-radius: 99px; padding: 6px 16px; font-size: 18px; }
+.onboarding-option:hover .onboarding-option-card { border-color: var(--eventide-coral); }
+.onboarding-option input:checked + .onboarding-option-card {
   border-color: var(--eventide-coral);
   background: #fff0f2;
 }
-.onboarding-age-option input:focus-visible + .onboarding-age-card,
+.onboarding-option input:focus-visible + .onboarding-option-card,
 .onboarding-page a:focus-visible,
 .onboarding-page button:focus-visible { outline: 3px solid var(--eventide-ink); outline-offset: 4px; }
 .onboarding-panel h1:focus { outline: none; }
 
-.onboarding-footer { display: grid; grid-template-columns: 1fr minmax(120px, 40%) 1fr; align-items: center; gap: 20px; }
-.onboarding-progress { grid-column: 2; height: 8px; border-radius: 99px; background: #e1eff9; overflow: hidden; }
-.onboarding-progress > span { display: block; width: 20%; height: 100%; background: var(--eventide-blue); }
-.onboarding-skip { justify-self: end; min-width: 92px; text-align: center; }
+.onboarding-footer { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.onboarding-progress { height: 4px; border-radius: 99px; background: #e1eff9; overflow: hidden; }
+.onboarding-progress > span { display: block; height: 100%; background: var(--eventide-coral); transition: width 250ms ease; }
+.onboarding-actions { display: flex; align-items: center; gap: 16px; }
+.onboarding-back, .onboarding-skip { min-height: 44px; padding: 8px; border: 0; background: transparent; color: var(--eventide-ink); font: inherit; cursor: pointer; }
+.onboarding-back:hover, .onboarding-skip:hover { text-decoration: underline; }
+.onboarding-page .onboarding-continue { min-width: 120px; min-height: 44px; padding: 10px 22px; border-radius: 10px; text-align: center; font: inherit; }
+.onboarding-page .onboarding-continue.active { background: var(--eventide-coral); color: var(--eventide-ink); }
+.onboarding-page .onboarding-continue:disabled { border-color: #e0dce2; background: #f1eff2; color: #746b7b; cursor: not-allowed; }
+.onboarding-finish { display: flex; flex: 1; flex-direction: column; justify-content: center; align-items: center; gap: 20px; text-align: center; }
+.onboarding-finish-curating { animation: onboarding-welcome 5s ease both; }
+.onboarding-finish-complete { animation: onboarding-appear 400ms ease both; }
+.onboarding-finish p { color: var(--eventide-ink); font-size: clamp(17px, 2vw, 22px); line-height: 1.6; }
+.onboarding-dots { display: inline-block; width: 1em; text-align: left; white-space: nowrap; }
+.onboarding-dots span:nth-child(2) { animation: onboarding-dot-two 1.2s step-end infinite; }
+.onboarding-dots span:nth-child(3) { animation: onboarding-dot-three 1.2s step-end infinite; }
 
 @keyframes onboarding-welcome {
   0% { opacity: 0; }
@@ -126,19 +147,25 @@
   100% { opacity: 0; }
 }
 @keyframes onboarding-appear { from { opacity: 0; } to { opacity: 1; } }
+@keyframes onboarding-dot-two { 0% { opacity: 0; } 33%, 100% { opacity: 1; } }
+@keyframes onboarding-dot-three { 0% { opacity: 0; } 66%, 100% { opacity: 1; } }
 
 @media (max-width: 600px) {
   .onboarding-page { padding: 24px 16px; }
   .onboarding-main { padding-top: 28px; }
   .onboarding-panel { min-height: 76svh; padding: 24px 18px; border-radius: 18px; }
-  .onboarding-age-options { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-  .onboarding-age-option, .onboarding-age-option:nth-of-type(5) { grid-column: auto; }
-  .onboarding-age-card { aspect-ratio: auto; min-height: 80px; }
-  .onboarding-footer { grid-template-columns: 1fr auto; }
-  .onboarding-progress { grid-column: 1; }
+  .onboarding-options-age, .onboarding-options-budget { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .onboarding-option, .onboarding-options-age .onboarding-option:nth-of-type(5) { grid-column: auto; }
+  .onboarding-option-card { aspect-ratio: auto; min-height: 80px; }
+  .onboarding-options-interests { gap: 10px; }
+  .onboarding-options-interests .onboarding-option-card { min-height: 40px; padding-inline: 14px; font-size: 16px; }
+  .onboarding-footer { gap: 8px; }
+  .onboarding-actions { gap: 8px; }
+  .onboarding-page .onboarding-continue { min-width: 100px; padding-inline: 12px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .onboarding-welcome, .onboarding-age-step { animation: none; }
-  .onboarding-age-card { transition: none; }
+  .onboarding-welcome, .onboarding-step-content, .onboarding-finish,
+  .onboarding-dots span { animation: none !important; }
+  .onboarding-option-card, .onboarding-progress > span { transition: none; }
 }
