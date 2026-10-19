@@ -11,6 +11,7 @@ import DiscoverEventCard from "../components/DiscoverEventCard";
 import EventDetails from "../components/EventDetails";
 import EventRequestState from "../components/EventRequestState";
 import filterEvents from "../utils/filterEvents";
+import searchIcon from "../assets/images/search-icon.svg";
 
 type MapCenter = [longitude: number, latitude: number];
 
@@ -48,7 +49,6 @@ function MapPage({
 
   const [mapReady, setMapReady] = useState(false);
   const [location, setLocation] = useState<MapCenter>(DEFAULT_LOCATION);
-
   const [listOpen, setListOpen] = useState<boolean>(true);
   const [infoOpen, setInfoOpen] = useState<boolean>(false);
 
@@ -146,7 +146,12 @@ function MapPage({
                 />
               ),
           )}
-
+        {!listOpen && 
+                    <div className="floatingSearchButton">
+                      <button type="submit" className="searchBarButton" aria-label="Search" onClick={()=>{setListOpen(true)}}>
+                        <img className="icon" src={searchIcon} alt="" />
+                      </button>              
+                    </div>}
         {(listOpen || infoOpen) && (
           <div className="container-row mapSideBar" style={{ flex: 0 }}>
             {infoOpen && (
@@ -161,7 +166,7 @@ function MapPage({
                 </div>
                 {selectedEvent && (
                   <EventDetails
-                    style={{ padding: 0, border: "none" }}
+                    style={{ padding: 0, border: "none", overflowY: "auto", background: "none", borderRadius: 0}}
                     popup={false}
                     event={selectedEvent}
                     saved={saved.includes(selectedEvent.id)}

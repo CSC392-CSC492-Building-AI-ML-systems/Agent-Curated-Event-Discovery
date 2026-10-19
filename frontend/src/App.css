@@ -353,13 +353,19 @@ h1 {
   width: 100%;
 }
 
-.floatingSearchBar {
+.floatingSearchButton {
   height: auto;
   position: absolute;
-  top: 0;
-  left: 0;
-  padding: 24px 80px;
-  width: 100%;
+  top: 30px;
+  right: 30px;
+  width: 40px;
+  height: 40px;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  background: var(--bg);
+  border-radius: 50px;
+  box-shadow: 1px 1px 10px 0 rgb(0, 0, 0, 0.2);
 }
 
 .searchAndFilters {
