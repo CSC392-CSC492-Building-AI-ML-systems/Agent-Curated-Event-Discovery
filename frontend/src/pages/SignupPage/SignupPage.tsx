@@ -1,5 +1,5 @@
 import { type SyntheticEvent, useState } from "react";
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from "react-router-dom";
 import { createClient } from "../../lib/supabase/client";
 import "./SignupPage.css";
 
@@ -56,12 +56,14 @@ export default function SignupPage({}: SignupPageProps) {
         email: email.trim(),
         password,
         options: {
-          emailRedirectTo: 'http://localhost:5173/',
+          emailRedirectTo: "http://localhost:5173/",
         },
       });
       if (signupError) {
         if (signupError.message.toLowerCase().includes("already registered")) {
-          setError("An account with this email may already exist. Try logging in instead.");
+          setError(
+            "An account with this email may already exist. Try logging in instead.",
+          );
         } else {
           setError(signupError.message);
         }
@@ -69,7 +71,9 @@ export default function SignupPage({}: SignupPageProps) {
       }
 
       if (data.user && !data.session) {
-        setSuccess("Account created! Check your email for a confirmation link before logging in.");
+        setSuccess(
+          "Account created! Check your email for a confirmation link before logging in.",
+        );
       } else {
         setSuccess("Your account has been created successfully!");
       }
@@ -86,13 +90,25 @@ export default function SignupPage({}: SignupPageProps) {
 
   return (
     <main className="signup-page">
-        <header className="signup-nav"><Link className="discover-logo" to="/">even<i>tide</i><svg viewBox="0 0 100 12" preserveAspectRatio="none" aria-hidden="true"><path d="M2 9 L14 3 L26 9 L38 3 L50 9 L62 3 L74 9 L86 3 L98 9" /></svg></Link></header>
+      <header className="signup-nav">
+        <Link className="discover-logo" to="/">
+          even<i>tide</i>
+          <svg
+            viewBox="0 0 100 12"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            <path d="M2 9 L14 3 L26 9 L38 3 L50 9 L62 3 L74 9 L86 3 L98 9" />
+          </svg>
+        </Link>
+      </header>
       <section className="signup-content" aria-labelledby="signup-title">
         <div className="signup-card">
           <div className="signup-card-heading">
             <h1 id="signup-title">Find your kind of event.</h1>
             <p className="signup-subtitle">
-              Create an account to see events curated for you, save your favorites, and follow topics you care about.
+              Create an account to see events curated for you, save your
+              favorites, and follow topics you care about.
             </p>
           </div>
 
@@ -153,19 +169,26 @@ export default function SignupPage({}: SignupPageProps) {
               </p>
             )}
 
-            <button className="signup-submit" type="submit" disabled={isSubmitting}>
+            <button
+              className="signup-submit"
+              type="submit"
+              disabled={isSubmitting}
+            >
               {isSubmitting ? "Creating account…" : "Create account"}
             </button>
           </form>
 
           <p className="signup-login-prompt">
             Already have an account?{" "}
-            <button type="button" className="signup-text-button" onClick={() => navigate("/login")}>
+            <button
+              type="button"
+              className="signup-text-button"
+              onClick={() => navigate("/login")}
+            >
               Log in
             </button>
           </p>
         </div>
-
       </section>
     </main>
   );
