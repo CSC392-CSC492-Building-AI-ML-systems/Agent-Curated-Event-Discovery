@@ -36,13 +36,10 @@ function MapPage({
   ].sort((a, b) => a.name.localeCompare(b.name));
 
   const [now] = useState(() => Date.now());
-
   const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
-
   const { search, range, sort, tags } = browse;
-
-  const visible = filterEvents(events, browse, now);
-
+  const [visible, setVisible] = useState(events);
+  
   //UI states
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
@@ -86,9 +83,97 @@ function MapPage({
       container: mapContainerRef.current,
       center: DEFAULT_LOCATION,
       zoom: 10.12,
+      
     });
     mapRef.current = map;
     const handleLoad = () => {
+      map.addSource('events', {
+            type: 'geojson',
+            generateId: true,
+            cluster: true,
+            clusterMaxZoom: 14, 
+            clusterRadius: 50,
+            data: {
+              "type": "FeatureCollection",
+              "crs": {
+                "type": "name",
+                "properties": {
+                  "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+                }
+              },
+              "features": visible.map((event)=>                
+                ({"type": "Feature",
+                  "geometry": {
+                      "type": "Point",
+                      "coordinates": [event.longitude, event.latitude]
+                  },
+                  "properties": {
+                    "key": event.id,
+                    "id": event.id
+                  }
+                })
+              )
+            }
+        });
+
+        map.addLayer({
+            id: 'clusters',
+            type: 'circle',
+            source: 'events',
+            filter: ['has', 'point_count'],
+            paint: {
+                // Use step expressions (https://docs.mapbox.com/style-spec/reference/expressions/#step)
+                // with three steps to implement three types of circles:
+                //   * Blue, 20px circles when point count is less than 100
+                //   * Yellow, 30px circles when point count is between 100 and 750
+                //   * Pink, 40px circles when point count is greater than or equal to 750
+                'circle-color': [
+                    'step',
+                    ['get', 'point_count'],
+                    '#51bbd6',
+                    100,
+                    '#f1f075',
+                    750,
+                    '#f28cb1'
+                ],
+                'circle-radius': [
+                    'step',
+                    ['get', 'point_count'],
+                    20,
+                    100,
+                    30,
+                    750,
+                    40
+                ],
+                'circle-emissive-strength': 1
+            }
+        });
+
+        map.addLayer({
+            id: 'cluster-count',
+            type: 'symbol',
+            source: 'events',
+            filter: ['has', 'point_count'],
+            layout: {
+                'text-field': ['get', 'point_count_abbreviated'],
+                'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+                'text-size': 12
+            }
+        });
+
+        map.addLayer({
+            id: 'unclustered-point',
+            type: 'circle',
+            source: 'events',
+            filter: ['!', ['has', 'point_count']],
+            paint: {
+                'circle-color': '#11b4da',
+                'circle-radius': 4,
+                'circle-stroke-width': 1,
+                'circle-stroke-color': '#fff',
+                'circle-emissive-strength': 1
+            }
+        });
       setMapReady(true);
     };
     map.on("load", handleLoad);
@@ -108,6 +193,34 @@ function MapPage({
     mapRef.current?.setCenter(location);
   }, [location]);
 
+  useEffect(()=>{
+    setVisible(filterEvents(events, browse, now));
+  }, [events, browse, now])
+  useEffect(()=>{
+    //since visible changed, change the source on map
+    const source = mapRef.current?.getSource('events') as mapboxgl.GeoJSONSource | undefined;
+    source?.setData({
+              "type": "FeatureCollection",
+              "crs": {
+                "type": "name",
+                "properties": {
+                  "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+                }
+              },
+              "features": visible.map((event)=>                
+                ({"type": "Feature",
+                  "geometry": {
+                      "type": "Point",
+                      "coordinates": [event.longitude, event.latitude]
+                  },
+                  "properties": {
+                    "key": event.id,
+                    "id": event.id
+                  }
+                })
+              )
+            })
+  })
   return (
     <div
       className="map-page"
@@ -127,25 +240,7 @@ function MapPage({
       </div>
       <div className="map">
         <div ref={mapContainerRef} className="mapContainer" />
-        {mapReady &&
-          visible.map(
-            (event) =>
-              event.longitude != null &&
-              event.latitude != null && (
-                <Marker
-                  key={event.id}
-                  id={event.id}
-                  map={mapRef.current!}
-                  long={event.longitude}
-                  lati={event.latitude}
-                  isActive={event.id === selectedEventId}
-                  onClick={(id: number) => {
-                    setSelectedEventId(id);
-                    setInfoOpen(true);
-                  }}
-                />
-              ),
-          )}
+        
         {!listOpen && 
                     <div className="floatingSearchButton">
                       <button type="submit" className="searchBarButton" aria-label="Search" onClick={()=>{setListOpen(true)}}>

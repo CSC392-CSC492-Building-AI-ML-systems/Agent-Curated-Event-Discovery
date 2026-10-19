@@ -4,6 +4,8 @@ import DiscoverPage from "./pages/DiscoverPage";
 import YourEventsPage from "./pages/YourEventsPage";
 import TagPage from "./pages/TagPage";
 import MapPage from "./pages/MapPage";
+import Map from "./pages/Map";
+
 import SignupPage from "./pages/SignupPage/SignupPage";
 import LoginPage from "./pages/LoginPage/LoginPage";
 import useEvents from "./hooks/useEvents";
@@ -68,6 +70,7 @@ function App() {
         <Route path="/map" element={<MapPage {...eventProps} />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/maptest" element={<Map/>} />
       </Routes>
     </BrowserRouter>
   );
