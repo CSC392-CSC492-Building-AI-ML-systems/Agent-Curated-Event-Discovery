@@ -211,9 +211,7 @@ export default function DiscoverPage({
                   {followed.length ? (
                     followed.map((tag) => {
                       const matches = visible.filter((event) =>
-                        event.tags.some((eventTag) => {
-                          eventTag.id === tag.id;
-                        }),
+                        event.tags.some((eventTag) => eventTag.id == tag.id),
                       );
 
                       return (
