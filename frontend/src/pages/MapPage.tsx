@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Header } from "../components/NavBar";
 import SearchBar from "../components/SearchBar";
 import type { EventPageProps } from "../interfaces/interfaces";
-import mapboxgl from "mapbox-gl";
+import mapboxgl, { type GeoJSONFeature } from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import closeIcon from "../assets/images/close-icon.svg";
 import mapMarkerIcon from '../assets/images/map-marker.svg';
@@ -12,6 +12,7 @@ import EventDetails from "../components/EventDetails";
 import EventRequestState from "../components/EventRequestState";
 import filterEvents from "../utils/filterEvents";
 import searchIcon from "../assets/images/search-icon.svg";
+import targetIcon from "../assets/images/target-icon.svg";
 
 type MapCenter = [longitude: number, latitude: number];
 
@@ -45,7 +46,7 @@ function MapPage({
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
 
   const [mapReady, setMapReady] = useState(false);
-  const [location, setLocation] = useState<MapCenter>(DEFAULT_LOCATION);
+  const [userLocation, setUserLocation]  = useState<MapCenter | null>(null); //this is the user's actual location from their browser data
   const [listOpen, setListOpen] = useState<boolean>(true);
   const [infoOpen, setInfoOpen] = useState<boolean>(false);
 
@@ -62,7 +63,9 @@ function MapPage({
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        setLocation([position.coords.longitude, position.coords.latitude]);
+        const pos = [position.coords.longitude, position.coords.latitude] as MapCenter;
+        setUserLocation(pos);
+        mapRef.current?.setCenter(pos);
       },
       (error) => {
         console.warn("Unable to get the user's location:", error.message);
@@ -182,13 +185,13 @@ function MapPage({
           const features = map.queryRenderedFeatures(e.point, {
             layers: ['clusters']
           });
-          const clusterId = features[0].properties.cluster_id;
+          const clusterId = features[0].properties?.cluster_id;
           const events = map.getSource('events') as mapboxgl.GeoJSONSource | undefined
-          events.getClusterExpansionZoom(clusterId, (err, zoom) => {
+          events?.getClusterExpansionZoom(clusterId, (err, zoom) => {
               if (err) return;
               map.easeTo({
                 center: features[0].geometry.coordinates,
-                zoom: zoom
+                zoom: zoom?? undefined
               });
             });
         }
@@ -263,10 +266,6 @@ function MapPage({
     getLocation();
   }, []);
 
-  useEffect(() => {
-    mapRef.current?.setCenter(location);
-  }, [location]);
-
   useEffect(()=>{
     setVisible(filterEvents(events, browse, now));
   }, [events, browse, now])
@@ -314,13 +313,19 @@ function MapPage({
       </div>
       <div className="map">
         <div ref={mapContainerRef} className="mapContainer" />
-        
-        {!listOpen && 
-                    <div className="floatingSearchButton">
-                      <button type="submit" className="searchBarButton" aria-label="Search" onClick={()=>{setListOpen(true)}}>
-                        <img className="icon" src={searchIcon} alt="" />
-                      </button>              
-                    </div>}
+          <div className="column floatingButtonContainer small-gap">
+            {!listOpen && <div className="floatingButton">
+              <button type="submit" className="searchBarButton" aria-label="Search" onClick={()=>{setListOpen(true)}}>
+                <img className="icon" src={searchIcon} alt="" />
+              </button>              
+            </div>}
+            { userLocation && //for re-centering user location
+            <div className="floatingButton"> 
+              <button type="submit" className="userTargetButton" aria-label="Recenter" onClick={()=>{mapRef.current?.setCenter(userLocation); console.log(`set user location: ${JSON.stringify(userLocation)}`)}}>
+                <img className="icon" src={targetIcon} alt="" />
+              </button>              
+            </div>}
+        </div>
         {(listOpen || infoOpen) && (
           <div className="container-row mapSideBar" style={{ flex: 0 }}>
             {infoOpen && (
@@ -458,7 +463,7 @@ function MapPage({
                                     event.latitude,
                                   ),
                                 ) &&
-                              setLocation([event.longitude, event.latitude]);
+                              mapRef.current?.setCenter([event.longitude, event.latitude]);
                           }}
                         />
                       ))}
