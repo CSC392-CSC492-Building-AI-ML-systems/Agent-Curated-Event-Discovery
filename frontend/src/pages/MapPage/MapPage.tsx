@@ -49,6 +49,7 @@ function MapPage({
 
   const [mapReady, setMapReady] = useState(false);
   const [userLocation, setUserLocation]  = useState<MapCenter | null>(null); //this is the user's actual location from their browser data
+  const [userLocation, setUserLocation]  = useState<MapCenter | null>(null); //this is the user's actual location from their browser data
   const [listOpen, setListOpen] = useState<boolean>(true);
   const [infoOpen, setInfoOpen] = useState<boolean>(false);
   console.log(`visible:${JSON.stringify(visible)}`)
@@ -184,11 +185,14 @@ function MapPage({
             layers: ['clusters']
           });
           const clusterId = features[0].properties?.cluster_id;
+          const clusterId = features[0].properties?.cluster_id;
           const events = map.getSource('events') as mapboxgl.GeoJSONSource | undefined
+          events?.getClusterExpansionZoom(clusterId, (err, zoom) => {
           events?.getClusterExpansionZoom(clusterId, (err, zoom) => {
               if (err) return;
               map.easeTo({
                 center: features[0].geometry.coordinates,
+                zoom: zoom?? undefined
                 zoom: zoom?? undefined
               });
             });
