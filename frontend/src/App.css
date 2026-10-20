@@ -353,11 +353,14 @@ h1 {
   width: 100%;
 }
 
-.floatingSearchButton {
-  height: auto;
+.floatingButtonContainer {
   position: absolute;
   top: 30px;
   right: 30px;
+}
+
+.floatingButton {
+  height: auto;
   width: 40px;
   height: 40px;
   justify-content: center;
@@ -457,6 +460,17 @@ label {
 }
 
 .searchBarButton {
+  background: transparent;
+  border: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 4px;
+  font: inherit;
+}
+
+.userTargetButton{
   background: transparent;
   border: 0;
   display: inline-flex;
