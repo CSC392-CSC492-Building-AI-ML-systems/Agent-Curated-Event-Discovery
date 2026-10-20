@@ -5,9 +5,11 @@ from google import genai
 from google.genai import types
 import googlemaps
 from tags import get_all_tags_by_name
+from typesafe_sdk import TypeSafeClient, Noul, NoulCriteria
 
 gemini = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 maps = googlemaps.Client(key=os.environ["GOOGLE_MAPS_API_KEY"])
+client = TypeSafeClient(api_key=os.environ["TYPESAFE_API_KEY"])
 
 def get_coordinates(address: str):
     if not address or not address.strip():
@@ -22,6 +24,43 @@ def get_coordinates(address: str):
         print(f"Google Maps HTTP error for address {address!r}: {e}")
         return None
 
+def valid_event(original_event) -> bool:
+    """
+    Assesses a Together API event using Jev to evaluate whether it is a valid
+    event.
+
+    Paramaters: <original_event> is the unprocessed Togather event
+    Return:  the evalution result as a valid event (True) or not (False)
+    """
+    event_details = {'name': original_event.get('name'),
+                     'description': original_event.get('description'),
+                     'location name': original_event.get('locationname')}
+    state_string = f"These are details about an event from Toronto: {event_details}"
+    try:
+        response = client.system_one(
+            model="jev-latest",
+            state=state_string,
+            questions={
+                "is_valid_event": Noul(
+                    instructions="Is this a legitimate toronto event that can be searched for online?",
+                    criteria=NoulCriteria(
+                        true="Event details provide a meaningful information across name, description, and location name that can be used to search for an event online.",
+                        false="The name, description, and/or location name combined are not sufficient to search for this event",
+                    ),
+                ),
+            },
+        )
+        score = response.answers["is_valid_event"].noul
+        print(score)
+        if score > 0.4:
+            return True
+        return False
+    except Exception as e:
+        print(f"Jev validation failed for event id ({original_event.get('id')}): {e}")
+        # Better to return event as valid and attempt to enrich than lose a potentially valid event, especially with the
+        return True
+
+
 def enhance_description(original_event, page_content, link):
     """
     This function takes <original_event> which is a single TogetherAPI
@@ -33,7 +72,7 @@ def enhance_description(original_event, page_content, link):
     'venue_name' in the return as it would otherwise conflict with the event name field.
     """
     # NOTE: fields for ORGANIZER, VENUE, and EVENT are contained in the JSON created.
-    # EXCEPT "coordinates" for VENUE table and link for Event Table (however working_url is added to the dictionary before returning
+    # EXCEPT "coordinates" for VENUE table and link for Event Table (however working_url is added to the dictionary before returning)
     tag_list = get_all_tags_by_name()
     prompt = f"""This is the original event data for a Toronto, ON, Canada event: {original_event}.
     A websearch for the corresponding event has provided the following 
@@ -48,7 +87,7 @@ def enhance_description(original_event, page_content, link):
                If the end time is explicitly mentioned choose that that (formated as HH:MM:00 not an ISO 8601 string), OTHERWISE null (not an ISO 8601 string, only the time).
                Format start date and end date as YYYY-MM-DD.
                If the same event is taking place on multiple different dates, which require seperate registration, then include additional dictionary elements to the list (following the same rules as outlined above).
-    - "venue": Name of the event venue.
+    - "venue": Name of the event venue. DO NOT FILL WITH RANDOM WORDS LIKE 'test'
     - "address": Event venue full street address, OR "online" for virtual events.
     - "price": The event ticket cost as a number (if there are multiple tiers of cost, choose the lowest price), OR 0 if the event is free, OR null if the price is unknown.
     - "eighteen_plus": TRUE only if the event explicitly mentions an age restriction on the event as 18+, otherwise FALSE.
@@ -61,7 +100,7 @@ def enhance_description(original_event, page_content, link):
 	- "twitter": The organization twitter or X account/page link or null.
 	- "linkedin": The organization LinkedIn account/page link OR null.
 	- "tiktok": The organization TikTok account/page link OR null.
-	- "tags": The list of tags that help describe the category of this event. ONLY FROM the list of tags from {tag_list}, select the tags that closely apply based on the enhanced event descriptions generated.
+	- "tags": The list of tags that help describe the category of this event. ONLY FROM the list of tags from {tag_list}, select and give a list of tags that closely apply to the event based on the enhanced event descriptions generated.
 	            
 	NOTE: If any of the following JSON object keys from the following list are null RETURN AN EMPTY JSON. 
 	DO NOT INTERPRET FIELDS THAT ARE NOT EXPLICITLY MENTIONED UNLESS STATED OTHERWISE FOR A FIELD.
@@ -75,7 +114,9 @@ def enhance_description(original_event, page_content, link):
         contents=prompt,
         config=types.GenerateContentConfig(response_mime_type="application/json")
     )
-    print(response.text)
+    #print("----------------RESPONSE----------------")
+    #print(response.text)
+    #print("----------------RESPONSE END----------------")
     if response.text == '{}':
         return None
     try:
