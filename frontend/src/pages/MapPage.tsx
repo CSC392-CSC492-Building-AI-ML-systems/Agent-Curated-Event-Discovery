@@ -2,11 +2,11 @@ import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Header } from "../components/NavBar";
 import SearchBar from "../components/SearchBar";
-import Marker from "../components/Marker";
 import type { EventPageProps } from "../interfaces/interfaces";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import closeIcon from "../assets/images/close-icon.svg";
+import mapMarkerIcon from '../assets/images/map-marker.svg';
 import DiscoverEventCard from "../components/DiscoverEventCard";
 import EventDetails from "../components/EventDetails";
 import EventRequestState from "../components/EventRequestState";
@@ -83,101 +83,175 @@ function MapPage({
       container: mapContainerRef.current,
       center: DEFAULT_LOCATION,
       zoom: 10.12,
-      
+      fadeDuration: 0,
     });
     mapRef.current = map;
     const handleLoad = () => {
+      if (!map.hasImage("marker")){
+        const mapMarker = new Image(50, 50);
+        mapMarker.onload = ()=>{
+          map.addImage("marker", mapMarker, { pixelRatio: 2 });
+        }
+        mapMarker.src = mapMarkerIcon;
+      }
       map.addSource('events', {
-            type: 'geojson',
-            generateId: true,
-            cluster: true,
-            clusterMaxZoom: 14, 
-            clusterRadius: 50,
-            data: {
-              "type": "FeatureCollection",
-              "crs": {
-                "type": "name",
+          type: 'geojson',
+          generateId: true,
+          cluster: true,
+          clusterMaxZoom: 14, 
+          clusterRadius: 50,
+          data: {
+            "type": "FeatureCollection",
+            "crs": {
+              "type": "name",
+              "properties": {
+                "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+              }
+            },
+            "features": visible.map((event)=>                
+              ({"type": "Feature",
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [event.longitude, event.latitude]
+                },
                 "properties": {
-                  "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+                  "key": event.id,
+                  "id": event.id
                 }
-              },
-              "features": visible.map((event)=>                
-                ({"type": "Feature",
-                  "geometry": {
-                      "type": "Point",
-                      "coordinates": [event.longitude, event.latitude]
-                  },
-                  "properties": {
-                    "key": event.id,
-                    "id": event.id
-                  }
-                })
-              )
-            }
-        });
+              })
+            )
+          }
+      });
 
-        map.addLayer({
-            id: 'clusters',
-            type: 'circle',
-            source: 'events',
-            filter: ['has', 'point_count'],
-            paint: {
-                // Use step expressions (https://docs.mapbox.com/style-spec/reference/expressions/#step)
-                // with three steps to implement three types of circles:
-                //   * Blue, 20px circles when point count is less than 100
-                //   * Yellow, 30px circles when point count is between 100 and 750
-                //   * Pink, 40px circles when point count is greater than or equal to 750
-                'circle-color': [
-                    'step',
-                    ['get', 'point_count'],
-                    '#51bbd6',
-                    100,
-                    '#f1f075',
-                    750,
-                    '#f28cb1'
-                ],
-                'circle-radius': [
-                    'step',
-                    ['get', 'point_count'],
-                    20,
-                    100,
-                    30,
-                    750,
-                    40
-                ],
-                'circle-emissive-strength': 1
-            }
-        });
+      map.addLayer({
+          id: 'clusters',
+          type: 'circle',
+          source: 'events',
+          filter: ['has', 'point_count'],
+          paint: {
+              // Use step expressions (https://docs.mapbox.com/style-spec/reference/expressions/#step)
+              // with three steps to implement three types of circles:
+              // 20px circles when point count is less than 100, 30px circles when point count is between 100 and 750, 40px circles when point count is greater than or equal to 750
+              'circle-color': '#f6545c',
+              'circle-radius': [
+                  'step',
+                  ['get', 'point_count'],
+                  20,
+                  100,
+                  30,
+                  750,
+                  40
+              ],
+          }
+      });
 
-        map.addLayer({
-            id: 'cluster-count',
-            type: 'symbol',
-            source: 'events',
-            filter: ['has', 'point_count'],
-            layout: {
-                'text-field': ['get', 'point_count_abbreviated'],
-                'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
-                'text-size': 12
-            }
-        });
+      map.addLayer({
+          id: 'cluster-count',
+          type: 'symbol',
+          source: 'events',
+          filter: ['has', 'point_count'],
+          layout: {
+              'text-field': ['get', 'point_count_abbreviated'],
+              'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+              'text-size': 20
+          },
+          paint: {
+            'text-color': 'white'
+          }
+      });
 
-        map.addLayer({
-            id: 'unclustered-point',
-            type: 'circle',
-            source: 'events',
-            filter: ['!', ['has', 'point_count']],
-            paint: {
-                'circle-color': '#11b4da',
-                'circle-radius': 4,
-                'circle-stroke-width': 1,
-                'circle-stroke-color': '#fff',
-                'circle-emissive-strength': 1
-            }
-        });
+      map.addLayer({
+          id: 'unclustered-point',
+          type: 'symbol',
+          source: 'events',
+          filter: ['!', ['has', 'point_count']],
+          layout: {
+            "icon-image": "marker",
+            "icon-size": 1.5,
+            "icon-allow-overlap": true,
+          },
+      });
+      // When a click event occurs on a cluster,
+      // getClusterExpansionZoom grabs the zoomlevel where the cluster expands
+      // Then the viewport zooms in to show the expanded cluster
+      // Displaying the underlying individual points and/or smaller clusters
+      map.addInteraction('click-clusters', {
+        type: 'click',
+        target: { layerId: 'clusters' },
+        handler: (e) => {
+          const features = map.queryRenderedFeatures(e.point, {
+            layers: ['clusters']
+          });
+          const clusterId = features[0].properties.cluster_id;
+          const events = map.getSource('events') as mapboxgl.GeoJSONSource | undefined
+          events.getClusterExpansionZoom(clusterId, (err, zoom) => {
+              if (err) return;
+              map.easeTo({
+                center: features[0].geometry.coordinates,
+                zoom: zoom
+              });
+            });
+        }
+      });
+
+      // When a click event occurs on a feature in
+      // the unclustered-point layer, open a popup at
+      // the location of the feature, with
+      // description HTML from its properties.
+      map.addInteraction('click-unclustered', {
+        type: 'click',
+        target: { layerId: 'unclustered-point' },
+        handler: (e) => {
+          const coordinates = e.feature?.geometry.coordinates.slice();
+          const mag = e.feature?.properties.mag;
+          const tsunami = e.feature?.properties.tsunami === 1 ? 'yes' : 'no';
+
+          new mapboxgl.Popup()
+            .setLngLat(coordinates)
+            .setHTML(`magnitude: ${mag}<br>Was there a tsunami?: ${tsunami}`)
+            .addTo(map);
+        }
+      });
+
+      // Change the cursor to a pointer when the mouse is over a cluster of POIs.
+      map.addInteraction('clustered-mouseenter', {
+        type: 'mouseenter',
+        target: { layerId: 'clusters' },
+        handler: () => {
+          map.getCanvas().style.cursor = 'pointer';
+        }
+      });
+
+      // Change the cursor back to a pointer when it stops hovering over a cluster of POIs.
+      map.addInteraction('clustered-mouseleave', {
+        type: 'mouseleave',
+        target: { layerId: 'clusters' },
+        handler: () => {
+          map.getCanvas().style.cursor = '';
+        }
+      });
+
+      // Change the cursor to a pointer when the mouse is over an individual POI.
+      map.addInteraction('unclustered-mouseenter', {
+        type: 'mouseenter',
+        target: { layerId: 'unclustered-point' },
+        handler: () => {
+          map.getCanvas().style.cursor = 'pointer';
+        }
+      });
+
+      // Change the cursor back to a pointer when it stops hovering over an individual POI.
+      map.addInteraction('unclustered-mouseleave', {
+        type: 'mouseleave',
+        target: { layerId: 'unclustered-point' },
+        handler: () => {
+          map.getCanvas().style.cursor = '';
+        }
+      });
       setMapReady(true);
     };
     map.on("load", handleLoad);
-
+    
     return () => {
       map.off("load", handleLoad);
       map.remove();
@@ -220,7 +294,7 @@ function MapPage({
                 })
               )
             })
-  })
+  }, [mapReady, visible])
   return (
     <div
       className="map-page"
