@@ -3,21 +3,21 @@ import mapboxgl from "mapbox-gl";
 
 type props = {
   map: mapboxgl.Map;
-  id: number; //id of the event element
   long: number;
   lati: number;
   isActive?: boolean;
-  onClick?: (id: number) => void;
+  onClick?: () => void;
+  element?: HTMLElement;
 };
-export default function Marker ({ map, id, long, lati, isActive, onClick }: props) {
+export default function Marker ({ map, long, lati, isActive, onClick, element }: props) {
   const markerRef = useRef<mapboxgl.Marker | null>(null);
 
   useEffect(() => {
-    markerRef.current = new mapboxgl.Marker()
+    markerRef.current = new mapboxgl.Marker({element: element})
       .setLngLat([long, lati])
       .addTo(map);
     markerRef.current.getElement().addEventListener("click", () => {
-      onClick ? onClick(id) : () => {};
+      onClick ? onClick() : () => {};
     });
     
     const svg = markerRef.current.getElement().querySelector("svg");

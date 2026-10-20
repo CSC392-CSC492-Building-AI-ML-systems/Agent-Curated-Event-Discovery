@@ -1,18 +1,20 @@
 import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Header } from "../components/NavBar";
-import SearchBar from "../components/SearchBar";
-import type { EventPageProps } from "../interfaces/interfaces";
-import mapboxgl, { type GeoJSONFeature } from "mapbox-gl";
+import { Header } from "../../components/NavBar";
+import SearchBar from "../../components/SearchBar";
+import Marker from "../../components/Marker";
+import type { EventPageProps } from "../../interfaces/interfaces";
+import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
-import closeIcon from "../assets/images/close-icon.svg";
-import mapMarkerIcon from '../assets/images/map-marker.svg';
-import DiscoverEventCard from "../components/DiscoverEventCard";
-import EventDetails from "../components/EventDetails";
-import EventRequestState from "../components/EventRequestState";
-import filterEvents from "../utils/filterEvents";
-import searchIcon from "../assets/images/search-icon.svg";
-import targetIcon from "../assets/images/target-icon.svg";
+import closeIcon from "../../assets/images/close-icon.svg";
+import mapMarkerIcon from '../../assets/images/map-marker.svg';
+import DiscoverEventCard from "../../components/DiscoverEventCard";
+import EventDetails from "../../components/EventDetails";
+import EventRequestState from "../../components/EventRequestState";
+import filterEvents from "../../utils/filterEvents";
+import searchIcon from "../../assets/images/search-icon.svg";
+import targetIcon from "../../assets/images/target-icon.svg";
+import "./MapPage.css";
 
 type MapCenter = [longitude: number, latitude: number];
 
@@ -50,6 +52,12 @@ function MapPage({
   const [listOpen, setListOpen] = useState<boolean>(true);
   const [infoOpen, setInfoOpen] = useState<boolean>(false);
   console.log(`visible:${JSON.stringify(visible)}`)
+
+  const userLocationElement = document.createElement('div');
+    const markerInner = document.createElement('div');
+    markerInner.className = 'pulsating-circle';
+    userLocationElement.appendChild(markerInner);
+
   const selectedEvent =
     selectedEventId === null
       ? undefined
@@ -65,7 +73,7 @@ function MapPage({
       (position) => {
         const pos = [position.coords.longitude, position.coords.latitude] as MapCenter;
         setUserLocation(pos);
-        mapRef.current?.setCenter(pos);
+        mapRef.current?.easeTo({center: pos, duration: 500});
       },
       (error) => {
         console.warn("Unable to get the user's location:", error.message);
@@ -163,6 +171,7 @@ function MapPage({
             "icon-allow-overlap": true,
           },
       });
+      
       // When a click event occurs on a cluster,
       // getClusterExpansionZoom grabs the zoomlevel where the cluster expands
       // Then the viewport zooms in to show the expanded cluster
@@ -304,6 +313,8 @@ function MapPage({
       </div>
       <div className="map">
         <div ref={mapContainerRef} className="mapContainer" />
+          {userLocation && mapRef.current && <Marker element={userLocationElement} key="userLocation" map={mapRef.current} long={userLocation[0]} lati={userLocation[1]} />}
+        <div className="mapSideBarContainer">
           <div className="column floatingButtonContainer small-gap">
             {!listOpen && <div className="floatingButton">
               <button type="submit" className="searchBarButton" aria-label="Search" onClick={()=>{setListOpen(true)}}>
@@ -312,14 +323,14 @@ function MapPage({
             </div>}
             { userLocation && //for re-centering user location
             <div className="floatingButton"> 
-              <button type="submit" className="userTargetButton" aria-label="Recenter" onClick={()=>{mapRef.current?.setCenter(userLocation); console.log(`set user location: ${JSON.stringify(userLocation)}`)}}>
+              <button type="submit" className="userTargetButton" aria-label="Recenter" onClick={()=>{mapRef.current?.easeTo({center: userLocation, duration: 500}); console.log(`set user location: ${JSON.stringify(userLocation)}`)}}>
                 <img className="icon" src={targetIcon} alt="" />
               </button>              
             </div>}
-        </div>
-        {(listOpen || infoOpen) && (
+          </div>
+        
           <div className="container-row mapSideBar" style={{ flex: 0 }}>
-            {infoOpen && (
+            <div className={`eventsSideBarContainer ${infoOpen? "open": ""}`}>
               <div className="eventsSideBar">
                 <div className="row justify-end">
                   <img
@@ -340,8 +351,8 @@ function MapPage({
                   />
                 )}
               </div>
-            )}
-            {listOpen && (
+            </div>
+            <div className={`eventsSideBarContainer ${listOpen? "open": ""}`}>
               <div className="eventsSideBar events">
                 <div className="eventsSideBarScroll">
                   <div className="searchAndFilters column small-gap">
@@ -454,16 +465,16 @@ function MapPage({
                                     event.latitude,
                                   ),
                                 ) &&
-                              mapRef.current?.setCenter([event.longitude, event.latitude]);
+                              mapRef.current?.easeTo({center: [event.longitude, event.latitude], duration: 500});
                           }}
                         />
                       ))}
                   </div>
                 </div>
               </div>
-            )}
+            </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
