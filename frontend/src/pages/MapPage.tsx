@@ -48,7 +48,7 @@ function MapPage({
   const [location, setLocation] = useState<MapCenter>(DEFAULT_LOCATION);
   const [listOpen, setListOpen] = useState<boolean>(true);
   const [infoOpen, setInfoOpen] = useState<boolean>(false);
-
+  console.log(`visible:${JSON.stringify(visible)}`)
   const selectedEvent =
     selectedEventId === null
       ? undefined
@@ -108,18 +108,7 @@ function MapPage({
                 "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
               }
             },
-            "features": visible.map((event)=>                
-              ({"type": "Feature",
-                "geometry": {
-                    "type": "Point",
-                    "coordinates": [event.longitude, event.latitude]
-                },
-                "properties": {
-                  "key": event.id,
-                  "id": event.id
-                }
-              })
-            )
+            "features": []
           }
       });
 
@@ -203,12 +192,12 @@ function MapPage({
         target: { layerId: 'unclustered-point' },
         handler: (e) => {
           const coordinates = e.feature?.geometry.coordinates.slice();
-          const mag = e.feature?.properties.mag;
-          const tsunami = e.feature?.properties.tsunami === 1 ? 'yes' : 'no';
+          const title = e.feature?.properties.title;
+          const tag = e.feature?.properties.tag;
 
           new mapboxgl.Popup()
             .setLngLat(coordinates)
-            .setHTML(`magnitude: ${mag}<br>Was there a tsunami?: ${tsunami}`)
+            .setHTML(`${title}`)
             .addTo(map);
         }
       });
@@ -289,7 +278,9 @@ function MapPage({
                   },
                   "properties": {
                     "key": event.id,
-                    "id": event.id
+                    "id": event.id,
+                    "title": event.title,
+                    "tag": event.tags[0]
                   }
                 })
               )
