@@ -317,6 +317,27 @@ h1 {
   width: 100%;
 }
 
+<<<<<<< HEAD
+=======
+.floatingButtonContainer {
+  position: absolute;
+  top: 30px;
+  right: 30px;
+}
+
+.floatingButton {
+  height: auto;
+  width: 40px;
+  height: 40px;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  background: var(--bg);
+  border-radius: 50px;
+  box-shadow: 1px 1px 10px 0 rgb(0, 0, 0, 0.2);
+}
+
+>>>>>>> 7e6d8ca (feat(frontend): make target)
 .searchAndFilters {
   width: 100%;
 }
