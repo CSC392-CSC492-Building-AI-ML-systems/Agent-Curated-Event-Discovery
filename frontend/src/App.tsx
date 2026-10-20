@@ -26,8 +26,8 @@ function App() {
 
   const onFollow = (tag: EventideTag) =>
     setFollowed((current) =>
-      current.includes(tag)
-        ? current.filter((value) => value !== tag)
+      current.some((selectedTag) => selectedTag.id === tag.id)
+        ? current.filter((value) => value.id !== tag.id)
         : [...current, tag],
     );
   const [saved, setSaved] = useState<number[]>([]);
