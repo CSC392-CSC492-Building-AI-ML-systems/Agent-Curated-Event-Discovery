@@ -448,6 +448,17 @@ label {
   font: inherit;
 }
 
+.userTargetButton{
+  background: transparent;
+  border: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 4px;
+  font: inherit;
+}
+
 .navbar .active {
   border-bottom: 3px solid #f6545c;
   color: #d63a45;
