@@ -67,7 +67,7 @@
 .mapSideBar{
   height: 100%;
   border-radius: 50px 0px 0px 50px;
-  background: var(--bg);
+  background: white;
 }
 .mapContainer {
   display: flex;
@@ -122,6 +122,7 @@
   color: var(--map-ink);
   color-scheme: light;
   background-attachment: fixed;
+  overflow: hidden;
 }
 
 .map-page *,
@@ -155,8 +156,11 @@
 
 
 .floatingButtonContainer {
-  position: relative;
-  padding: 20px
+  position: absolute;
+  left: -80px;
+  top: 0;
+  padding: 20px;
+  height: auto;
 }
 
 .floatingButton {
@@ -166,7 +170,7 @@
   justify-content: center;
   align-items: center;
   display: flex;
-  background: var(--bg);
+  background: white;
   border-radius: 50px;
   box-shadow: 1px 1px 10px 0 rgb(0, 0, 0, 0.2);
 }
@@ -205,3 +209,21 @@
   align-items: flex-start;
 }
 
+.selectedEventsSideBar.open {
+    padding: 20px;
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.selectedEventsSideBar {
+    width: 375px;
+    padding: 20px;
+    position: absolute;
+    top: 0;
+    right: -375px;
+    transition: right 0.2s ease;
+    height: 100%;
+    background: white;
+    border-radius: 50px;
+}
