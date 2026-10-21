@@ -114,11 +114,13 @@ def enhance_description(original_event, page_content, link):
 	- "linkedin": The organization LinkedIn account/page link OR null.
 	- "tiktok": The organization TikTok account/page link OR null.
 	- "tags": The list of tags that help describe the category of this event. ONLY FROM the list of tags from {tag_list}, select and give a list of tags that closely apply to the event based on the enhanced event descriptions generated.
-	            
-	NOTE: If any of the following JSON object keys from the following list are null RETURN AN EMPTY JSON. 
+	
+	NOTES: 
+    - If any of the following JSON object keys from the following list are null RETURN AN EMPTY JSON. 
 	DO NOT INTERPRET FIELDS THAT ARE NOT EXPLICITLY MENTIONED UNLESS STATED OTHERWISE FOR A FIELD.
-    List of required non-null values for the corresponding keys: 
-    "name", "description", "address", "venue", "dates"
+	List of required non-null values for the corresponding keys: "name", "description", "address", "venue", "dates"
+	- For the keys "organizer", "phone", "email", "website", "instagram", "facebook", "twitter", "linkedin", and "tiktok"
+	Ensure relevance of the organizer's name with the event. BE AWARE DATA/INFORMATION THAT APPEARS FROM THE WEBSEARCH CAN BE UNRELATED TO THE EVENT AND LINK TO OTHER EVENTS/ACTIVITIES/PAGES ON THE SITE.
     """
 
     # argument 3 forces gemini to return a valid and parseable JSON string over text or markdown
