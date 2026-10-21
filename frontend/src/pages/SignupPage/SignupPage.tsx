@@ -1,6 +1,7 @@
 import { type SyntheticEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { createClient } from "../../lib/supabase/client";
+import GoogleLoginButton from "../../components/GoogleLoginButton";
 import "./SignupPage.css";
 
 type SignupPageProps = {
@@ -111,73 +112,76 @@ export default function SignupPage({}: SignupPageProps) {
               favorites, and follow topics you care about.
             </p>
           </div>
+          <div>
+            <form className="signup-form" onSubmit={handleSubmit}>
+              <div className="signup-field">
+                <label htmlFor="signup-email">Email address</label>
+                <input
+                  id="signup-email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  required
+                />
+              </div>
 
-          <form className="signup-form" onSubmit={handleSubmit}>
-            <div className="signup-field">
-              <label htmlFor="signup-email">Email address</label>
-              <input
-                id="signup-email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                required
-              />
-            </div>
+              <div className="signup-field">
+                <label htmlFor="signup-password">Password</label>
+                <input
+                  id="signup-password"
+                  name="password"
+                  type="password"
+                  autoComplete="new-password"
+                  placeholder="At least 8 characters, at least one uppercase letter, number, and special character"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  minLength={8}
+                  required
+                />
+              </div>
 
-            <div className="signup-field">
-              <label htmlFor="signup-password">Password</label>
-              <input
-                id="signup-password"
-                name="password"
-                type="password"
-                autoComplete="new-password"
-                placeholder="At least 8 characters, at least one uppercase letter, number, and special character"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                minLength={8}
-                required
-              />
-            </div>
+              <div className="signup-field">
+                <label htmlFor="signup-confirm-password">
+                  Confirm password
+                </label>
+                <input
+                  id="signup-confirm-password"
+                  name="confirmPassword"
+                  type="password"
+                  autoComplete="new-password"
+                  placeholder="Enter your password again"
+                  value={confirmPassword}
+                  onChange={(event) => setConfirmPassword(event.target.value)}
+                  minLength={8}
+                  required
+                />
+              </div>
 
-            <div className="signup-field">
-              <label htmlFor="signup-confirm-password">Confirm password</label>
-              <input
-                id="signup-confirm-password"
-                name="confirmPassword"
-                type="password"
-                autoComplete="new-password"
-                placeholder="Enter your password again"
-                value={confirmPassword}
-                onChange={(event) => setConfirmPassword(event.target.value)}
-                minLength={8}
-                required
-              />
-            </div>
+              {error && (
+                <p className="signup-error" role="alert">
+                  {error}
+                </p>
+              )}
 
-            {error && (
-              <p className="signup-error" role="alert">
-                {error}
-              </p>
-            )}
+              {success && (
+                <p className="signup-success" role="status">
+                  {success}
+                </p>
+              )}
 
-            {success && (
-              <p className="signup-success" role="status">
-                {success}
-              </p>
-            )}
-
-            <button
-              className="signup-submit"
-              type="submit"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? "Creating account…" : "Create account"}
-            </button>
-          </form>
-
+              <button
+                className="signup-submit"
+                type="submit"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Creating account…" : "Create account"}
+              </button>
+            </form>
+            <GoogleLoginButton />
+          </div>
           <p className="signup-login-prompt">
             Already have an account?{" "}
             <button
