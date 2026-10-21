@@ -104,7 +104,12 @@ And check out the following files:
 
 Visit https://playwright.dev/docs/intro for more information.
 
-### Environment File Requirements Agent-Curated-Event-Discovery/.env 
+### Environment File Frontend Requirements Agent-Curated-Event-Discovery/frontend/.env
+```ts
+
+```
+
+### Environment File Backend Requirements Agent-Curated-Event-Discovery/.env 
 ```ts
 GEMINI_API_KEY=
 GOOGLE_MAPS_API_KEY= 
