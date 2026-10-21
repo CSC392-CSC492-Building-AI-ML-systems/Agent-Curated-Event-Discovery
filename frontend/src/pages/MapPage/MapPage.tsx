@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Header } from "../../components/NavBar";
 import SearchBar from "../../components/SearchBar";
 import Marker from "../../components/Marker";
-import type { EventPageProps } from "../../interfaces/interfaces";
+import type { EventideEvent, EventPageProps } from "../../interfaces/interfaces";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import closeIcon from "../../assets/images/close-icon.svg";
@@ -14,12 +14,24 @@ import EventRequestState from "../../components/EventRequestState";
 import filterEvents from "../../utils/filterEvents";
 import searchIcon from "../../assets/images/search-icon.svg";
 import targetIcon from "../../assets/images/target-icon.svg";
+import backIcon from "../../assets/images/back-icon.svg";
 import "./MapPage.css";
 
 type MapCenter = [longitude: number, latitude: number];
 
 const DEFAULT_LOCATION: MapCenter = [-79.34, 43.64];
 
+const eventInBounds = (event: EventideEvent, mapRef: React.RefObject<mapboxgl.Map | null>, infoOpen: boolean, listOpen: boolean): boolean => {
+  if (!mapRef || !(mapRef.current)) return false;
+  if (!event.longitude || !event.latitude) return true;
+  const {x, y} = mapRef.current?.project(new mapboxgl.LngLat(
+    event.longitude,
+    event.latitude,
+  ))?? {x: null, y: null};
+  const {clientWidth, clientHeight} = mapRef.current.getCanvas();
+  if (!x || !y) return true;
+  return x >= 0 && x<=(clientWidth - (infoOpen? 376: 0) - (listOpen? 376: 0)) && y >= 0 && y <= clientHeight;
+}
 function MapPage({
   events,
   saved,
@@ -40,12 +52,15 @@ function MapPage({
 
   const [now] = useState(() => Date.now());
   const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
+  const [selectedEventIds, setSelectedEventIds] = useState<number[] | null>(null);
   const { search, range, sort, tags } = browse;
   const [visible, setVisible] = useState(events);
   
   //UI states
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
+  const infoMenu = useRef<HTMLDivElement | null>(null); //events details
+  const listMenu = useRef<HTMLDivElement | null>(null); //events list
 
   const [mapReady, setMapReady] = useState(false);
   const [userLocation, setUserLocation]  = useState<MapCenter | null>(null); //this is the user's actual location from their browser data
@@ -57,11 +72,18 @@ function MapPage({
     const markerInner = document.createElement('div');
     markerInner.className = 'pulsating-circle';
     userLocationElement.appendChild(markerInner);
-
   const selectedEvent =
     selectedEventId === null
       ? undefined
       : events.find((event) => event.id === selectedEventId);
+  const selectedEvents = []
+  if (selectedEventIds){
+    for (let event of events){
+      if (selectedEventIds.includes(event.id)){
+        selectedEvents.push(event)
+      }
+    }   
+  }
 
   const getLocation = () => {
     if (!navigator.geolocation) {
@@ -73,7 +95,7 @@ function MapPage({
       (position) => {
         const pos = [position.coords.longitude, position.coords.latitude] as MapCenter;
         setUserLocation(pos);
-        mapRef.current?.easeTo({center: pos, duration: 500});
+        mapRef.current?.easeTo({center: pos, duration: 500,  padding: {right: (infoOpen? 376: 0) + (listOpen? 376: 0)}});
       },
       (error) => {
         console.warn("Unable to get the user's location:", error.message);
@@ -182,16 +204,40 @@ function MapPage({
         handler: (e) => {
           const features = map.queryRenderedFeatures(e.point, {
             layers: ['clusters']
-          });
+          });          
           const clusterId = features[0].properties?.cluster_id;
           const events = map.getSource('events') as mapboxgl.GeoJSONSource | undefined
-          events?.getClusterExpansionZoom(clusterId, (err, zoom) => {
-              if (err) return;
-              map.easeTo({
-                center: features[0].geometry.coordinates,
-                zoom: zoom?? undefined
-              });
-            });
+
+          //first check if cluster has all the same locations
+          let allSameLocation = true;
+          let eventIds: number[] = []
+          const point_count = features[0].properties.point_count;
+          events?.getClusterLeaves(clusterId, point_count, 0, 
+            (err, features) =>{
+              if (!features) return
+              const x = features[0].geometry.coordinates[0];
+              const y = features[0].geometry.coordinates[1];
+              
+              for (let feature of features){
+                if (feature.geometry.coordinates[0] !== x || feature.geometry.coordinates[1] !== y) {allSameLocation = false;}
+                eventIds.push(feature.properties.id);
+              }
+              if (allSameLocation){
+                setSelectedEventIds(eventIds);
+                setSelectedEventId(null);
+                setInfoOpen(false);
+                setListOpen(true);
+              }else{
+                events?.getClusterExpansionZoom(clusterId, (err, zoom) => {
+                  if (err) return;
+                  map.easeTo({
+                    center: features[0].geometry.coordinates,
+                    zoom: zoom?? undefined,
+                    padding: {right: (infoOpen? 376: 0) + (listOpen? 376: 0)}
+                  });
+                });
+              }              
+            })
         }
       });
 
@@ -203,14 +249,24 @@ function MapPage({
         type: 'click',
         target: { layerId: 'unclustered-point' },
         handler: (e) => {
-          const coordinates = e.feature?.geometry.coordinates.slice();
-          const title = e.feature?.properties.title;
-          const tag = e.feature?.properties.tag;
+          // const coordinates = e.feature?.geometry.coordinates.slice();
+          // const title = e.feature?.properties.title;
+          // const tag = e.feature?.properties.tag;
 
-          new mapboxgl.Popup()
-            .setLngLat(coordinates)
-            .setHTML(`${title}`)
-            .addTo(map);
+          // new mapboxgl.Popup()
+          //   .setLngLat(coordinates)
+          //   .setHTML(`${title}`)
+          //   .addTo(map);
+          const features = map.queryRenderedFeatures(e.point, {
+            layers: ['unclustered-point']
+          });
+          map.easeTo({
+            center: features[0].geometry.coordinates,
+            padding: {right: (infoOpen? 376: 0) + (listOpen? 376: 0)}
+          });
+          setSelectedEventId(features[0].properties.id);
+          setSelectedEventIds([]);
+          setInfoOpen(true);
         }
       });
 
@@ -323,14 +379,14 @@ function MapPage({
             </div>}
             { userLocation && //for re-centering user location
             <div className="floatingButton"> 
-              <button type="submit" className="userTargetButton" aria-label="Recenter" onClick={()=>{mapRef.current?.easeTo({center: userLocation, duration: 500}); console.log(`set user location: ${JSON.stringify(userLocation)}`)}}>
+              <button type="submit" className="userTargetButton" aria-label="Recenter" onClick={()=>{mapRef.current?.easeTo({center: userLocation, duration: 500, padding: {right: (infoOpen? 376: 0) + (listOpen? 376: 0)}}); console.log(`set user location: ${JSON.stringify(userLocation)}`)}}>
                 <img className="icon" src={targetIcon} alt="" />
               </button>              
             </div>}
           </div>
         
           <div className="container-row mapSideBar" style={{ flex: 0 }}>
-            <div className={`eventsSideBarContainer ${infoOpen? "open": ""}`}>
+            <div ref={infoMenu} className={`eventsSideBarContainer ${infoOpen? "open": ""}`}>
               <div className="eventsSideBar">
                 <div className="row justify-end">
                   <img
@@ -342,7 +398,7 @@ function MapPage({
                 </div>
                 {selectedEvent && (
                   <EventDetails
-                    style={{ padding: 0, border: "none", overflowY: "auto", background: "none", borderRadius: 0}}
+                    style={{ margin: 0, padding: 0, border: "none", overflowY: "auto", background: "none", borderRadius: 0}}
                     popup={false}
                     event={selectedEvent}
                     saved={saved.includes(selectedEvent.id)}
@@ -352,7 +408,7 @@ function MapPage({
                 )}
               </div>
             </div>
-            <div className={`eventsSideBarContainer ${listOpen? "open": ""}`}>
+            <div ref={listMenu} className={`eventsSideBarContainer ${listOpen? "open": ""}`}>
               <div className="eventsSideBar events">
                 <div className="eventsSideBarScroll">
                   <div className="searchAndFilters column small-gap">
@@ -456,21 +512,43 @@ function MapPage({
                             setInfoOpen(true);
                             event.longitude != null &&
                               event.latitude != null &&
-                              mapRef.current?.getBounds() &&
-                              !mapRef.current
-                                .getBounds()
-                                ?.contains(
-                                  new mapboxgl.LngLat(
-                                    event.longitude,
-                                    event.latitude,
-                                  ),
-                                ) &&
-                              mapRef.current?.easeTo({center: [event.longitude, event.latitude], duration: 500});
+                              !eventInBounds(event, mapRef, infoOpen, listOpen)&&
+                              mapRef.current?.easeTo({center: [event.longitude, event.latitude], duration: 500, padding: {right: (infoOpen? 376: 0) + (listOpen? 376: 0)}});
                           }}
                         />
                       ))}
                   </div>
                 </div>
+                 
+                 <div className={`selectedEventsSideBar ${selectedEvents.length>1? "open": ""}`}>
+                  <div className="eventsSideBarScroll small-gap column">
+                    <img
+                      className="back-icon"
+                      src={backIcon}
+                      alt="Back"
+                      onClick={()=>{setSelectedEventIds([])}}
+                      width="40px"
+                      height="40px"
+                    />
+                    {selectedEvents.map((event) => (
+                      <DiscoverEventCard
+                        key={event.id}
+                        event={event}
+                        compact={true}
+                        saved={saved.includes(event.id)}
+                        onSave={onSave}
+                        onOpen={(eventideEvent) => {
+                          setSelectedEventId(eventideEvent.id);
+                          setInfoOpen(true);
+                          event.longitude != null &&
+                            event.latitude != null &&
+                            !eventInBounds(event, mapRef, infoOpen, listOpen)&&
+                            mapRef.current?.easeTo({center: [event.longitude, event.latitude], duration: 500, padding: {right: (infoOpen? 376: 0) + (listOpen? 376: 0)}});
+                        }}
+                      />))
+                      }
+                    </div>
+                  </div>
               </div>
             </div>
           </div>
