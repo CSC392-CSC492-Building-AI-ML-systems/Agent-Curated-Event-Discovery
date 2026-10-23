@@ -21,6 +21,7 @@ class TogatherEvent(Base):
     enddate: Mapped[str] = mapped_column(Text)
     locationname: Mapped[str] = mapped_column(Text)
     inserteddate: Mapped[date] = mapped_column(Date)
+    scrapeddate: Mapped[date] = mapped_column(Date)
 
 
 class Venue(Base):
@@ -79,7 +80,7 @@ class Event(Base):
     price: Mapped[Optional[Decimal]] = mapped_column(Numeric(6, 2))
     link: Mapped[str] = mapped_column(Text, nullable=False)
     eighteenplus: Mapped[bool] = mapped_column(Boolean, nullable=False)
-
+    togathereventid: Mapped[str] = mapped_column(Text, nullable=False)
     venue_obj: Mapped["Venue"] = relationship(back_populates="events")
     organizer_obj: Mapped[Optional["Organizer"]] = relationship(
         back_populates="events"

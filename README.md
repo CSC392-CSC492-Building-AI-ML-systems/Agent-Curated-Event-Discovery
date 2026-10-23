@@ -106,17 +106,24 @@ Visit https://playwright.dev/docs/intro for more information.
 
 ### Environment File Frontend Requirements Agent-Curated-Event-Discovery/frontend/.env
 ```ts
-
+VITE_MAPBOX_TOKEN=
+VITE_API_BASE_URL=http://localhost:8000
+VITE_SUPABASE_URL=
+VITE_SUPABASE_PUBLISHABLE_KEY=
 ```
 
 ### Environment File Backend Requirements Agent-Curated-Event-Discovery/.env 
 ```ts
 GEMINI_API_KEY=
 GOOGLE_MAPS_API_KEY= 
-BB_API_KEY=
+BROWSERBASE_API_KEY=
 DATABASE_URL=
 DATABASE_URL_SYNC=
 TYPESAFE_API_KEY=
+SUPABASE_URL=
 ```
 
-✨
+### SQL script for deduplication
+```with cte as (select id, name, startdate, enddate, locationname, inserteddate, row_number() over (partition by name, startdate, enddate, locationname order by inserteddate desc) as rn from togatherevent)
+delete from togatherevent using cte where togatherevent.id = cte.id and rn > 1;
+```

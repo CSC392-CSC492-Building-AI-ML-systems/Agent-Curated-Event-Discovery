@@ -21,7 +21,7 @@ def insert_event(event: dict):
     link = event.get("link", None)
     eighteenplus = event.get("eighteen_plus", False)
     tags = event.get("tags", [])
-
+    togathereventid = event.get("id")
     with SessionLocal() as session:
         for occurrance in event.get("dates", []):
             startdate = occurrance.get("startdate", None)
@@ -45,7 +45,9 @@ def insert_event(event: dict):
                                             endtime=cast(endtime, Time),
                                             venue=venue_id,
                                             organizer=organizer_id, price=price, link=link,
-                                            eighteenplus=eighteenplus).returning(Event.id)
+                                            eighteenplus=eighteenplus,
+                                            togathereventid=togathereventid
+                                            ).returning(Event.id)
                 event_id = session.execute(stmt).scalar_one()
             insert_event_tags(session, event_id, tags)
         session.commit()
