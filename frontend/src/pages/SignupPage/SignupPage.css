@@ -34,14 +34,6 @@
     #fffaf7;
 }
 
-/* .signup-header {
-  display: flex;
-  align-items: center;
-  gap: clamp(32px, 4vw, 64px);
-  max-width: 1500px;
-  margin: 0 auto;
-} */
-
 .signup-header {
   display: flex;
   align-items: center;
@@ -137,6 +129,46 @@
     border-color 160ms ease,
     box-shadow 160ms ease,
     background 160ms ease;
+}
+
+.signup-password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.signup-password-wrapper input {
+  width: 100%;
+  box-sizing: border-box;
+  padding-right: 48px;
+}
+
+.signup-password-toggle {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 4px;
+  border: none;
+  background: transparent;
+  color: #777;
+  cursor: pointer;
+}
+
+.signup-password-toggle:hover {
+  color: #30283b;
+}
+
+.signup-password-toggle:focus-visible {
+  outline: 2px solid #ff5262;
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 .signup-field input::placeholder {

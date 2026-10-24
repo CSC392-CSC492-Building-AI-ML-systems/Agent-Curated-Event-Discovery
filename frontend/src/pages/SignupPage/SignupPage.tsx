@@ -1,5 +1,6 @@
 import { type SyntheticEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react";
 import { createClient } from "../../lib/supabase/client";
 import GoogleLoginButton from "../../components/GoogleLoginButton";
 import "./SignupPage.css";
@@ -20,6 +21,8 @@ export default function SignupPage({}: SignupPageProps) {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   async function handleSubmit(event: SyntheticEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -61,19 +64,13 @@ export default function SignupPage({}: SignupPageProps) {
         },
       });
       if (signupError) {
-        if (signupError.message.toLowerCase().includes("already registered")) {
-          setError(
-            "An account with this email may already exist. Try logging in instead.",
-          );
-        } else {
-          setError(signupError.message);
-        }
+        setError(signupError.message);
         return;
       }
 
       if (data.user && !data.session) {
         setSuccess(
-          "Account created! Check your email for a confirmation link before logging in.",
+          "Account created! Check your email for a confirmation link before logging in (this might end up in your spam folder). If you already have an account, please log in instead.",
         );
       } else {
         setSuccess("Your account has been created successfully!");
@@ -130,34 +127,66 @@ export default function SignupPage({}: SignupPageProps) {
 
               <div className="signup-field">
                 <label htmlFor="signup-password">Password</label>
-                <input
-                  id="signup-password"
-                  name="password"
-                  type="password"
-                  autoComplete="new-password"
-                  placeholder="At least 8 characters, at least one uppercase letter, number, and special character"
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  minLength={8}
-                  required
-                />
+                <div className="signup-password-wrapper">
+                  <input
+                    id="signup-password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    autoComplete="new-password"
+                    placeholder="At least 8 characters, at least one uppercase letter, number, and special character"
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    minLength={8}
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="signup-password-toggle"
+                    onClick={() => setShowPassword(!showPassword)}
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
+                    aria-pressed={showPassword}
+                  >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
               </div>
 
               <div className="signup-field">
                 <label htmlFor="signup-confirm-password">
                   Confirm password
                 </label>
-                <input
-                  id="signup-confirm-password"
-                  name="confirmPassword"
-                  type="password"
-                  autoComplete="new-password"
-                  placeholder="Enter your password again"
-                  value={confirmPassword}
-                  onChange={(event) => setConfirmPassword(event.target.value)}
-                  minLength={8}
-                  required
-                />
+                <div className="signup-password-wrapper">
+                  <input
+                    id="signup-confirm-password"
+                    name="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
+                    autoComplete="new-password"
+                    placeholder="Enter your password again"
+                    value={confirmPassword}
+                    onChange={(event) => setConfirmPassword(event.target.value)}
+                    minLength={8}
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="signup-password-toggle"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    aria-label={
+                      showConfirmPassword
+                        ? "Hide confirm password"
+                        : "Show confirm password"
+                    }
+                    aria-pressed={showConfirmPassword}
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff size={20} />
+                    ) : (
+                      <Eye size={20} />
+                    )}
+                  </button>
+                </div>
               </div>
 
               {error && (
