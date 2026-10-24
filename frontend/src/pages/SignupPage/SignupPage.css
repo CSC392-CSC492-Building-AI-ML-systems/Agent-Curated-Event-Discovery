@@ -1,4 +1,3 @@
-
 :root {
   --eventide-ink: #21162f;
   --eventide-muted: #77717a;
@@ -17,28 +16,30 @@
   color: var(--eventide-ink);
   font-family: "Trebuchet MS", "Avenir Next", Avenir, sans-serif;
   background:
-    radial-gradient(ellipse at 8% 88%, rgba(255, 222, 125, 0.56), transparent 37%),
-    radial-gradient(ellipse at 94% 15%, rgba(255, 191, 183, 0.47), transparent 35%),
-    radial-gradient(ellipse at 52% 4%, rgba(197, 213, 233, 0.48), transparent 38%),
+    radial-gradient(
+      ellipse at 8% 88%,
+      rgba(255, 222, 125, 0.56),
+      transparent 37%
+    ),
+    radial-gradient(
+      ellipse at 94% 15%,
+      rgba(255, 191, 183, 0.47),
+      transparent 35%
+    ),
+    radial-gradient(
+      ellipse at 52% 4%,
+      rgba(197, 213, 233, 0.48),
+      transparent 38%
+    ),
     #fffaf7;
 }
 
-/* .signup-header {
+.signup-header {
   display: flex;
   align-items: center;
-  gap: clamp(32px, 4vw, 64px);
-  max-width: 1500px;
-  margin: 0 auto;
-} */
-
-.signup-header { 
-    display: flex; 
-    align-items: center; 
-    gap: 32px; 
-    flex-wrap: wrap; 
+  gap: 32px;
+  flex-wrap: wrap;
 }
-
-
 
 .signup-logo {
   position: relative;
@@ -52,11 +53,9 @@
   text-decoration: none;
 }
 
-
 .signup-logo > span:first-child {
   font-style: italic;
 }
-
 
 .signup-content {
   display: flex;
@@ -126,7 +125,50 @@
   color: var(--eventide-ink);
   font: inherit;
   font-size: 15px;
-  transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease;
+}
+
+.signup-password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.signup-password-wrapper input {
+  width: 100%;
+  box-sizing: border-box;
+  padding-right: 48px;
+}
+
+.signup-password-toggle {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 4px;
+  border: none;
+  background: transparent;
+  color: #777;
+  cursor: pointer;
+}
+
+.signup-password-toggle:hover {
+  color: #30283b;
+}
+
+.signup-password-toggle:focus-visible {
+  outline: 2px solid #ff5262;
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 .signup-field input::placeholder {
@@ -173,7 +215,10 @@
   font: inherit;
   font-size: 17px;
   font-weight: 700;
-  transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease;
 }
 
 .signup-submit:hover:not(:disabled) {
@@ -196,7 +241,7 @@
 }
 
 .signup-login-prompt {
-  margin: 24px 0 0;
+  margin: 10px 0 0;
   color: var(--eventide-muted);
   font-size: 14px;
   text-align: center;
@@ -220,14 +265,14 @@
 }
 
 .signup-field input:-webkit-autofill,
-.signup-field input:-webkit-autofill:hover, 
+.signup-field input:-webkit-autofill:hover,
 .signup-field input:-webkit-autofill:focus,
 .signup-field input:autofill {
   -webkit-box-shadow: 0 0 0px 1000px #fffdfc inset !important;
   box-shadow: 0 0 0px 1000px #fffdfc inset !important;
 
   -webkit-text-fill-color: #21162f !important;
-  
+
   font-family: "Trebuchet MS", "Avenir Next", Avenir, sans-serif !important;
   font-size: 15px !important;
 }
@@ -235,8 +280,12 @@
 .signup-field input:-webkit-autofill:focus,
 .signup-field input:autofill:focus {
   border-color: var(--eventide-coral) !important;
-  -webkit-box-shadow: 0 0 0px 1000px #ffffff inset, 0 0 0 4px rgba(255, 82, 98, 0.12) !important;
-  box-shadow: 0 0 0px 1000px #ffffff inset, 0 0 0 4px rgba(255, 82, 98, 0.12) !important;
+  -webkit-box-shadow:
+    0 0 0px 1000px #ffffff inset,
+    0 0 0 4px rgba(255, 82, 98, 0.12) !important;
+  box-shadow:
+    0 0 0px 1000px #ffffff inset,
+    0 0 0 4px rgba(255, 82, 98, 0.12) !important;
 }
 
 @media (max-width: 560px) {
@@ -272,4 +321,3 @@
     border-radius: 24px;
   }
 }
-
