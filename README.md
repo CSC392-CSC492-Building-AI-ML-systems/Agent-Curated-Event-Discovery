@@ -120,7 +120,7 @@ BROWSERBASE_API_KEY=
 DATABASE_URL=
 DATABASE_URL_SYNC=
 TYPESAFE_API_KEY=
-SUPABASE_URL=
+SUPABASE_URL=  // <- Is this needed?
 ```
 
 ### SQL script for deduplication
