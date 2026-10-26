@@ -1,7 +1,9 @@
 import { type SyntheticEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react";
 import { createClient } from "../../lib/supabase/client";
 import "../SignupPage/SignupPage.css";
+import GoogleLoginButton from "../../components/GoogleLoginButton";
 
 type LoginPageProps = {
   onLogin?: (details: {
@@ -18,6 +20,7 @@ export default function LoginPage({}: LoginPageProps) {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   async function handleSubmit(event: SyntheticEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -75,54 +78,69 @@ export default function LoginPage({}: LoginPageProps) {
               follow topics you care about.
             </p>
           </div>
+          <div>
+            <form className="signup-form" onSubmit={handleSubmit}>
+              <div className="signup-field">
+                <label htmlFor="signup-email">Email address</label>
+                <input
+                  id="signup-email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  required
+                />
+              </div>
 
-          <form className="signup-form" onSubmit={handleSubmit}>
-            <div className="signup-field">
-              <label htmlFor="signup-email">Email address</label>
-              <input
-                id="signup-email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                required
-              />
-            </div>
+              <div className="signup-field">
+                <label htmlFor="signup-password">Password</label>
+                <div className="signup-password-wrapper">
+                  <input
+                    id="signup-password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    autoComplete="new-password"
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="signup-password-toggle"
+                    onClick={() => setShowPassword(!showPassword)}
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
+                    aria-pressed={showPassword}
+                  >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
+              </div>
 
-            <div className="signup-field">
-              <label htmlFor="signup-password">Password</label>
-              <input
-                id="signup-password"
-                name="password"
-                type="password"
-                autoComplete="new-password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                required
-              />
-            </div>
+              {error && (
+                <p className="signup-error" role="alert">
+                  {error}
+                </p>
+              )}
 
-            {error && (
-              <p className="signup-error" role="alert">
-                {error}
-              </p>
-            )}
+              {success && (
+                <p className="signup-success" role="status">
+                  {success}
+                </p>
+              )}
 
-            {success && (
-              <p className="signup-success" role="status">
-                {success}
-              </p>
-            )}
-
-            <button
-              className="signup-submit"
-              type="submit"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? "Logging in…" : "Log in"}
-            </button>
-          </form>
+              <button
+                className="signup-submit"
+                type="submit"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Logging in…" : "Log in"}
+              </button>
+            </form>
+            <GoogleLoginButton />
+          </div>
 
           <p className="signup-login-prompt">
             Don't have an account?{" "}
