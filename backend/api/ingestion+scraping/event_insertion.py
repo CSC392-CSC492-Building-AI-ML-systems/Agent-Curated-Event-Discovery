@@ -105,10 +105,9 @@ def find_or_create_organizer(name: str, email: Optional[str], phone: Optional[st
         else:
             stmt = select(Organizer.id).where(Organizer.name == name)
         organizer_id = session.execute(stmt).scalar_one_or_none()
-        if organizer_id is not None:
-            return organizer_id
-        stmt = (insert(Organizer).values(name=name, email=email, phone=phone, website=website, instagram=instagram,
-                    facebook=facebook, twitter=twitter, linkedin=linkedin, tiktok=tiktok)).on_conflict_do_update(
+        stmt = insert(Organizer).values(name=name, email=email, phone=phone, website=website, instagram=instagram,
+                    facebook=facebook, twitter=twitter, linkedin=linkedin, tiktok=tiktok)
+        stmt = stmt.on_conflict_do_update(
                     index_elements=["id"],
                     set_={
                         "name": func.coalesce(Organizer.name, stmt.excluded.name),
