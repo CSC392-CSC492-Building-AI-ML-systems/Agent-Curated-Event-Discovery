@@ -1,7 +1,7 @@
 import { type SyntheticEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
-import { createClient } from "../../lib/supabase/client";
+import { supabase_client } from "../../lib/supabase/client";
 import GoogleLoginButton from "../../components/GoogleLoginButton";
 import "./SignupPage.css";
 
@@ -56,7 +56,7 @@ export default function SignupPage({}: SignupPageProps) {
 
     try {
       setIsSubmitting(true);
-      const { data, error: signupError } = await createClient().auth.signUp({
+      const { data, error: signupError } = await supabase_client.auth.signUp({
         email: email.trim(),
         password,
         options: {
@@ -106,7 +106,7 @@ export default function SignupPage({}: SignupPageProps) {
             <h1 id="signup-title">Find your kind of event.</h1>
             <p className="signup-subtitle">
               Create an account to see events curated for you, save your
-              favorites, and follow topics you care about.
+              favourites, and follow topics you care about.
             </p>
           </div>
           <div>

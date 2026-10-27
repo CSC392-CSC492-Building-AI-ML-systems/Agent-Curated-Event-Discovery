@@ -68,6 +68,115 @@ The backend allows `http://localhost:5173` and `http://127.0.0.1:5173` by defaul
 For another frontend port, set `FRONTEND_ORIGINS` to a comma-separated list of
 allowed origins when starting the backend. Restart the backend after changes.
 
+### User preferences API
+
+The backend now supports `GET /users/me`, `GET /users/me/preferences`, and
+`PUT /users/me/preferences`. All require a Supabase **user access token**, sent
+as `Authorization: Bearer <access_token>`. A publishable API key is not a user
+access token. The user ID comes from the verified token and cannot be supplied
+in the request body.
+
+Setup:
+
+1. Install the backend requirements, including `PyJWT[crypto]`.
+2. Add `SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co` to the **root `.env`**
+   alongside `DATABASE_URL`. Use the same project as the frontend's
+   `VITE_SUPABASE_URL`. No signing secret or service-role key is needed.
+   Verification supports Supabase's ES256 and RS256 asymmetric signing keys.
+3. Have the database owner apply
+   `backend/database/migrations/001_user_preferences.sql` in the Supabase SQL
+   editor. This creates two tables, references `auth.users` and the existing
+   `public.tag`, and disables direct access by Supabase's public Data API roles.
+   FastAPI's database connection must have access to these tables and bypass
+   their RLS (the existing postgres connection can do this). No migration runs
+   automatically at server startup.
+4. Restart the backend. `/docs` has an **Authorize** button for testing with
+   a signed-in user's access token.
+
+`PUT /users/me/preferences` replaces the complete set of preferences:
+
+```json
+{
+  "age_group": "20_29",
+  "budget": "under_25",
+  "interest_tag_ids": [1, 5, 12]
+}
+```
+
+All three fields are required. Age and budget accept `null` when skipped.
+Allowed age groups are `20_29`, `30_39`, `40_49`, `50_59`, `60_69`, `70_79`,
+and `80_plus`. Allowed budgets are `free`, `under_25`, `25_to_50`, `50_to_100`,
+`100_to_200`, and `over_200`. These represent typical per-event spending in CAD,
+not an enforced spending cap: `free` means zero, `under_25` means above zero and
+below 25, the middle bands include their lower bound and exclude their upper
+bound, and `over_200` means 200 or more. Interest IDs must be distinct positive
+integers, must exist in `/tags`, and must contain at least one selection.
+Unknown fields (including a client-supplied user ID or completion flag) are rejected.
+
+A successful save returns HTTP 200 with the saved fields, sorted interest IDs,
+and `onboarding_completed: true`. Saving again updates the same user's profile;
+old interest selections are replaced in the same transaction. For a user with
+no profile, GET returns:
+
+```json
+{
+  "age_group": null,
+  "budget": null,
+  "interest_tag_ids": [],
+  "onboarding_completed": false
+}
+```
+
+Errors: 401 for missing/invalid/expired sessions, 422 for invalid preferences,
+503 for unavailable or unconfigured authentication, and 500 if saving fails.
+Failed writes roll back without changing existing preferences. CORS permits
+the authenticated JSON PUT from configured frontend origins.
+
+The onboarding UI loads real `/tags` options and these saved preferences after
+login. It submits stable age/budget values and tag IDs with the current session's
+access token. Skipped answers are `null`. The curation screen stays visible for
+at least three seconds on success, and longer if the save is still pending.
+A failed save keeps the answers for retry. Completion is
+shown only after a successful response. Saving preferences does not generate
+recommendations.
+
+The shared Supabase session provider restores login on reload and responds to
+sign-in, token refresh, and logout. The header shows Profile and Log out for
+signed-in users. `/profile` displays stored preferences and links back to edit
+them. Discover's For You is hidden for signed-out users, shows an onboarding
+prompt for incomplete profiles, and acknowledges saved preferences for completed
+profiles. Recommendation generation is still pending. Preferences and local
+saved/followed selections are scoped to the active account, so switching accounts
+does not display the previous user's selections.
+
+Frontend auth requires `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` in
+`frontend/.env`; restart Vite after changing them. Use the same Supabase project
+as the backend. Both providers fetch data only after a session is available;
+the page provides loading and retry states instead of guessing completion status
+when the preferences request fails.
+
+Isolated tests (SQLite storage and locally signed tokens; no Supabase access):
+
+```bash
+PYTHONPATH=backend python -m unittest discover -s backend/tests -p test_preferences.py -v
+```
+
+Browser integration tests use a separate Vite server with fake Supabase
+credentials and intercepted API responses, never live accounts or database
+writes. They cover reload persistence, account isolation, skips, saving/retry,
+and dynamic tags:
+
+```bash
+cd frontend
+npx playwright install chromium --only-shell
+npm run test:onboarding
+```
+
+For live verification, log in, finish onboarding, reload `/profile`, and check
+that the stored answers return. Log out and use a second account to verify its
+profile starts independently. This requires the migration and configuration
+above; the isolated browser tests alone do not verify your Supabase deployment.
+
 
 ## INFO
 I'm just putting this here so we have it, info for running Playwright tests.

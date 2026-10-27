@@ -1,7 +1,7 @@
 import { type SyntheticEvent, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
-import { createClient } from "../../lib/supabase/client";
+import { supabase_client } from "../../lib/supabase/client";
 import "../SignupPage/SignupPage.css";
 import GoogleLoginButton from "../../components/GoogleLoginButton";
 
@@ -15,6 +15,8 @@ type LoginPageProps = {
 
 export default function LoginPage({}: LoginPageProps) {
   const navigate = useNavigate();
+  const location = useLocation();
+  const returnTo = location.state?.returnTo;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -30,7 +32,7 @@ export default function LoginPage({}: LoginPageProps) {
     try {
       setIsSubmitting(true);
       const { data, error: loginError } =
-        await createClient().auth.signInWithPassword({
+        await supabase_client.auth.signInWithPassword({
           email: email.trim(),
           password,
         });
@@ -42,7 +44,7 @@ export default function LoginPage({}: LoginPageProps) {
 
       if (data.user) {
         setSuccess("You have been logged in successfully!");
-        navigate("/");
+        void navigate(returnTo === "/onboarding" || returnTo === "/profile" ? returnTo : "/", { replace: true });
       }
 
       setEmail("");
@@ -74,7 +76,7 @@ export default function LoginPage({}: LoginPageProps) {
           <div className="signup-card-heading">
             <h1 id="signup-title">Find your kind of event.</h1>
             <p className="signup-subtitle">
-              Log in to see events curated for you, save your favorites, and
+              Log in to see events curated for you, save your favourites, and
               follow topics you care about.
             </p>
           </div>

@@ -30,8 +30,10 @@ def verify_token(token: str) -> dict:
 
 
 def get_current_user(
-        credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme)
+        credentials: HTTPAuthorizationCredentials | None= Depends(bearer_scheme)
 ) -> dict:
+    if credentials is None:
+        raise HTTPException(status_code=401, detail="Invalid or expired session")
     try:
         claims = verify_token(credentials.credentials)
         if claims.get("role") != "authenticated":
