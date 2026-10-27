@@ -21,40 +21,37 @@ def insert_event(event: dict):
     link = event.get("link", None)
     eighteenplus = event.get("eighteen_plus", False)
     tags = event.get("tags", [])
+    togathereventid = event.get("id")
     with SessionLocal() as session:
-        ids = event.get("ids", [])
-        dates = event.get("dates", [])
-        if len(dates) > 0 and len(ids) > 0 and len(dates) == len(ids):
-            for i in len(dates):
-                occurrance = dates[i]
-                togathereventid = ids[i]
-                startdate = occurrance.get("startdate", None)
-                enddate = occurrance.get("enddate", None)
-                starttime = occurrance.get("starttime", None)
-                endtime = occurrance.get("endtime", None)
-                # check if the event is already in the database
-                stmt = select(Event.id).where(Event.name == name,
-                                            Event.startdate == func.to_date(startdate, 'YYYY-MM-DD'),
-                                            Event.enddate == func.to_date(enddate, 'YYYY-MM-DD'),
-                                            Event.starttime == cast(starttime, Time),
-                                            Event.endtime == cast(endtime, Time) if endtime is not None else Event.endtime.is_(None),
-                                            Event.venue == venue_id,
-                                            Event.organizer == organizer_id)
-                event_id = session.execute(stmt).scalar_one_or_none()
-                if event_id is None:
-                    stmt = insert(Event).values(name=name, description=description,
-                                                startdate=func.to_date(startdate, 'YYYY-MM-DD'),
-                                                enddate=func.to_date(enddate, 'YYYY-MM-DD'),
-                                                starttime=cast(starttime, Time),
-                                                endtime=cast(endtime, Time),
-                                                venue=venue_id,
-                                                organizer=organizer_id, price=price, link=link,
-                                                eighteenplus=eighteenplus,
-                                                togathereventid=togathereventid
-                                                ).returning(Event.id)
-                    event_id = session.execute(stmt).scalar_one()
-                insert_event_tags(session, event_id, tags)
-            session.commit()
+        for occurrance in event.get("dates", []):
+            startdate = occurrance.get("startdate", None)
+            enddate = occurrance.get("enddate", None)
+            starttime = occurrance.get("starttime", None)
+            endtime = occurrance.get("endtime", None)
+            # check if the event is already in the database
+            stmt = select(Event.id).where(Event.name == name,
+                                          Event.startdate == func.to_date(startdate, 'YYYY-MM-DD'),
+                                          Event.enddate == func.to_date(enddate, 'YYYY-MM-DD'),
+                                          Event.starttime == cast(starttime, Time),
+                                          Event.endtime == cast(endtime, Time) if endtime is not None else Event.endtime.is_(None),
+                                          Event.venue == venue_id,
+                                          Event.organizer == organizer_id)
+            event_id = session.execute(stmt).scalar_one_or_none()
+            if event_id is None:
+                stmt = insert(Event).values(name=name, description=description,
+                                            startdate=func.to_date(startdate, 'YYYY-MM-DD'),
+                                            enddate=func.to_date(enddate, 'YYYY-MM-DD'),
+                                            starttime=cast(starttime, Time),
+                                            endtime=cast(endtime, Time),
+                                            venue=venue_id,
+                                            organizer=organizer_id, price=price, link=link,
+                                            eighteenplus=eighteenplus,
+                                            togathereventid=togathereventid
+                                            ).returning(Event.id)
+                event_id = session.execute(stmt).scalar_one()
+            insert_event_tags(session, event_id, tags)
+        session.commit()
+
 
 # TODO: will need to use google maps api to get the longitude and latitude of the venue
 def find_or_create_venue(name: str, address: str) -> int:
