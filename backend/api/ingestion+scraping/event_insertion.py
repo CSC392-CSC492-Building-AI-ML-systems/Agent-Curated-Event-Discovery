@@ -1,5 +1,6 @@
 from database import SessionLocal
 from sqlalchemy import insert, select, func, cast, Time
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 from backend.api.models.event import Event, Venue, Organizer, Tag, event_tags
 from helpers import get_coordinates
 from typing import Optional
@@ -101,13 +102,32 @@ def find_or_create_organizer(name: str, email: Optional[str], phone: Optional[st
     :return:
     """
     with SessionLocal() as session:
-        stmt = select(Organizer.id).where(Organizer.email == email)
-        organizer_id = session.execute(stmt).scalar_one_or_none()
+        stmt = None
+        if email:
+            stmt = select(Organizer.id).where(Organizer.email == email)
+        else:
+            stmt = select(Organizer.id).where(Organizer.name == name)
+        organizer_id = session.execute(stmt).scalars().first()
+        # print(f"id: {organizer_id}")
         if organizer_id is not None:
-            return organizer_id
-        stmt = (insert(Organizer).values(name=name, email=email, phone=phone, website=website, instagram=instagram,
+            stmt = pg_insert(Organizer).values(id=organizer_id, name=name, email=email, phone=phone, website=website, instagram=instagram,
+                        facebook=facebook, twitter=twitter, linkedin=linkedin, tiktok=tiktok)
+            stmt = stmt.on_conflict_do_update(
+                        index_elements=["id"],
+                        set_={
+                            c: func.coalesce(
+                                func.nullif(getattr(Organizer, c), ""),
+                                func.nullif(stmt.excluded[c], ""),
+                                getattr(Organizer, c),
+                            )
+                            for c in ["name", "email", "phone", "website", "instagram", "facebook", "twitter", "linkedin", "tiktok"]
+                        },
+                    )
+            session.execute(stmt)
+        else:
+            stmt = (insert(Organizer).values(name=name, email=email, phone=phone, website=website, instagram=instagram,
                                          facebook=facebook, twitter=twitter, linkedin=linkedin, tiktok=tiktok)).returning(Organizer.id)
-        organizer_id = session.execute(stmt).scalar_one()
+            organizer_id = session.execute(stmt).scalar_one()
         session.commit()
         return organizer_id
 
