@@ -103,22 +103,22 @@ def find_or_create_organizer(name: str, email: Optional[str], phone: Optional[st
     """
     with SessionLocal() as session:
         stmt = None
-        if email:  
+        if email:
             stmt = select(Organizer.id).where(Organizer.email == email)
         else:
             stmt = select(Organizer.id).where(Organizer.name == name)
         organizer_id = session.execute(stmt).scalars().first()
-        print(f"id: {organizer_id}")
-        if organizer_id is not None:            
+        # print(f"id: {organizer_id}")
+        if organizer_id is not None:
             stmt = pg_insert(Organizer).values(id=organizer_id, name=name, email=email, phone=phone, website=website, instagram=instagram,
                         facebook=facebook, twitter=twitter, linkedin=linkedin, tiktok=tiktok)
             stmt = stmt.on_conflict_do_update(
                         index_elements=["id"],
                         set_={
                             c: func.coalesce(
-                                func.nullif(getattr(Organizer, c), ""),   
-                                func.nullif(stmt.excluded[c], ""),        
-                                getattr(Organizer, c),                    
+                                func.nullif(getattr(Organizer, c), ""),
+                                func.nullif(stmt.excluded[c], ""),
+                                getattr(Organizer, c),
                             )
                             for c in ["name", "email", "phone", "website", "instagram", "facebook", "twitter", "linkedin", "tiktok"]
                         },

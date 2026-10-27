@@ -118,7 +118,7 @@ def enhance_description(original_event, page_content, link):
 	NOTES: 
     - If any of the following JSON object keys from the following list are null RETURN AN EMPTY JSON. 
 	DO NOT INTERPRET FIELDS THAT ARE NOT EXPLICITLY MENTIONED UNLESS STATED OTHERWISE FOR A FIELD.
-	List of required non-null values for the corresponding keys: "name", "description", "address", "venue", "dates"
+	List of required non-null values for the corresponding keys: "name", "description", "address", "venue", "dates", "organizer"
 	- For the keys "organizer", "phone", "email", "website", "instagram", "facebook", "twitter", "linkedin", and "tiktok"
 	Ensure relevance of the organizer's name with the event. BE AWARE DATA/INFORMATION THAT APPEARS FROM THE WEBSEARCH CAN BE UNRELATED TO THE EVENT AND LINK TO OTHER EVENTS/ACTIVITIES/PAGES ON THE SITE.
     """
