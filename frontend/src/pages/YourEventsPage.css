@@ -1,4 +1,4 @@
-.your-events-switch { display: flex; gap: 8px; margin-top: 20px; }
+.your-events-switch { display: flex; gap: 8px; margin: 20px; }
 .your-events-empty { margin-top: 32px; }
 .your-events-empty h2 { margin-top: 0; justify-content: center; }
 .your-events-calendar-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin: 28px 0 16px; }

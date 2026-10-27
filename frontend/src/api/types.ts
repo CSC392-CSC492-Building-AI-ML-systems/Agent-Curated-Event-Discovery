@@ -6,7 +6,7 @@ export interface ApiTag {
 
 export interface ApiCoordinates {
   type: "Point";
-  coordinates: [number, number];
+  coordinates: [longitude: number, latitude: number];
 }
 
 export interface ApiVenue {
@@ -37,13 +37,13 @@ export interface ApiEvent {
   starttime: string | null;
   enddate: string | null;
   endtime: string | null;
-  venue: ApiVenue;
-  organizer: ApiOrganizer | null;
-  price: number | string | null;
+  price: number | null;
   link: string;
   eighteenplus: boolean;
+  tags: ApiTag[];
+  organizer: ApiOrganizer | null;
+  venue: ApiVenue;
   // The tag-events route does not currently eagerly load event tags.
-  tags?: ApiTag[];
 }
 
 export interface RequestOptions {
