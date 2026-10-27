@@ -99,12 +99,16 @@ def find_or_create_organizer(name: str, email: Optional[str], phone: Optional[st
     :return:
     """
     with SessionLocal() as session:
-        stmt = select(Organizer.id).where(Organizer.email == email)
+        stmt = None
+        if email:  
+            stmt = select(Organizer.id).where(Organizer.email == email)
+        else:
+            stmt = select(Organizer.id).where(Organizer.name == name)
         organizer_id = session.execute(stmt).scalar_one_or_none()
         if organizer_id is not None:
             return organizer_id
         stmt = (insert(Organizer).values(name=name, email=email, phone=phone, website=website, instagram=instagram,
-                                         facebook=facebook, twitter=twitter, linkedin=linkedin, tiktok=tiktok)).returning(Organizer.id)
+                                        facebook=facebook, twitter=twitter, linkedin=linkedin, tiktok=tiktok)).returning(Organizer.id)
         organizer_id = session.execute(stmt).scalar_one()
         session.commit()
         return organizer_id
