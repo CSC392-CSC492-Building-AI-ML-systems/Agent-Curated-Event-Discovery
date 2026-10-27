@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Header } from "../../components/NavBar";
 import SearchBar from "../../components/SearchBar";
 import Marker from "../../components/Marker";
-import type { EventPageProps } from "../../interfaces/interfaces";
+import type { EventideEvent, EventPageProps } from "../../interfaces/interfaces";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import closeIcon from "../../assets/images/close-icon.svg";
@@ -14,12 +14,24 @@ import EventRequestState from "../../components/EventRequestState";
 import filterEvents from "../../utils/filterEvents";
 import searchIcon from "../../assets/images/search-icon.svg";
 import targetIcon from "../../assets/images/target-icon.svg";
+import backIcon from "../../assets/images/back-icon.svg";
 import "./MapPage.css";
 
 type MapCenter = [longitude: number, latitude: number];
 
 const DEFAULT_LOCATION: MapCenter = [-79.34, 43.64];
 
+const eventInBounds = (event: EventideEvent, mapRef: React.RefObject<mapboxgl.Map | null>, infoOpen: boolean, listOpen: boolean): boolean => {
+  if (!mapRef || !(mapRef.current)) return false;
+  if (!event.longitude || !event.latitude) return true;
+  const {x, y} = mapRef.current?.project(new mapboxgl.LngLat(
+    event.longitude,
+    event.latitude,
+  ))?? {x: null, y: null};
+  const {clientWidth, clientHeight} = mapRef.current.getCanvas();
+  if (!x || !y) return true;
+  return x >= 0 && x<=(clientWidth - (infoOpen? 376: 0) - (listOpen? 376: 0)) && y >= 0 && y <= clientHeight;
+}
 function MapPage({
   events,
   saved,
@@ -40,12 +52,16 @@ function MapPage({
 
   const [now] = useState(() => Date.now());
   const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
+  const [selectedEventIds, setSelectedEventIds] = useState<number[]>([]);
+  const selectedClusterId = useRef<number | null>(null);
   const { search, range, sort, tags } = browse;
   const [visible, setVisible] = useState(events);
   
   //UI states
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
+  const infoMenu = useRef<HTMLDivElement | null>(null); //events details
+  const listMenu = useRef<HTMLDivElement | null>(null); //events list
 
   const [mapReady, setMapReady] = useState(false);
   const [userLocation, setUserLocation]  = useState<MapCenter | null>(null); //this is the user's actual location from their browser data
@@ -57,11 +73,16 @@ function MapPage({
     const markerInner = document.createElement('div');
     markerInner.className = 'pulsating-circle';
     userLocationElement.appendChild(markerInner);
-
   const selectedEvent =
     selectedEventId === null
       ? undefined
       : events.find((event) => event.id === selectedEventId);
+  const selectedEvents = []
+  for (let event of events){
+    if (selectedEventIds.includes(event.id)){
+      selectedEvents.push(event)
+    }
+  }   
 
   const getLocation = () => {
     if (!navigator.geolocation) {
@@ -73,7 +94,7 @@ function MapPage({
       (position) => {
         const pos = [position.coords.longitude, position.coords.latitude] as MapCenter;
         setUserLocation(pos);
-        mapRef.current?.easeTo({center: pos, duration: 500});
+        mapRef.current?.easeTo({center: pos, duration: 500,  padding: {right: (infoOpen? 376: 0) + (listOpen? 376: 0)}});
       },
       (error) => {
         console.warn("Unable to get the user's location:", error.message);
@@ -95,13 +116,16 @@ function MapPage({
       center: DEFAULT_LOCATION,
       zoom: 10.12,
       fadeDuration: 0,
+      touchPitch: false
     });
     mapRef.current = map;
     const handleLoad = () => {
+      map.keyboard.disablePitch();
+      map.dragRotate.disablePitch();
       if (!map.hasImage("marker")){
         const mapMarker = new Image(50, 50);
         mapMarker.onload = ()=>{
-          map.addImage("marker", mapMarker, { pixelRatio: 2 });
+          map.addImage("marker", mapMarker, { pixelRatio: 2, sdf: true });
         }
         mapMarker.src = mapMarkerIcon;
       }
@@ -111,6 +135,7 @@ function MapPage({
           cluster: true,
           clusterMaxZoom: 14, 
           clusterRadius: 50,
+          clusterProperties: {"total_count": ["+", ["get", "count"]]},
           data: {
             "type": "FeatureCollection",
             "crs": {
@@ -135,7 +160,7 @@ function MapPage({
               'circle-color': '#f6545c',
               'circle-radius': [
                   'step',
-                  ['get', 'point_count'],
+                  ['get', 'total_count'],
                   20,
                   100,
                   30,
@@ -151,7 +176,38 @@ function MapPage({
           source: 'events',
           filter: ['has', 'point_count'],
           layout: {
-              'text-field': ['get', 'point_count_abbreviated'],
+              'text-field': ['get', 'total_count'],
+              'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+              'text-size': 20
+          },
+          paint: {
+            'text-color': 'white'
+          }
+      });
+
+      map.addLayer({
+          id: 'unclustered-multi-circle',
+          type: 'circle',
+          source: 'events',
+          filter: ["all", ["!", ["has", "point_count"]], [">", ["get", "count"], 1]],
+          paint: {
+            'circle-color': [
+              "case",
+              ["boolean", ["feature-state", "selected"], false],
+              '#6446e7',   // circle was selected
+              '#f6545c',   // normal
+            ],
+            'circle-radius': 20 
+          }
+      });
+
+      map.addLayer({
+          id: 'unclustered-multi-count',
+          type: 'symbol',
+          source: 'events',
+          filter: ["all", ["!", ["has", "point_count"]], [">", ["get", "count"], 1]],
+          layout: {
+              'text-field': ['get', 'count'],
               'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
               'text-size': 20
           },
@@ -164,12 +220,20 @@ function MapPage({
           id: 'unclustered-point',
           type: 'symbol',
           source: 'events',
-          filter: ['!', ['has', 'point_count']],
+          filter: ["all", ["!", ["has", "point_count"]], ["==", ["get", "count"], 1]],
           layout: {
             "icon-image": "marker",
             "icon-size": 1.5,
             "icon-allow-overlap": true,
           },
+          paint: {
+            "icon-color": [
+              "case",
+              ["boolean", ["feature-state", "selected"], false],
+              '#6446e7',   // icon was selected
+              '#f6545c',   // normal
+            ],
+          }
       });
       
       // When a click event occurs on a cluster,
@@ -179,38 +243,91 @@ function MapPage({
       map.addInteraction('click-clusters', {
         type: 'click',
         target: { layerId: 'clusters' },
-        handler: (e) => {
+        handler: (e) => {  
           const features = map.queryRenderedFeatures(e.point, {
             layers: ['clusters']
-          });
+          });         
           const clusterId = features[0].properties?.cluster_id;
           const events = map.getSource('events') as mapboxgl.GeoJSONSource | undefined
           events?.getClusterExpansionZoom(clusterId, (err, zoom) => {
-              if (err) return;
-              map.easeTo({
-                center: features[0].geometry.coordinates,
-                zoom: zoom?? undefined
-              });
+            if (err) return;
+            map.easeTo({
+              center: features[0].geometry.coordinates,
+              zoom: zoom?? undefined,
+              padding: {right: (listOpen? 376: 0) + (infoOpen? 376: 0)}
             });
+          });          
+        }
+      });
+      
+      //upon clicking on unclustered point count (pin representing a [lng, lat] with more than one event), open side menu
+      //and print out info about all events occurring there
+      map.addInteraction('click-unclustered-multi', {
+        type: 'click',
+        target: { layerId: 'unclustered-multi-circle' },
+        handler: (e) => {
+          const features = map.queryRenderedFeatures(e.point, {
+            layers: ['unclustered-multi-circle']
+          });
+          const ids = features[0].properties.ids;
+          
+          console.log(`selectedClusterId.current: ${selectedClusterId.current}`);
+          //set the unclustered-multi or unclustered-point that was previously selected to deselected.
+          if (selectedClusterId.current !== null){
+            map.setFeatureState(
+              { source: "events", id: selectedClusterId.current },
+              { selected: false }
+            );
+          }
+
+          //select this unclustered-multi
+          map.setFeatureState({ source: "events", id: features[0].id }, { selected: true });
+
+          let eventIds: number[] = JSON.parse(ids);
+          setSelectedEventIds(eventIds);
+          setSelectedEventId(null);
+          selectedClusterId.current = features[0].id;
+          setInfoOpen(false);
+          setListOpen(true);            
+          map.easeTo({
+            center: features[0].geometry.coordinates,
+            padding: {right: (infoOpen? 376: 0) + 376}
+          });
         }
       });
 
       // When a click event occurs on a feature in
-      // the unclustered-point layer, open a popup at
-      // the location of the feature, with
-      // description HTML from its properties.
-      map.addInteraction('click-unclustered', {
+      // the unclustered-point layer, open a popup on sidebar
+      // with its event info
+      map.addInteraction('click-unclustered-point', {
         type: 'click',
         target: { layerId: 'unclustered-point' },
         handler: (e) => {
-          const coordinates = e.feature?.geometry.coordinates.slice();
-          const title = e.feature?.properties.title;
-          const tag = e.feature?.properties.tag;
+          const features = map.queryRenderedFeatures(e.point, {
+            layers: ['unclustered-point']
+          });
 
-          new mapboxgl.Popup()
-            .setLngLat(coordinates)
-            .setHTML(`${title}`)
-            .addTo(map);
+          console.log(`selectedClusterId.current: ${selectedClusterId.current}`);
+          //set the unclustered-multi or unclustered-point that was previously selected to deselected.
+          if (selectedClusterId.current !== null){
+            map.setFeatureState(
+              { source: "events", id: selectedClusterId.current },
+              { selected: false }
+            );
+          }
+
+          //select this unclustered-point
+          map.setFeatureState({ source: "events", id: features[0].id }, { selected: true });
+
+          setSelectedEventId(features[0].properties.id);
+          setSelectedEventIds([]);
+          selectedClusterId.current = features[0].id;
+          setInfoOpen(true);
+
+          map.easeTo({
+            center: features[0].geometry.coordinates,
+            padding: {right: 376 + (listOpen? 376: 0)}
+          });
         }
       });
 
@@ -270,29 +387,72 @@ function MapPage({
   useEffect(()=>{
     //since visible changed, change the source on map
     const source = mapRef.current?.getSource('events') as mapboxgl.GeoJSONSource | undefined;
+    const eventCount = new Map();
+    const eventInfo = new Map();
+    const features = [];
+    for (const event of visible) {
+      console.log( `event: ${JSON.stringify(event)}`)
+      const coorsStr = JSON.stringify([event.longitude, event.latitude]);
+      console.log( `coors: ${coorsStr}`)
+      if (!eventCount.has(coorsStr)){
+        console.log( `eventCount does not have coors`)
+        eventCount.set(coorsStr, 1);
+        eventInfo.set(coorsStr, [event]);
+      }else{
+        console.log( `eventCount has coors`)
+        const count = eventCount.get(coorsStr);
+        eventCount.set(coorsStr, count+1);
+        eventInfo.get(coorsStr).push(event);
+      }
+    }
+    console.log(`eventCount: ${JSON.stringify(eventCount)}`)
+    for (const [coorsStr, count] of eventCount){
+      const events = eventInfo.get(coorsStr);
+      const coors = JSON.parse(coorsStr);
+      if (count > 1){
+        features.push(
+          {"type": "Feature",
+            "id": events[0].id, //this is just for featureState logic, for making pin size bigger if it was selected
+            "geometry": {
+                "type": "Point",
+                "coordinates": [coors[0], coors[1]]
+            },
+            "properties": {
+              "count": count,
+              "ids": JSON.stringify(events.map((event: EventideEvent) => event.id))
+            }
+          }
+        )
+      }else{
+        features.push(
+          {"type": "Feature",
+            "id": events[0].id,
+            "geometry": {
+                "type": "Point",
+                "coordinates": [coors[0], coors[1]],
+            },
+            "properties": {
+              "count": count,
+              "key": events[0].id,
+              "id": events[0].id,
+              "title": events[0].title,
+              "tag": events[0].tags[0]
+            }
+          }
+        )
+      }
+    }
+    console.log(`features: ${JSON.stringify(features)}`)
     source?.setData({
-              "type": "FeatureCollection",
-              "crs": {
-                "type": "name",
-                "properties": {
-                  "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
-                }
-              },
-              "features": visible.map((event)=>                
-                ({"type": "Feature",
-                  "geometry": {
-                      "type": "Point",
-                      "coordinates": [event.longitude, event.latitude]
-                  },
-                  "properties": {
-                    "key": event.id,
-                    "id": event.id,
-                    "title": event.title,
-                    "tag": event.tags[0]
-                  }
-                })
-              )
-            })
+      "type": "FeatureCollection",
+      "crs": {
+        "type": "name",
+        "properties": {
+          "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+        }
+      },
+      "features": features
+    })
   }, [mapReady, visible])
   return (
     <div
@@ -323,14 +483,14 @@ function MapPage({
             </div>}
             { userLocation && //for re-centering user location
             <div className="floatingButton"> 
-              <button type="submit" className="userTargetButton" aria-label="Recenter" onClick={()=>{mapRef.current?.easeTo({center: userLocation, duration: 500}); console.log(`set user location: ${JSON.stringify(userLocation)}`)}}>
+              <button type="submit" className="userTargetButton" aria-label="Recenter" onClick={()=>{mapRef.current?.easeTo({center: userLocation, duration: 500, padding: {right: (infoOpen? 376: 0) + (listOpen? 376: 0)}}); console.log(`set user location: ${JSON.stringify(userLocation)}`)}}>
                 <img className="icon" src={targetIcon} alt="" />
               </button>              
             </div>}
           </div>
         
           <div className="container-row mapSideBar" style={{ flex: 0 }}>
-            <div className={`eventsSideBarContainer ${infoOpen? "open": ""}`}>
+            <div ref={infoMenu} className={`eventsSideBarContainer ${infoOpen? "open": ""}`}>
               <div className="eventsSideBar">
                 <div className="row justify-end">
                   <img
@@ -340,19 +500,21 @@ function MapPage({
                     onClick={closeEventDetails}
                   />
                 </div>
-                {selectedEvent && (
-                  <EventDetails
-                    style={{ padding: 0, border: "none", overflowY: "auto", background: "none", borderRadius: 0}}
-                    popup={false}
-                    event={selectedEvent}
-                    saved={saved.includes(selectedEvent.id)}
-                    onSave={onSave}
-                    onClose={closeEventDetails}
-                  />
-                )}
+                <div className="eventsSideBarScroll">
+                  {selectedEvent && (
+                    <EventDetails
+                      style={{ margin: 0, padding: 0, border: "none", background: "none", borderRadius: 0}}
+                      popup={false}
+                      event={selectedEvent}
+                      saved={saved.includes(selectedEvent.id)}
+                      onSave={onSave}
+                      onClose={closeEventDetails}
+                    />
+                  )}
+                </div>                
               </div>
             </div>
-            <div className={`eventsSideBarContainer ${listOpen? "open": ""}`}>
+            <div ref={listMenu} className={`eventsSideBarContainer ${listOpen? "open": ""}`}>
               <div className="eventsSideBar events">
                 <div className="eventsSideBarScroll">
                   <div className="searchAndFilters column small-gap">
@@ -456,21 +618,43 @@ function MapPage({
                             setInfoOpen(true);
                             event.longitude != null &&
                               event.latitude != null &&
-                              mapRef.current?.getBounds() &&
-                              !mapRef.current
-                                .getBounds()
-                                ?.contains(
-                                  new mapboxgl.LngLat(
-                                    event.longitude,
-                                    event.latitude,
-                                  ),
-                                ) &&
-                              mapRef.current?.easeTo({center: [event.longitude, event.latitude], duration: 500});
+                              !eventInBounds(event, mapRef, infoOpen, listOpen)&&
+                              mapRef.current?.easeTo({center: [event.longitude, event.latitude], duration: 500, padding: {right: (infoOpen? 376: 0) + (listOpen? 376: 0)}});
                           }}
                         />
                       ))}
                   </div>
                 </div>
+                 
+                 <div className={`selectedEventsSideBar ${selectedEvents.length>1? "open": ""}`}>
+                  <div className="eventsSideBarScroll small-gap column" style={{height: "100%"}}>
+                    <img
+                      className="back-icon"
+                      src={backIcon}
+                      alt="Back"
+                      onClick={()=>{setSelectedEventIds([])}}
+                      width="40px"
+                      height="40px"
+                    />
+                    {selectedEvents.map((event) => (
+                      <DiscoverEventCard
+                        key={event.id}
+                        event={event}
+                        compact={true}
+                        saved={saved.includes(event.id)}
+                        onSave={onSave}
+                        onOpen={(eventideEvent) => {
+                          setSelectedEventId(eventideEvent.id);
+                          setInfoOpen(true);
+                          event.longitude != null &&
+                            event.latitude != null &&
+                            !eventInBounds(event, mapRef, infoOpen, listOpen)&&
+                            mapRef.current?.easeTo({center: [event.longitude, event.latitude], duration: 500, padding: {right: (infoOpen? 376: 0) + (listOpen? 376: 0)}});
+                        }}
+                      />))
+                      }
+                    </div>
+                  </div>
               </div>
             </div>
           </div>
