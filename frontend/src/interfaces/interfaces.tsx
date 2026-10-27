@@ -86,3 +86,4 @@ export type EventPageProps = EventRequestProps & {
   browse: BrowseState;
   setBrowse: React.Dispatch<React.SetStateAction<BrowseState>>;
 };
+

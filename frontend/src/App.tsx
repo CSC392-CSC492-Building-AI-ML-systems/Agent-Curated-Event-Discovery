@@ -7,11 +7,25 @@ import MapPage from "./pages/MapPage/MapPage";
 
 import SignupPage from "./pages/SignupPage/SignupPage";
 import LoginPage from "./pages/LoginPage/LoginPage";
+import OnboardingPage from "./pages/OnboardingPage";
+import ProfilePage from "./pages/ProfilePage";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { PreferencesProvider } from "./contexts/PreferencesContext";
 import useEvents from "./hooks/useEvents";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import type { BrowseState, EventideTag } from "./interfaces/interfaces";
 
 function App() {
+  return <AuthProvider><PreferencesProvider><BrowserRouter><SessionRoutes /></BrowserRouter></PreferencesProvider></AuthProvider>;
+}
+
+function SessionRoutes() {
+  const { session } = useAuth();
+  // Do not carry account-specific in-memory selections into a different login.
+  return <EventRoutes key={session?.user.id ?? "guest"} />;
+}
+
+function EventRoutes() {
   const { events, loading, error, retry } = useEvents();
   const [calendarView, setCalendarView] = useState<"list" | "calendar">("list");
   const [calendarMonth, setCalendarMonth] = useState<Date | null>(null);
@@ -49,7 +63,6 @@ function App() {
     setBrowse,
   };
   return (
-    <BrowserRouter>
       <Routes>
         <Route path="/" element={<DiscoverPage {...eventProps} />} />
         <Route
@@ -69,8 +82,9 @@ function App() {
         <Route path="/map" element={<MapPage {...eventProps} />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/onboarding" element={<OnboardingPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
       </Routes>
-    </BrowserRouter>
   );
 }
 

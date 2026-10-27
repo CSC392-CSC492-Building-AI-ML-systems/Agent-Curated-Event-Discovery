@@ -6,6 +6,7 @@ import SearchBar from "../components/SearchBar";
 import DiscoverEventCard from "../components/DiscoverEventCard";
 import EventDetails from "../components/EventDetails";
 import EventRequestState from "../components/EventRequestState";
+import ForYouSection from "../components/ForYouSection";
 import type { EventideEvent, EventPageProps } from "../interfaces/interfaces";
 import "./DiscoverPage.css";
 import filterEvents from "../utils/filterEvents";
@@ -92,7 +93,7 @@ export default function DiscoverPage({
               </select>
             </label>
             <div className="discover-view">
-              <span className={"pill active"} aria-browse="page">
+              <span className={"pill active"} aria-current="page">
                 List
               </span>
               <Link className="pill" to="/map">
@@ -129,24 +130,12 @@ export default function DiscoverPage({
             ))}
           </div>
 
+          <ForYouSection />
+
           <EventRequestState loading={loading} error={error} retry={retry} />
 
           {!loading && !error && (
             <>
-              {!query && visible.length > 0 && (
-                // for now this isnt actually the "curated" events, its just the top of the events list
-                <section aria-labelledby="discover-for-you">
-                  <h2 id="discover-for-you">
-                    For You <span>✦ Curated events</span>
-                  </h2>
-
-                  <div className="discover-grid">
-                    {visible
-                      .slice(0, 6)
-                      .map((event) => renderCard(event, true))}
-                  </div>
-                </section>
-              )}
 
               <section aria-labelledby="discover-upcoming">
                 <div className="discover-section-heading">

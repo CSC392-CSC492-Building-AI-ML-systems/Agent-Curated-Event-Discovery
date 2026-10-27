@@ -22,7 +22,7 @@ def insert_event(event: dict):
     link = event.get("link", None)
     eighteenplus = event.get("eighteen_plus", False)
     tags = event.get("tags", [])
-
+    togathereventid = event.get("id")
     with SessionLocal() as session:
         for occurrance in event.get("dates", []):
             startdate = occurrance.get("startdate", None)
@@ -46,9 +46,11 @@ def insert_event(event: dict):
                                             endtime=cast(endtime, Time),
                                             venue=venue_id,
                                             organizer=organizer_id, price=price, link=link,
-                                            eighteenplus=eighteenplus).returning(Event.id)
+                                            eighteenplus=eighteenplus,
+                                            togathereventid=togathereventid
+                                            ).returning(Event.id)
                 event_id = session.execute(stmt).scalar_one()
-            insert_event_tags(event_id, tags)
+            insert_event_tags(session, event_id, tags)
         session.commit()
 
 
@@ -130,20 +132,25 @@ def find_or_create_organizer(name: str, email: Optional[str], phone: Optional[st
         return organizer_id
 
 
-def insert_event_tags(event_id: int, tags: list[str]):
+def insert_event_tags(session, event_id: int, tags: list[str]):
     """
     Insert the event-tag pairs into the joint table.
+    :param ensure tag is written in same transaction as event with <session>, instead of opening a new session
+           which caused issues since event wasn't recorded yet, erroring when event tag was inserted into the joint table.
     :param event_id:
     :param tags:
     :return:
     """
-    tags = get_tags_by_names(tags)
+    """tags = get_tags_by_names(tags)
     with SessionLocal() as session:
         for tag in tags:
             stmt = insert(event_tags).values(eventid=event_id, tagid=tag)
             session.execute(stmt)
-            session.commit()
-
+            session.commit()"""
+    tag_ids = get_tags_by_names(tags)
+    for tag_id in tag_ids:
+        stmt = insert(event_tags).values(eventid=event_id, tagid=tag_id)
+        session.execute(stmt)
 
 def get_tags_by_names(names: list[str]) -> list[int]:
     """
@@ -154,7 +161,3 @@ def get_tags_by_names(names: list[str]) -> list[int]:
     with SessionLocal() as session:
         stmt = select(Tag.id).where(Tag.name.in_(names))
         return session.execute(stmt).scalars().all()
-
-
-if __name__ == "__main__":
-    find_or_create_organizer("test", "", "test", "", "", "", "", "", "")

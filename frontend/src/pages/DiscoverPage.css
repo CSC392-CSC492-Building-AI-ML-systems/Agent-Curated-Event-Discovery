@@ -1,5 +1,16 @@
 @import url('https://fonts.googleapis.com/css2?family=ABeeZee:ital@0;1&display=swap');
 
+.header-account { display: flex; align-items: center; justify-content: flex-end; gap: 12px; flex-wrap: wrap; }
+.header-account button { min-height: 44px; cursor: pointer; }
+.header-account [role="alert"] { flex-basis: 100%; }
+.profile-content { max-width: 760px; margin: 40px auto 0; padding: clamp(20px, 4vw, 40px); border: 1px solid var(--discover-line); border-radius: 24px; background: white; }
+.profile-content h1 { border: 0; color: inherit; font-size: 32px; }
+.profile-content p { margin: 16px 0; overflow-wrap: anywhere; }
+.profile-preferences { display: grid; grid-template-columns: auto 1fr; gap: 16px 24px; margin: 28px 0; }
+.profile-preferences dt { font-weight: 700; }
+.profile-preferences dd { margin: 0; }
+@media (max-width: 600px) { .profile-preferences { grid-template-columns: 1fr; gap: 8px; } .profile-preferences dd { margin-bottom: 12px; } }
+
 .discover-page {
   --discover-ink: #2a1f33;
   --discover-muted: #6d5a78;
@@ -20,7 +31,10 @@
 .discover-page h2 > span { font-size: 16px; color: #d63a45; }
 .discover-page #discover-following > .discover-tags { position: relative; top: 4px; }
 .discover-page p, .discover-dialog p { color: inherit; }
-.discover-header { display: flex; align-items: center; justify-content: space-between; gap: 32px; flex-wrap: wrap; }
+.discover-header { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 32px; }
+.discover-header > .logo { justify-self: start; }
+.discover-header > .navbar { justify-self: center; }
+.discover-header > .header-account { justify-self: end; min-width: 0; max-width: 100%; }
 .discover-header + main > .searchBarContainer { margin-top: 16px; }
 .discover-logo { position: relative; display: inline-block; font-size: 32px; line-height: 1; color: inherit; text-decoration: none; letter-spacing: -1px; }
 .discover-logo > svg { position: absolute; left: 47%; bottom: -.2em; width: 53%; height: .22em; overflow: visible; }
@@ -99,11 +113,13 @@
     outline-offset: 4px;
 }
 
-@media (max-width: 650px) {
+@media (max-width: 800px) {
     .discover-header {
-        flex-wrap: wrap;
+        grid-template-columns: auto minmax(0, 1fr);
         gap: 14px;
     }
+    .discover-header > .navbar { grid-column: 1 / -1; grid-row: 2; }
+    .discover-header > .header-account { grid-column: 2; grid-row: 1; }
 
     .discover-auth-button {
         margin-left: auto;
