@@ -52,7 +52,8 @@ function MapPage({
 
   const [now] = useState(() => Date.now());
   const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
-  const [selectedEventIds, setSelectedEventIds] = useState<number[] | null>(null);
+  const [selectedEventIds, setSelectedEventIds] = useState<number[]>([]);
+  const selectedClusterId = useRef<number | null>(null);
   const { search, range, sort, tags } = browse;
   const [visible, setVisible] = useState(events);
   
@@ -77,13 +78,11 @@ function MapPage({
       ? undefined
       : events.find((event) => event.id === selectedEventId);
   const selectedEvents = []
-  if (selectedEventIds){
-    for (let event of events){
-      if (selectedEventIds.includes(event.id)){
-        selectedEvents.push(event)
-      }
-    }   
-  }
+  for (let event of events){
+    if (selectedEventIds.includes(event.id)){
+      selectedEvents.push(event)
+    }
+  }   
 
   const getLocation = () => {
     if (!navigator.geolocation) {
@@ -126,7 +125,7 @@ function MapPage({
       if (!map.hasImage("marker")){
         const mapMarker = new Image(50, 50);
         mapMarker.onload = ()=>{
-          map.addImage("marker", mapMarker, { pixelRatio: 2 });
+          map.addImage("marker", mapMarker, { pixelRatio: 2, sdf: true });
         }
         mapMarker.src = mapMarkerIcon;
       }
@@ -192,8 +191,13 @@ function MapPage({
           source: 'events',
           filter: ["all", ["!", ["has", "point_count"]], [">", ["get", "count"], 1]],
           paint: {
-            'circle-color': '#f6545c',
-            'circle-radius': 20,
+            'circle-color': [
+              "case",
+              ["boolean", ["feature-state", "selected"], false],
+              '#6446e7',   // circle was selected
+              '#f6545c',   // normal
+            ],
+            'circle-radius': 20 
           }
       });
 
@@ -222,6 +226,14 @@ function MapPage({
             "icon-size": 1.5,
             "icon-allow-overlap": true,
           },
+          paint: {
+            "icon-color": [
+              "case",
+              ["boolean", ["feature-state", "selected"], false],
+              '#6446e7',   // icon was selected
+              '#f6545c',   // normal
+            ],
+          }
       });
       
       // When a click event occurs on a cluster,
@@ -232,7 +244,6 @@ function MapPage({
         type: 'click',
         target: { layerId: 'clusters' },
         handler: (e) => {  
-          let willOpen = false;      
           const features = map.queryRenderedFeatures(e.point, {
             layers: ['clusters']
           });         
@@ -243,7 +254,7 @@ function MapPage({
             map.easeTo({
               center: features[0].geometry.coordinates,
               zoom: zoom?? undefined,
-              padding: {right: (willOpen? 376: 0) + (infoOpen? 376: 0)}
+              padding: {right: (listOpen? 376: 0) + (infoOpen? 376: 0)}
             });
           });          
         }
@@ -259,9 +270,23 @@ function MapPage({
             layers: ['unclustered-multi-circle']
           });
           const ids = features[0].properties.ids;
+          
+          console.log(`selectedClusterId.current: ${selectedClusterId.current}`);
+          //set the unclustered-multi or unclustered-point that was previously selected to deselected.
+          if (selectedClusterId.current !== null){
+            map.setFeatureState(
+              { source: "events", id: selectedClusterId.current },
+              { selected: false }
+            );
+          }
+
+          //select this unclustered-multi
+          map.setFeatureState({ source: "events", id: features[0].id }, { selected: true });
+
           let eventIds: number[] = JSON.parse(ids);
           setSelectedEventIds(eventIds);
           setSelectedEventId(null);
+          selectedClusterId.current = features[0].id;
           setInfoOpen(false);
           setListOpen(true);            
           map.easeTo({
@@ -281,13 +306,28 @@ function MapPage({
           const features = map.queryRenderedFeatures(e.point, {
             layers: ['unclustered-point']
           });
-          map.easeTo({
-            center: features[0].geometry.coordinates,
-            padding: {right: (infoOpen? 376: 0) + (listOpen? 376: 0)}
-          });
+
+          console.log(`selectedClusterId.current: ${selectedClusterId.current}`);
+          //set the unclustered-multi or unclustered-point that was previously selected to deselected.
+          if (selectedClusterId.current !== null){
+            map.setFeatureState(
+              { source: "events", id: selectedClusterId.current },
+              { selected: false }
+            );
+          }
+
+          //select this unclustered-point
+          map.setFeatureState({ source: "events", id: features[0].id }, { selected: true });
+
           setSelectedEventId(features[0].properties.id);
           setSelectedEventIds([]);
+          selectedClusterId.current = features[0].id;
           setInfoOpen(true);
+
+          map.easeTo({
+            center: features[0].geometry.coordinates,
+            padding: {right: 376 + (listOpen? 376: 0)}
+          });
         }
       });
 
@@ -372,6 +412,7 @@ function MapPage({
       if (count > 1){
         features.push(
           {"type": "Feature",
+            "id": events[0].id, //this is just for featureState logic, for making pin size bigger if it was selected
             "geometry": {
                 "type": "Point",
                 "coordinates": [coors[0], coors[1]]
@@ -385,9 +426,10 @@ function MapPage({
       }else{
         features.push(
           {"type": "Feature",
+            "id": events[0].id,
             "geometry": {
                 "type": "Point",
-                "coordinates": [coors[0], coors[1]]
+                "coordinates": [coors[0], coors[1]],
             },
             "properties": {
               "count": count,
