@@ -117,9 +117,12 @@ function MapPage({
       center: DEFAULT_LOCATION,
       zoom: 10.12,
       fadeDuration: 0,
+      touchPitch: false
     });
     mapRef.current = map;
     const handleLoad = () => {
+      map.keyboard.disablePitch();
+      map.dragRotate.disablePitch();
       if (!map.hasImage("marker")){
         const mapMarker = new Image(50, 50);
         mapMarker.onload = ()=>{
@@ -133,6 +136,7 @@ function MapPage({
           cluster: true,
           clusterMaxZoom: 14, 
           clusterRadius: 50,
+          clusterProperties: {"total_count": ["+", ["get", "count"]]},
           data: {
             "type": "FeatureCollection",
             "crs": {
@@ -157,7 +161,7 @@ function MapPage({
               'circle-color': '#f6545c',
               'circle-radius': [
                   'step',
-                  ['get', 'point_count'],
+                  ['get', 'total_count'],
                   20,
                   100,
                   30,
@@ -173,7 +177,33 @@ function MapPage({
           source: 'events',
           filter: ['has', 'point_count'],
           layout: {
-              'text-field': ['get', 'point_count_abbreviated'],
+              'text-field': ['get', 'total_count'],
+              'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+              'text-size': 20
+          },
+          paint: {
+            'text-color': 'white'
+          }
+      });
+
+      map.addLayer({
+          id: 'unclustered-multi-circle',
+          type: 'circle',
+          source: 'events',
+          filter: ["all", ["!", ["has", "point_count"]], [">", ["get", "count"], 1]],
+          paint: {
+            'circle-color': '#f6545c',
+            'circle-radius': 20,
+          }
+      });
+
+      map.addLayer({
+          id: 'unclustered-multi-count',
+          type: 'symbol',
+          source: 'events',
+          filter: ["all", ["!", ["has", "point_count"]], [">", ["get", "count"], 1]],
+          layout: {
+              'text-field': ['get', 'count'],
               'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
               'text-size': 20
           },
@@ -186,7 +216,7 @@ function MapPage({
           id: 'unclustered-point',
           type: 'symbol',
           source: 'events',
-          filter: ['!', ['has', 'point_count']],
+          filter: ["all", ["!", ["has", "point_count"]], ["==", ["get", "count"], 1]],
           layout: {
             "icon-image": "marker",
             "icon-size": 1.5,
@@ -201,62 +231,53 @@ function MapPage({
       map.addInteraction('click-clusters', {
         type: 'click',
         target: { layerId: 'clusters' },
-        handler: (e) => {
+        handler: (e) => {  
+          let willOpen = false;      
           const features = map.queryRenderedFeatures(e.point, {
             layers: ['clusters']
-          });          
+          });         
           const clusterId = features[0].properties?.cluster_id;
           const events = map.getSource('events') as mapboxgl.GeoJSONSource | undefined
-
-          //first check if cluster has all the same locations
-          let allSameLocation = true;
-          let eventIds: number[] = []
-          const point_count = features[0].properties.point_count;
-          events?.getClusterLeaves(clusterId, point_count, 0, 
-            (err, features) =>{
-              if (!features) return
-              const x = features[0].geometry.coordinates[0];
-              const y = features[0].geometry.coordinates[1];
-              
-              for (let feature of features){
-                if (feature.geometry.coordinates[0] !== x || feature.geometry.coordinates[1] !== y) {allSameLocation = false;}
-                eventIds.push(feature.properties.id);
-              }
-              if (allSameLocation){
-                setSelectedEventIds(eventIds);
-                setSelectedEventId(null);
-                setInfoOpen(false);
-                setListOpen(true);
-              }else{
-                events?.getClusterExpansionZoom(clusterId, (err, zoom) => {
-                  if (err) return;
-                  map.easeTo({
-                    center: features[0].geometry.coordinates,
-                    zoom: zoom?? undefined,
-                    padding: {right: (infoOpen? 376: 0) + (listOpen? 376: 0)}
-                  });
-                });
-              }              
-            })
+          events?.getClusterExpansionZoom(clusterId, (err, zoom) => {
+            if (err) return;
+            map.easeTo({
+              center: features[0].geometry.coordinates,
+              zoom: zoom?? undefined,
+              padding: {right: (willOpen? 376: 0) + (infoOpen? 376: 0)}
+            });
+          });          
+        }
+      });
+      
+      //upon clicking on unclustered point count (pin representing a [lng, lat] with more than one event), open side menu
+      //and print out info about all events occurring there
+      map.addInteraction('click-unclustered-multi', {
+        type: 'click',
+        target: { layerId: 'unclustered-multi-circle' },
+        handler: (e) => {
+          const features = map.queryRenderedFeatures(e.point, {
+            layers: ['unclustered-multi-circle']
+          });
+          const ids = features[0].properties.ids;
+          let eventIds: number[] = JSON.parse(ids);
+          setSelectedEventIds(eventIds);
+          setSelectedEventId(null);
+          setInfoOpen(false);
+          setListOpen(true);            
+          map.easeTo({
+            center: features[0].geometry.coordinates,
+            padding: {right: (infoOpen? 376: 0) + 376}
+          });
         }
       });
 
       // When a click event occurs on a feature in
-      // the unclustered-point layer, open a popup at
-      // the location of the feature, with
-      // description HTML from its properties.
-      map.addInteraction('click-unclustered', {
+      // the unclustered-point layer, open a popup on sidebar
+      // with its event info
+      map.addInteraction('click-unclustered-point', {
         type: 'click',
         target: { layerId: 'unclustered-point' },
         handler: (e) => {
-          // const coordinates = e.feature?.geometry.coordinates.slice();
-          // const title = e.feature?.properties.title;
-          // const tag = e.feature?.properties.tag;
-
-          // new mapboxgl.Popup()
-          //   .setLngLat(coordinates)
-          //   .setHTML(`${title}`)
-          //   .addTo(map);
           const features = map.queryRenderedFeatures(e.point, {
             layers: ['unclustered-point']
           });
@@ -326,29 +347,70 @@ function MapPage({
   useEffect(()=>{
     //since visible changed, change the source on map
     const source = mapRef.current?.getSource('events') as mapboxgl.GeoJSONSource | undefined;
+    const eventCount = new Map();
+    const eventInfo = new Map();
+    const features = [];
+    for (const event of visible) {
+      console.log( `event: ${JSON.stringify(event)}`)
+      const coorsStr = JSON.stringify([event.longitude, event.latitude]);
+      console.log( `coors: ${coorsStr}`)
+      if (!eventCount.has(coorsStr)){
+        console.log( `eventCount does not have coors`)
+        eventCount.set(coorsStr, 1);
+        eventInfo.set(coorsStr, [event]);
+      }else{
+        console.log( `eventCount has coors`)
+        const count = eventCount.get(coorsStr);
+        eventCount.set(coorsStr, count+1);
+        eventInfo.get(coorsStr).push(event);
+      }
+    }
+    console.log(`eventCount: ${JSON.stringify(eventCount)}`)
+    for (const [coorsStr, count] of eventCount){
+      const events = eventInfo.get(coorsStr);
+      const coors = JSON.parse(coorsStr);
+      if (count > 1){
+        features.push(
+          {"type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [coors[0], coors[1]]
+            },
+            "properties": {
+              "count": count,
+              "ids": JSON.stringify(events.map((event: EventideEvent) => event.id))
+            }
+          }
+        )
+      }else{
+        features.push(
+          {"type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [coors[0], coors[1]]
+            },
+            "properties": {
+              "count": count,
+              "key": events[0].id,
+              "id": events[0].id,
+              "title": events[0].title,
+              "tag": events[0].tags[0]
+            }
+          }
+        )
+      }
+    }
+    console.log(`features: ${JSON.stringify(features)}`)
     source?.setData({
-              "type": "FeatureCollection",
-              "crs": {
-                "type": "name",
-                "properties": {
-                  "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
-                }
-              },
-              "features": visible.map((event)=>                
-                ({"type": "Feature",
-                  "geometry": {
-                      "type": "Point",
-                      "coordinates": [event.longitude, event.latitude]
-                  },
-                  "properties": {
-                    "key": event.id,
-                    "id": event.id,
-                    "title": event.title,
-                    "tag": event.tags[0]
-                  }
-                })
-              )
-            })
+      "type": "FeatureCollection",
+      "crs": {
+        "type": "name",
+        "properties": {
+          "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+        }
+      },
+      "features": features
+    })
   }, [mapReady, visible])
   return (
     <div
@@ -396,16 +458,18 @@ function MapPage({
                     onClick={closeEventDetails}
                   />
                 </div>
-                {selectedEvent && (
-                  <EventDetails
-                    style={{ margin: 0, padding: 0, border: "none", overflowY: "auto", background: "none", borderRadius: 0}}
-                    popup={false}
-                    event={selectedEvent}
-                    saved={saved.includes(selectedEvent.id)}
-                    onSave={onSave}
-                    onClose={closeEventDetails}
-                  />
-                )}
+                <div className="eventsSideBarScroll">
+                  {selectedEvent && (
+                    <EventDetails
+                      style={{ margin: 0, padding: 0, border: "none", background: "none", borderRadius: 0}}
+                      popup={false}
+                      event={selectedEvent}
+                      saved={saved.includes(selectedEvent.id)}
+                      onSave={onSave}
+                      onClose={closeEventDetails}
+                    />
+                  )}
+                </div>                
               </div>
             </div>
             <div ref={listMenu} className={`eventsSideBarContainer ${listOpen? "open": ""}`}>
@@ -521,7 +585,7 @@ function MapPage({
                 </div>
                  
                  <div className={`selectedEventsSideBar ${selectedEvents.length>1? "open": ""}`}>
-                  <div className="eventsSideBarScroll small-gap column">
+                  <div className="eventsSideBarScroll small-gap column" style={{height: "100%"}}>
                     <img
                       className="back-icon"
                       src={backIcon}
