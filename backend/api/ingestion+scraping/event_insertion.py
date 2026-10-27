@@ -1,6 +1,7 @@
 from database import SessionLocal
 from sqlalchemy import insert, select, func, cast, Time
-from backend.api.models.event import Event, Venue, Organizer, Tag, EventTags
+from sqlalchemy.dialects.postgresql import insert as pg_insert
+from backend.api.models.event import Event, Venue, Organizer, Tag, event_tags
 from helpers import get_coordinates
 from typing import Optional
 
@@ -104,24 +105,27 @@ def find_or_create_organizer(name: str, email: Optional[str], phone: Optional[st
             stmt = select(Organizer.id).where(Organizer.email == email)
         else:
             stmt = select(Organizer.id).where(Organizer.name == name)
-        organizer_id = session.execute(stmt).scalar_one_or_none()
-        stmt = insert(Organizer).values(name=name, email=email, phone=phone, website=website, instagram=instagram,
-                    facebook=facebook, twitter=twitter, linkedin=linkedin, tiktok=tiktok)
-        stmt = stmt.on_conflict_do_update(
-                    index_elements=["id"],
-                    set_={
-                        "name": func.coalesce(Organizer.name, stmt.excluded.name),
-                        "email": func.coalesce(Organizer.email, stmt.excluded.email),
-                        "phone": func.coalesce(Organizer.phone, stmt.excluded.phone),
-                        "website": func.coalesce(Organizer.website, stmt.excluded.website),
-                        "instagram": func.coalesce(Organizer.instagram, stmt.excluded.instagram),
-                        "facebook": func.coalesce(Organizer.facebook, stmt.excluded.facebook),
-                        "twitter": func.coalesce(Organizer.twitter, stmt.excluded.twitter),
-                        "linkedin": func.coalesce(Organizer.linkedin, stmt.excluded.linkedin),
-                        "tiktok": func.coalesce(Organizer.tiktok, stmt.excluded.tiktok),
-                    },
-                ).returning(Organizer.id)
-        organizer_id = session.execute(stmt).scalar_one()
+        organizer_id = session.execute(stmt).scalars().first()
+        print(f"id: {organizer_id}")
+        if organizer_id is not None:            
+            stmt = pg_insert(Organizer).values(id=organizer_id, name=name, email=email, phone=phone, website=website, instagram=instagram,
+                        facebook=facebook, twitter=twitter, linkedin=linkedin, tiktok=tiktok)
+            stmt = stmt.on_conflict_do_update(
+                        index_elements=["id"],
+                        set_={
+                            c: func.coalesce(
+                                func.nullif(getattr(Organizer, c), ""),   
+                                func.nullif(stmt.excluded[c], ""),        
+                                getattr(Organizer, c),                    
+                            )
+                            for c in ["name", "email", "phone", "website", "instagram", "facebook", "twitter", "linkedin", "tiktok"]
+                        },
+                    )
+            session.execute(stmt)
+        else:
+            stmt = (insert(Organizer).values(name=name, email=email, phone=phone, website=website, instagram=instagram,
+                                         facebook=facebook, twitter=twitter, linkedin=linkedin, tiktok=tiktok)).returning(Organizer.id)
+            organizer_id = session.execute(stmt).scalar_one()
         session.commit()
         return organizer_id
 
@@ -136,7 +140,7 @@ def insert_event_tags(event_id: int, tags: list[str]):
     tags = get_tags_by_names(tags)
     with SessionLocal() as session:
         for tag in tags:
-            stmt = insert(EventTags).values(eventid=event_id, tagid=tag)
+            stmt = insert(event_tags).values(eventid=event_id, tagid=tag)
             session.execute(stmt)
             session.commit()
 
@@ -150,3 +154,7 @@ def get_tags_by_names(names: list[str]) -> list[int]:
     with SessionLocal() as session:
         stmt = select(Tag.id).where(Tag.name.in_(names))
         return session.execute(stmt).scalars().all()
+
+
+if __name__ == "__main__":
+    find_or_create_organizer("test", "", "test", "", "", "", "", "", "")
