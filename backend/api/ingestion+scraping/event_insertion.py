@@ -108,7 +108,20 @@ def find_or_create_organizer(name: str, email: Optional[str], phone: Optional[st
         if organizer_id is not None:
             return organizer_id
         stmt = (insert(Organizer).values(name=name, email=email, phone=phone, website=website, instagram=instagram,
-                                        facebook=facebook, twitter=twitter, linkedin=linkedin, tiktok=tiktok)).returning(Organizer.id)
+                    facebook=facebook, twitter=twitter, linkedin=linkedin, tiktok=tiktok)).on_conflict_do_update(
+                    index_elements=["id"],
+                    set_={
+                        "name": func.coalesce(Organizer.name, stmt.excluded.name),
+                        "email": func.coalesce(Organizer.email, stmt.excluded.email),
+                        "phone": func.coalesce(Organizer.phone, stmt.excluded.phone),
+                        "website": func.coalesce(Organizer.website, stmt.excluded.website),
+                        "instagram": func.coalesce(Organizer.instagram, stmt.excluded.instagram),
+                        "facebook": func.coalesce(Organizer.facebook, stmt.excluded.facebook),
+                        "twitter": func.coalesce(Organizer.twitter, stmt.excluded.twitter),
+                        "linkedin": func.coalesce(Organizer.linkedin, stmt.excluded.linkedin),
+                        "tiktok": func.coalesce(Organizer.tiktok, stmt.excluded.tiktok),
+                    },
+                ).returning(Organizer.id)
         organizer_id = session.execute(stmt).scalar_one()
         session.commit()
         return organizer_id
