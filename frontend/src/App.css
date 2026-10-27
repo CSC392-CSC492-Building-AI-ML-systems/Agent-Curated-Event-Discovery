@@ -616,11 +616,36 @@ label {
 .event-card-copy {
   min-width: 0;
 }
-
+.event-card-copy h3 {
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /*limit h3 to 2 lines*/
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.event-card-copy p {
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /*limit p to 2 lines*/
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 .event-card-compact .event-card-copy {
   display: flex;
   flex-direction: column;
   padding-right: 24px;
+}
+
+.event-card-compact .event-card-copy h3 {
+  -webkit-line-clamp: 2; 
+}
+
+.event-card-large .event-card-copy h3 {
+  -webkit-line-clamp: 1; 
+}
+
+.event-card-large .event-card-copy p {
+  -webkit-line-clamp: 4; 
 }
 
 .event-card-compact h3 {

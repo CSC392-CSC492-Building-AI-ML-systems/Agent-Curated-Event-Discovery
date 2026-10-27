@@ -40,7 +40,7 @@ export default function DiscoverEventCard({
               {formatEventDate(event.startDate, event.startTimeKnown)}
             </span>
           )}
-          <h3>{event.title}</h3>
+          {<h3>{event.title}</h3>}
           {!compact && <p>{event.description}</p>}
           {compact && (
             <span className="event-location">
@@ -53,11 +53,11 @@ export default function DiscoverEventCard({
         <div className="event-card-footer">
           <span>{formatEventDate(event.startDate, event.startTimeKnown)}</span>
           <span>{event.venue.name || "Location to be announced"}</span>
-          <span className="event-tags">
+          <div className="event-tags row small-gap">
             {event.tags.map((tag) => (
               <TagLink key={tag.id} tag={tag} />
             ))}
-          </span>
+          </div>
         </div>
       )}
       <button
