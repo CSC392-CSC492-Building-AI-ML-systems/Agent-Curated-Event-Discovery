@@ -2,6 +2,12 @@ import { Link, NavLink, useLocation } from "react-router-dom";
 import EventideLogo from "./EventideLogo";
 import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
+import heartIcon from "../assets/images/heart-icon.svg";
+import heartIconFilled from "../assets/images/heart-icon-filled.svg";
+import saveIcon from "../assets/images/save-icon.svg";
+import saveIconFilled from "../assets/images/save-icon-filled.svg";
+import settingIcon from "../assets/images/setting-icon.svg";
+import settingIconFilled from "../assets/images/setting-icon-filled.svg";
 
 export default function NavBar({ savedCount }: { savedCount?: number }) {
   const location = useLocation();
@@ -53,3 +59,20 @@ export function Header({ savedCount }: { savedCount?: number }) {
     </header>
   );
 }
+
+export function ProfileNavBar ({ route }: { route: string }) {
+  return <div>
+            <nav aria-label="Main navigation" className="profile-navbar">
+              <NavLink to="/profile">
+                <img className="setting-icon" src={route == "settings" ? settingIconFilled: settingIcon} alt="settings" />
+              </NavLink>
+              <NavLink to="/likes">
+                <img className="heart-icon" src={route == "likes" ? heartIconFilled: heartIcon} alt="likes" />
+              </NavLink>
+              <NavLink to="/saves">
+                <img className="save-icon" src={route == "saves" ? saveIconFilled: saveIcon} alt="saves" />
+              </NavLink>
+            </nav>
+          </div>
+}
+

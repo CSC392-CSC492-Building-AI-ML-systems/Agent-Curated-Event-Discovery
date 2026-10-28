@@ -4,11 +4,11 @@ import DiscoverPage from "./pages/DiscoverPage";
 import YourEventsPage from "./pages/YourEventsPage";
 import TagPage from "./pages/TagPage";
 import MapPage from "./pages/MapPage/MapPage";
-
 import SignupPage from "./pages/SignupPage/SignupPage";
 import LoginPage from "./pages/LoginPage/LoginPage";
 import OnboardingPage from "./pages/OnboardingPage";
-import ProfilePage from "./pages/ProfilePage";
+import ProfilePage from "./pages/ProfilePages/ProfilePage";
+
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { PreferencesProvider } from "./contexts/PreferencesContext";
 import useEvents from "./hooks/useEvents";
@@ -78,12 +78,13 @@ function EventRoutes() {
           }
         />
         <Route path="/tags/:tagId" element={<TagPage {...eventProps} />} />
-
         <Route path="/map" element={<MapPage {...eventProps} />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/onboarding" element={<OnboardingPage />} />
-        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/profile" element={<ProfilePage route="settings" />} />
+        <Route path="/likes" element={<ProfilePage route="likes" />} />
+        <Route path="/saves" element={<ProfilePage route="saves" />} />
       </Routes>
   );
 }
