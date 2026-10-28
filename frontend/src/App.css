@@ -317,27 +317,6 @@ h1 {
   width: 100%;
 }
 
-<<<<<<< HEAD
-=======
-.floatingButtonContainer {
-  position: absolute;
-  top: 30px;
-  right: 30px;
-}
-
-.floatingButton {
-  height: auto;
-  width: 40px;
-  height: 40px;
-  justify-content: center;
-  align-items: center;
-  display: flex;
-  background: var(--bg);
-  border-radius: 50px;
-  box-shadow: 1px 1px 10px 0 rgb(0, 0, 0, 0.2);
-}
-
->>>>>>> 7e6d8ca (feat(frontend): make target)
 .searchAndFilters {
   width: 100%;
 }
@@ -750,18 +729,34 @@ label {
   font-size: 14px;
 }
 
-.event-save {
+.event-actions {
+  display: flex;
   position: absolute;
-  right: 10px;
-  top: 10px;
-  background: white;
-  border: 0;
   color: #d63a45 !important;
   font-size: 25px !important;
-  border-radius: 50%;
-  width: 34px;
-  height: 34px;
+}
+.event-card-large .event-actions {
+  position: relative;
+}
+.event-card-compact .event-actions {
+  right: 5px;
+  top: 5px;
+}
+
+.event-like-wrap {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.event-save, .event-like{
+  border: 0;
   line-height: 1;
+  background: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 20px;
 }
 
 .event-card-large .event-card-open {
@@ -777,7 +772,7 @@ label {
 }
 
 .event-card-large .event-card-copy {
-  padding: 18px 44px 0 0;
+  padding: 10px 0 0 0;
   align-self: center;
   text-align: center;
 }
@@ -806,6 +801,14 @@ label {
   padding: 0 20px 16px;
 }
 
+.event-card-large .icon {
+  width: 25px;
+  height: 25px;
+}
+.event-card-compact .icon {
+  width: 20px;
+  height: 20px;
+}
 @media (max-width: 650px) {
   .event-card-large .event-save {
     top: 18px;
@@ -879,4 +882,8 @@ label {
 
 .align-start {
   align-items: flex-start;
+}
+
+.mini-text {
+  font-size: 10px;
 }

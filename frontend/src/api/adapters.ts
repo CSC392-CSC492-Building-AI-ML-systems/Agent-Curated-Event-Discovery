@@ -37,6 +37,8 @@ export function toEventideEvent(event: ApiEvent): EventideEvent {
 
     latitude: event.venue.coordinates?.coordinates[1],
     longitude: event.venue.coordinates?.coordinates[0],
+
+    likes: 0
     // Address, image, and coordinates aren't supplied by these endpoints yet.
   };
 }

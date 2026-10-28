@@ -50,10 +50,19 @@ function EventRoutes() {
         ? current.filter((value) => value !== id)
         : [...current, id],
     );
+  const [liked, setLiked] = useState<number[]>([]);
+  const onLike = (id: number) =>
+    setLiked((current) =>
+      current.includes(id)
+        ? current.filter((value) => value !== id)
+        : [...current, id],
+    );
   const eventProps = {
     events,
     saved,
     onSave,
+    liked,
+    onLike,
     followed,
     onFollow,
     loading,

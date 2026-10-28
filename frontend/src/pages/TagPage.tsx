@@ -12,6 +12,8 @@ export default function TagPage({
   events,
   saved,
   onSave,
+  liked, 
+  onLike,
   followed,
   onFollow,
 }: EventPageProps) {
@@ -109,6 +111,8 @@ export default function TagPage({
                         event={event}
                         saved={saved.includes(event.id)}
                         onSave={onSave}
+                        liked={liked.includes(event.id)}
+                        onLike={onLike}
                         onOpen={setSelected}
                       />
                     ))}

@@ -15,6 +15,8 @@ export default function DiscoverPage({
   events,
   saved,
   onSave,
+  liked, 
+  onLike,
   followed,
   browse,
   setBrowse,
@@ -53,6 +55,8 @@ export default function DiscoverPage({
       compact={compact}
       saved={saved.includes(event.id)}
       onSave={onSave}
+      liked={liked.includes(event.id)}
+      onLike={onLike}
       onOpen={setSelected}
     />
   );

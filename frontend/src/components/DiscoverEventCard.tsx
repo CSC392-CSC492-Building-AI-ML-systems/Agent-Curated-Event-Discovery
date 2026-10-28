@@ -1,5 +1,9 @@
 import TagLink from "./TagLink";
 import type { EventideEvent } from "../interfaces/interfaces";
+import saveIcon from "../assets/images/save-icon-pink.svg";
+import saveIconFilled from "../assets/images/save-icon-filled-pink.svg";
+import heartIcon from "../assets/images/heart-icon-pink.svg";
+import heartIconFilled from "../assets/images/heart-icon-filled-pink.svg";
 
 import { formatEventDate } from "../utils/eventDate";
 
@@ -7,16 +11,20 @@ type Props = {
   event: EventideEvent;
   compact?: boolean;
   saved: boolean;
-  onOpen: (event: EventideEvent) => void;
   onSave: (id: number) => void;
+  liked: boolean;
+  onLike: (id: number) => void;
+  onOpen: (event: EventideEvent) => void;
 };
 
 export default function DiscoverEventCard({
   event,
   compact = false,
   saved,
-  onOpen,
   onSave,
+  liked, 
+  onLike,
+  onOpen,
 }: Props) {
   return (
     <article
@@ -58,16 +66,49 @@ export default function DiscoverEventCard({
               <TagLink key={tag.id} tag={tag} />
             ))}
           </div>
+          {!compact && <div className="event-actions">
+            <div className="event-like-wrap">
+              <button
+                className="event-like"
+                aria-label={`${liked ? "Unlike" : "Like"} ${event.title}`}
+                aria-pressed={liked}
+                onClick={() => onLike(event.id)}
+              >
+                <img className="icon" src={liked ? heartIconFilled: heartIcon } alt="likes" />
+              </button>
+              <p className="mini-text">{event.likes}</p>
+            </div>
+            <button
+              className="event-save"
+              aria-label={`${saved ? "Unsave" : "Save"} ${event.title}`}
+              aria-pressed={saved}
+              onClick={() => onSave(event.id)}
+            >
+              <img className="icon" src={saved ? saveIconFilled: saveIcon} alt="likes" />
+            </button>
+          </div>}
         </div>
       )}
-      <button
-        className="event-save"
-        aria-label={`${saved ? "Unsave" : "Save"} ${event.title}`}
-        aria-pressed={saved}
-        onClick={() => onSave(event.id)}
-      >
-        {saved ? "★" : "☆"}
-      </button>
+      {compact && <div className="event-actions">
+        <div className="event-like-wrap">
+          <button
+            className="event-like"
+            aria-label={`${liked ? "Unlike" : "Like"} ${event.title}`}
+            aria-pressed={liked}
+            onClick={() => onLike(event.id)}
+          >
+            <img className="icon" src={liked ? heartIconFilled: heartIcon } alt="likes" />
+          </button>
+        </div>
+        <button
+          className="event-save"
+          aria-label={`${saved ? "Unsave" : "Save"} ${event.title}`}
+          aria-pressed={saved}
+          onClick={() => onSave(event.id)}
+        >
+          <img className="icon" src={saved ? saveIconFilled: saveIcon} alt="likes" />
+        </button>
+      </div>}
     </article>
   );
 }

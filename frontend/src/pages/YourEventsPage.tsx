@@ -24,6 +24,8 @@ export default function YourEventsPage({
   events,
   saved,
   onSave,
+  liked, 
+  onLike,
   view,
   setView,
   calendarMonth,
@@ -126,6 +128,8 @@ export default function YourEventsPage({
                       event={event}
                       saved
                       onSave={onSave}
+                      liked={liked.includes(event.id)}
+                      onLike={onLike}
                       onOpen={setSelected}
                     />
                   ))}
