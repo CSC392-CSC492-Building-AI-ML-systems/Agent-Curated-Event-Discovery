@@ -10,6 +10,7 @@ import ForYouSection from "../components/ForYouSection";
 import type { EventideEvent, EventPageProps } from "../interfaces/interfaces";
 import "./DiscoverPage.css";
 import filterEvents from "../utils/filterEvents";
+import TagFilters from "../components/TagFilters";
 
 export default function DiscoverPage({
   events,
@@ -106,28 +107,11 @@ export default function DiscoverPage({
             role="group"
             aria-label="Filter by topic"
           >
-            <span>Include</span>
-            {allTags.map((tag) => (
-              <button
-                key={tag.name}
-                className={`discover-chip ${tags.includes(tag) ? "active" : ""}`}
-                aria-pressed={tags.includes(tag)}
-                onClick={() =>
-                  setBrowse({
-                    ...browse,
-                    tags: browse.tags.some(
-                      (selectedTag) => selectedTag.id === tag.id,
-                    )
-                      ? browse.tags.filter(
-                          (selectedTag) => selectedTag.id !== tag.id,
-                        )
-                      : [...browse.tags, tag],
-                  })
-                }
-              >
-                #{tag.name}
-              </button>
-            ))}
+            <TagFilters
+              allTags={allTags}
+              selectedTags={tags}
+              setBrowse={setBrowse}
+            />
           </div>
 
           <ForYouSection />
@@ -136,7 +120,6 @@ export default function DiscoverPage({
 
           {!loading && !error && (
             <>
-
               <section aria-labelledby="discover-upcoming">
                 <div className="discover-section-heading">
                   <h2 id="discover-upcoming">
