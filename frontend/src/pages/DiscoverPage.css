@@ -56,16 +56,16 @@
 .discover-list { display: grid; gap: 14px; }
 .discover-section-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
 .discover-section-heading > span { color: var(--discover-muted); font-size: 14px; }
-.discover-empty { padding: 28px; background: #ffffffa0; border: 1px dashed var(--discover-line); border-radius: 20px; text-align: center; }
+.discover-empty { margin: 10px; padding: 28px; background: #ffffffa0; border: 1px dashed var(--discover-line); border-radius: 20px; text-align: center; }
 .discover-empty h3 { margin: 0 0 8px; }
 .discover-empty .pill { margin-top: 16px; }
 .discover-topic-heading { color: #d63a45; font-size: 24px; font-weight: 400; }
-.discover-dialog { border: 1px solid #f2cdd2; border-radius: 26px; width: min(760px, calc(100% - 32px)); max-height: 90vh; padding: 50px 30px; background: #fffaf7; color: #2a1f33; font-family: 'ABeeZee', system-ui, sans-serif; }
+.discover-dialog { border: 1px solid #f2cdd2; border-radius: 26px; width: min(760px, calc(100% - 32px)); max-height: 90vh; padding: 70px 50px 30px; background: #fffaf7; color: #2a1f33; font-family: 'ABeeZee', system-ui, sans-serif; }
 .discover-dialog::backdrop { background: #2a1f3370; }
 .discover-dialog > img { width: 100%; height: 240px; object-fit: cover; border-radius: 14px; }
 .discover-dialog h2 { margin: 0; color: inherit; font-size: 30px; }
 .discover-dialog p, .discover-dialog .discover-tags { margin: 16px 0; }
-.discover-dialog-close { position: absolute; top: 32px; right: 32px; background: white; border: 0; width: 36px; height: 36px; border-radius: 50%; font-size: 24px !important; }
+.discover-dialog-close { display: flex; justify-content: center; position: absolute; top: 32px; right: 32px; background: #fffaf7; border: 0; width: 36px; height: 36px; border-radius: 50%; font-size: 24px !important; }
 @media (max-width: 1000px) { .discover-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .discover-view { margin-left: 0; } }
 @media (max-width: 650px) {
   .discover-wrap { padding: 20px 16px 40px; }
@@ -86,7 +86,7 @@
     justify-content: center;
     white-space: nowrap;
 
-    padding: 12px 26px;
+    padding: 8px 16px;
     border: 2px solid #ff5262;
     border-radius: 999px;
 

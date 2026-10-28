@@ -1,6 +1,7 @@
 import TagLink from "./TagLink";
 import React, { useEffect, useRef } from "react";
 import type { EventideEvent } from "../interfaces/interfaces";
+import closeIcon from "../assets/images/close-icon.svg";
 
 export default function EventDetails({
   event,
@@ -85,7 +86,7 @@ export default function EventDetails({
         aria-label="Close event details"
         onClick={onClose}
       >
-        ×
+        <img className="close-icon" src={closeIcon} alt="" />
       </button>
 
       {content}
