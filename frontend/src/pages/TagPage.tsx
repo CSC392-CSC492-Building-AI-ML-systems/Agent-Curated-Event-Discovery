@@ -134,6 +134,8 @@ export default function TagPage({
             event={selected}
             saved={saved.includes(selected.id)}
             onSave={onSave}
+            liked={liked.includes(selected.id)}
+            onLike={onLike}
             onClose={() => setSelected(null)}
           />
         )}

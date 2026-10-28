@@ -7,6 +7,8 @@ export default function EventDetails({
   event,
   saved,
   onSave,
+  liked,
+  onLike,
   onClose,
   popup = true,
   style,
@@ -14,6 +16,8 @@ export default function EventDetails({
   event: EventideEvent;
   saved: boolean;
   onSave: (id: number) => void;
+  liked: boolean;
+  onLike: (id: number) => void;
   onClose: () => void;
   popup?: boolean;
   style?: React.CSSProperties;
@@ -37,15 +41,26 @@ export default function EventDetails({
           <TagLink key={tag.id} tag={tag} onNavigate={onClose} />
         ))}
       </div>
-
-      <button
-        type="button"
-        className="pill"
-        aria-pressed={saved}
-        onClick={() => onSave(event.id)}
-      >
-        {saved ? "★ Saved" : "☆ Save event"}
-      </button>
+      
+      <div className="row small-gap">
+        <button
+          type="button"
+          className="pill"
+          aria-pressed={liked}
+          onClick={() => onLike(event.id)}
+        >
+          {liked ? "★ Liked" : "☆ Like event"}
+        </button>
+        <button
+          type="button"
+          className="pill"
+          aria-pressed={saved}
+          onClick={() => onSave(event.id)}
+        >
+          {saved ? "★ Saved" : "☆ Save event"}
+        </button>
+      </div>
+      
     </>
   );
 

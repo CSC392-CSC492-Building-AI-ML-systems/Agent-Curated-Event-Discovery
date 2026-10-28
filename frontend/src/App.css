@@ -703,6 +703,7 @@ label {
 
 .event-card-large .event-card-copy h3 {
   -webkit-line-clamp: 1; 
+  width: 90%;
 }
 
 .event-card-large .event-card-copy p {
@@ -736,7 +737,8 @@ label {
   font-size: 25px !important;
 }
 .event-card-large .event-actions {
-  position: relative;
+  right: 20px;
+  top: 20px;
 }
 .event-card-compact .event-actions {
   right: 5px;

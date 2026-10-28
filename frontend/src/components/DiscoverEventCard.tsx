@@ -66,30 +66,9 @@ export default function DiscoverEventCard({
               <TagLink key={tag.id} tag={tag} />
             ))}
           </div>
-          {!compact && <div className="event-actions">
-            <div className="event-like-wrap">
-              <button
-                className="event-like"
-                aria-label={`${liked ? "Unlike" : "Like"} ${event.title}`}
-                aria-pressed={liked}
-                onClick={() => onLike(event.id)}
-              >
-                <img className="icon" src={liked ? heartIconFilled: heartIcon } alt="likes" />
-              </button>
-              <p className="mini-text">{event.likes}</p>
-            </div>
-            <button
-              className="event-save"
-              aria-label={`${saved ? "Unsave" : "Save"} ${event.title}`}
-              aria-pressed={saved}
-              onClick={() => onSave(event.id)}
-            >
-              <img className="icon" src={saved ? saveIconFilled: saveIcon} alt="likes" />
-            </button>
-          </div>}
         </div>
       )}
-      {compact && <div className="event-actions">
+      <div className="event-actions">
         <div className="event-like-wrap">
           <button
             className="event-like"
@@ -99,6 +78,7 @@ export default function DiscoverEventCard({
           >
             <img className="icon" src={liked ? heartIconFilled: heartIcon } alt="likes" />
           </button>
+          {!compact && <p className="mini-text">{event.likes}</p>}
         </div>
         <button
           className="event-save"
@@ -108,7 +88,7 @@ export default function DiscoverEventCard({
         >
           <img className="icon" src={saved ? saveIconFilled: saveIcon} alt="likes" />
         </button>
-      </div>}
+      </div>
     </article>
   );
 }
