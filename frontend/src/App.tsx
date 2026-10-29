@@ -1,13 +1,13 @@
 import { useState } from "react";
 import "./App.css";
 import DiscoverPage from "./pages/DiscoverPage";
-import YourEventsPage from "./pages/YourEventsPage";
+import YourEventsPage from "./pages/YourEventsPage/YourEventsPage";
 import TagPage from "./pages/TagPage";
 import MapPage from "./pages/MapPage/MapPage";
 import SignupPage from "./pages/SignupPage/SignupPage";
 import LoginPage from "./pages/LoginPage/LoginPage";
 import OnboardingPage from "./pages/OnboardingPage";
-import ProfilePage from "./pages/ProfilePages/ProfilePage";
+import ProfilePage from "./pages/ProfilePage/ProfilePage";
 
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { PreferencesProvider } from "./contexts/PreferencesContext";
@@ -27,8 +27,8 @@ function SessionRoutes() {
 
 function EventRoutes() {
   const { events, loading, error, retry } = useEvents();
-  const [calendarView, setCalendarView] = useState<"list" | "calendar">("list");
-  const [calendarMonth, setCalendarMonth] = useState<Date | null>(null);
+  const [yourEventsRoute, setYourEventsRoute] = useState<"likes" | "saves" | "calendar">("saves");
+  
   const [followed, setFollowed] = useState<EventideTag[]>([]);
   const [browse, setBrowse] = useState<BrowseState>({
     search: "",
@@ -74,26 +74,17 @@ function EventRoutes() {
   return (
       <Routes>
         <Route path="/" element={<DiscoverPage {...eventProps} />} />
-        <Route
-          path="/your-events"
-          element={
-            <YourEventsPage
-              {...eventProps}
-              view={calendarView}
-              setView={setCalendarView}
-              calendarMonth={calendarMonth}
-              setCalendarMonth={setCalendarMonth}
-            />
-          }
-        />
         <Route path="/tags/:tagId" element={<TagPage {...eventProps} />} />
         <Route path="/map" element={<MapPage {...eventProps} />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/onboarding" element={<OnboardingPage />} />
         <Route path="/profile" element={<ProfilePage route="settings" />} />
-        <Route path="/likes" element={<ProfilePage route="likes" />} />
-        <Route path="/saves" element={<ProfilePage route="saves" />} />
+        {/* <Route path="/likes" element={<ProfilePage route="likes" />} />
+        <Route path="/saves" element={<ProfilePage route="saves" />} /> */}
+        <Route path="/saves" element={<YourEventsPage {...eventProps} route="saves"/>}/>
+        <Route path="/likes" element={<YourEventsPage {...eventProps} route="likes"/>}/>
+        <Route path="/calendar" element={<YourEventsPage {...eventProps} route="calendar"/>}/>
       </Routes>
   );
 }

@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { Header, ProfileNavBar } from "../../components/NavBar";
 import { useAuth } from "../../contexts/AuthContext";
 import { usePreferences } from "../../contexts/PreferencesContext";
 import useTags from "../../hooks/useTags";

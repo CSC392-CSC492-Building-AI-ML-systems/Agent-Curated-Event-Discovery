@@ -22,6 +22,8 @@ def get_active_user(user: dict = Depends(get_current_user)):
     return {"id": user["sub"]}
 
 
+# USER PREFERENCES
+
 @router.get("/me/preferences", response_model=PreferencesResponse)
 async def get_preferences(
     user: dict = Depends(get_current_user), db: AsyncSession = Depends(get_db),
@@ -86,3 +88,41 @@ async def put_preferences(
         raise HTTPException(status_code=500, detail="Unable to save preferences; please retry") from None
 
     return PreferencesResponse(**payload.model_dump(), onboarding_completed=True)
+
+
+# USER LIKES AND SAVES
+@router.get("/me/likes", response_model=PreferencesResponse)
+async def get_likes(
+    user: dict = Depends(get_current_user), db: AsyncSession = Depends(get_db),
+):
+    pass
+
+@router.put("/me/like", response_model=PreferencesResponse)
+async def put_like(
+    user: dict = Depends(get_current_user), db: AsyncSession = Depends(get_db),
+):
+    pass
+
+@router.delete("/me/like", response_model=PreferencesResponse)
+async def delete_like(
+    user: dict = Depends(get_current_user), db: AsyncSession = Depends(get_db),
+):
+    pass
+
+@router.get("/me/saves", response_model=PreferencesResponse)
+async def get_saves(
+    user: dict = Depends(get_current_user), db: AsyncSession = Depends(get_db),
+):
+    pass
+
+@router.put("/me/save", response_model=PreferencesResponse)
+async def put_save(
+    user: dict = Depends(get_current_user), db: AsyncSession = Depends(get_db),
+):
+    pass
+
+@router.delete("/me/save", response_model=PreferencesResponse)
+async def delete_save(
+    user: dict = Depends(get_current_user), db: AsyncSession = Depends(get_db),
+):
+    pass

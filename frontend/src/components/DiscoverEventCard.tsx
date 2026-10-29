@@ -1,9 +1,9 @@
 import TagLink from "./TagLink";
 import type { EventideEvent } from "../interfaces/interfaces";
-import saveIcon from "../assets/images/save-icon-pink.svg";
-import saveIconFilled from "../assets/images/save-icon-filled-pink.svg";
-import heartIcon from "../assets/images/heart-icon-pink.svg";
-import heartIconFilled from "../assets/images/heart-icon-filled-pink.svg";
+import SaveIcon from '../assets/images/save-icon.svg?react';
+import SaveIconFilled from '../assets/images/save-icon-filled.svg?react';
+import HeartIcon from '../assets/images/heart-icon.svg?react';
+import HeartIconFilled from '../assets/images/heart-icon-filled.svg?react';
 
 import { formatEventDate } from "../utils/eventDate";
 
@@ -76,7 +76,7 @@ export default function DiscoverEventCard({
             aria-pressed={liked}
             onClick={() => onLike(event.id)}
           >
-            <img className="icon" src={liked ? heartIconFilled: heartIcon } alt="likes" />
+            {liked? <HeartIconFilled color="#f6545c" className="icon"/>: <HeartIcon color="#f6545c" className="icon"/>}
           </button>
           {!compact && <p className="mini-text">{event.likes}</p>}
         </div>
@@ -86,7 +86,7 @@ export default function DiscoverEventCard({
           aria-pressed={saved}
           onClick={() => onSave(event.id)}
         >
-          <img className="icon" src={saved ? saveIconFilled: saveIcon} alt="likes" />
+          {saved? <SaveIconFilled color="#f6545c" className="icon"/>: <SaveIcon color="#f6545c" className="icon"/>}
         </button>
       </div>
     </article>
