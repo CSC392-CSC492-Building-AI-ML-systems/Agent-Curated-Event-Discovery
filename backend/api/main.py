@@ -15,7 +15,7 @@ origins = [origin.strip() for origin in os.getenv(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_methods=["GET", "PUT"],
+    allow_methods=["GET", "PUT", "DELETE"],
     allow_headers=["Accept", "Authorization", "Content-Type"],
 )
 
