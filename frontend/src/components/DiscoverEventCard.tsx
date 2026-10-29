@@ -1,5 +1,6 @@
 import TagLink from "./TagLink";
 import type { EventideEvent } from "../interfaces/interfaces";
+import { useAnalytics } from "../hooks/useAnalytics";
 
 import { formatEventDate } from "../utils/eventDate";
 
@@ -18,13 +19,21 @@ export default function DiscoverEventCard({
   onOpen,
   onSave,
 }: Props) {
+  const { logEventClick } = useAnalytics();
+  const handleEventOpen = (event: EventideEvent) => {
+    onOpen(event);
+
+    void logEventClick(Number(event.id)).catch((error) => {
+      console.error("Failed to track event click:", error);
+    });
+  };
   return (
     <article
       className={`event-card ${compact ? "event-card-compact" : "event-card-large"}`}
     >
       <button
         className="event-card-open"
-        onClick={() => onOpen(event)}
+        onClick={() => handleEventOpen(event)}
         aria-label={`View ${event.title}`}
       >
         {event.imageUrl ? (
