@@ -26,9 +26,9 @@ function LikesPage({events, saved, onSave, liked, onLike}: LikesPageProps){
     return <>   
             {(!mine.length ? (
                       <section className="discover-empty your-events-empty">
-                        <h2>Your Events</h2>
+                        <h2>Your Likes</h2>
                         <p>
-                          Nothing saved yet. Tap ☆ on any event in Discover to keep it
+                          Nothing saved yet. Tap ⁠♡ on any event in Discover to keep it
                           here.
                         </p>
                         <Link className="pill" to="/">

@@ -49,14 +49,14 @@
 .discover-toolbar select { border: 0; border-radius: 8px; background: #b9dcf3; padding: 6px 8px; }
 .discover-view { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
 .discover-topics, .discover-tags { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
-.discover-topics { font-size: 15px; margin-top: 16px; gap: 8px; }
+.discover-topics { font-size: 15px; gap: 8px; }
 .discover-chip { border: 0; background: #b9dcf3; color: #2a1f33; border-radius: 99px; padding: 3px 9px; font-size: 14px !important; white-space: nowrap; }
 .discover-chip.active { background: #f6545c; color: white; }
 .discover-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
 .discover-list { display: grid; gap: 14px; }
 .discover-section-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
 .discover-section-heading > span { color: var(--discover-muted); font-size: 14px; }
-.discover-empty { margin: 10px; padding: 28px; background: #ffffffa0; border: 1px dashed var(--discover-line); border-radius: 20px; text-align: center; }
+.discover-empty { padding: 28px; background: #ffffffa0; border: 1px dashed var(--discover-line); border-radius: 20px; text-align: center; }
 .discover-empty h3 { margin: 0 0 8px; }
 .discover-empty .pill { margin-top: 16px; }
 .discover-topic-heading { color: #d63a45; font-size: 24px; font-weight: 400; }

@@ -3,15 +3,16 @@ import DiscoverEventCard from "../../components/DiscoverEventCard";
 import type { EventideEvent } from "../../interfaces/interfaces";
 import { useState } from "react";
 import EventDetails from "../../components/EventDetails";
+import SaveIcon from '../../assets/images/save-icon.svg?react';
 
-type LikesPageProps = {
+type SavesPageProps = {
     events: EventideEvent[]; //my saved events\
     saved: number[];
     onSave: (id: number) => void;
     liked: number[];
     onLike: (id: number) => void;
 }
-function LikesPage({events, saved, onSave, liked, onLike}: LikesPageProps){
+function SavesPage({events, saved, onSave, liked, onLike}: SavesPageProps){
     const [selected, setSelected] = useState<EventideEvent | null>(null);
     const mine = events
     .filter((event) => saved.includes(event.id))
@@ -28,8 +29,8 @@ function LikesPage({events, saved, onSave, liked, onLike}: LikesPageProps){
             (
             <section className="discover-empty your-events-empty">
                 <h2>Your Events</h2>
-                <p>Nothing saved yet. Tap ☆ on any event in Discover to keep it here.</p>
-                <Link className="pill" to="/"> Discover events </Link>
+                <p style={{display: "inline"}}>Nothing saved yet. Tap </p><SaveIcon style={{display: "inline", verticalAlign: "middle"}} width="15px" height="15px"/><p style={{display: "inline"}}> on any event in Discover to keep it here.</p>
+                <Link style={{display: "flex", width: "fit-content", justifySelf:"center"}} className="pill" to="/"> Discover events </Link>
             </section>
             ):
             <section aria-labelledby="your-events-list-title">
@@ -67,4 +68,4 @@ function LikesPage({events, saved, onSave, liked, onLike}: LikesPageProps){
         </>
 }
 
-export default LikesPage;
+export default SavesPage;

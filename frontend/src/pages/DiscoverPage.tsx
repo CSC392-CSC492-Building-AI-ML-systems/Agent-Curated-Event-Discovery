@@ -65,7 +65,7 @@ export default function DiscoverPage({
     <div className="discover-page">
       <div className="discover-wrap">
         <Header savedCount={saved.length} />
-        <main>
+        <main className="column small-gap">
           <SearchBar
             search={search}
             setSearch={(search: string) => setBrowse({ ...browse, search })}

@@ -34,6 +34,8 @@ const eventInBounds = (event: EventideEvent, mapRef: React.RefObject<mapboxgl.Ma
 }
 function MapPage({
   events,
+  liked,
+  onLike,
   saved,
   onSave,
   followed,
@@ -442,7 +444,6 @@ function MapPage({
         )
       }
     }
-    console.log(`features: ${JSON.stringify(features)}`)
     source?.setData({
       "type": "FeatureCollection",
       "crs": {
@@ -483,7 +484,7 @@ function MapPage({
             </div>}
             { userLocation && //for re-centering user location
             <div className="floatingButton"> 
-              <button type="submit" className="userTargetButton" aria-label="Recenter" onClick={()=>{mapRef.current?.easeTo({center: userLocation, duration: 500, padding: {right: (infoOpen? 376: 0) + (listOpen? 376: 0)}}); console.log(`set user location: ${JSON.stringify(userLocation)}`)}}>
+              <button type="submit" className="userTargetButton" aria-label="Recenter" onClick={()=>{mapRef.current?.easeTo({center: userLocation, duration: 500, padding: {right: (infoOpen? 376: 0) + (listOpen? 376: 0)}}); }}>
                 <img className="icon" src={targetIcon} alt="" />
               </button>              
             </div>}
@@ -506,6 +507,8 @@ function MapPage({
                       style={{ margin: 0, padding: 0, border: "none", background: "none", borderRadius: 0}}
                       popup={false}
                       event={selectedEvent}
+                      liked={liked.includes(selectedEvent.id)}
+                      onLike={onLike}
                       saved={saved.includes(selectedEvent.id)}
                       onSave={onSave}
                       onClose={closeEventDetails}
@@ -611,6 +614,8 @@ function MapPage({
                           key={event.id}
                           event={event}
                           compact={true}
+                          liked={liked.includes(event.id)}
+                          onLike={onLike}
                           saved={saved.includes(event.id)}
                           onSave={onSave}
                           onOpen={(eventideEvent) => {
@@ -641,6 +646,8 @@ function MapPage({
                         key={event.id}
                         event={event}
                         compact={true}
+                        liked={liked.includes(event.id)}
+                        onLike={onLike}
                         saved={saved.includes(event.id)}
                         onSave={onSave}
                         onOpen={(eventideEvent) => {

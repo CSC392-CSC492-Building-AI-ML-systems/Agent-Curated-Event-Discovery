@@ -2,6 +2,7 @@ import { getEvents } from "./events";
 import { toEventideEvent } from "./adapters";
 import type { EventideEvent } from "../interfaces/interfaces";
 import type { RequestOptions } from "./types";
+import { getEventsLiked, getEventsSaved } from "./user_actions";
 
 const PAGE_SIZE = 100;
 
@@ -13,6 +14,34 @@ export async function loadEventCatalog({
   for (let skip = 0; ; skip += PAGE_SIZE) {
     signal?.throwIfAborted();
     const page = await getEvents({ skip, limit: PAGE_SIZE, signal });
+    if (!Array.isArray(page))
+      throw new Error("The events API returned an unexpected response");
+    for (const event of page) events.set(event.id, toEventideEvent(event));
+    if (page.length < PAGE_SIZE) return [...events.values()];
+  }
+}
+
+export async function loadEventsLikedCatalog({
+  signal, accessToken
+}: RequestOptions & {accessToken?: string} = {}): Promise<EventideEvent[]> {
+  const events = new Map<number, EventideEvent>();
+  for (let skip = 0; ; skip += PAGE_SIZE) {
+    signal?.throwIfAborted();
+    const page = await getEventsLiked({ skip, limit: PAGE_SIZE, signal, accessToken });
+    if (!Array.isArray(page))
+      throw new Error("The events API returned an unexpected response");
+    for (const event of page) events.set(event.id, toEventideEvent(event));
+    if (page.length < PAGE_SIZE) return [...events.values()];
+  }
+}
+
+export async function loadEventsSavedCatalog({
+  signal,accessToken
+}: RequestOptions & {accessToken?: string}= {}): Promise<EventideEvent[]> {
+  const events = new Map<number, EventideEvent>();
+  for (let skip = 0; ; skip += PAGE_SIZE) {
+    signal?.throwIfAborted();
+    const page = await getEventsSaved({ skip, limit: PAGE_SIZE, signal, accessToken });
     if (!Array.isArray(page))
       throw new Error("The events API returned an unexpected response");
     for (const event of page) events.set(event.id, toEventideEvent(event));

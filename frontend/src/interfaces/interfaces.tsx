@@ -52,7 +52,8 @@ export interface EventideEvent {
   link: string;
   eighteenPlus: boolean;
   imageUrl?: string;
-  likes: number
+  likes: number;
+  saves: number;
 }
 
 export interface EventideFilters {

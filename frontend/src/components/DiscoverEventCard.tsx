@@ -6,6 +6,8 @@ import HeartIcon from '../assets/images/heart-icon.svg?react';
 import HeartIconFilled from '../assets/images/heart-icon-filled.svg?react';
 
 import { formatEventDate } from "../utils/eventDate";
+import { useAuth } from "../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 type Props = {
   event: EventideEvent;
@@ -26,6 +28,8 @@ export default function DiscoverEventCard({
   onLike,
   onOpen,
 }: Props) {
+  const { session } = useAuth();
+  const navigate = useNavigate();
   return (
     <article
       className={`event-card ${compact ? "event-card-compact" : "event-card-large"}`}
@@ -74,17 +78,17 @@ export default function DiscoverEventCard({
             className="event-like"
             aria-label={`${liked ? "Unlike" : "Like"} ${event.title}`}
             aria-pressed={liked}
-            onClick={() => onLike(event.id)}
+            onClick={() => {if (session?.access_token) {onLike(event.id)} else {navigate("/login")}}}
           >
             {liked? <HeartIconFilled color="#f6545c" className="icon"/>: <HeartIcon color="#f6545c" className="icon"/>}
           </button>
-          {!compact && <p className="mini-text">{event.likes}</p>}
+          {!compact && event.likes > 0 && <p className="mini-text">{event.likes}</p>}
         </div>
         <button
           className="event-save"
           aria-label={`${saved ? "Unsave" : "Save"} ${event.title}`}
           aria-pressed={saved}
-          onClick={() => onSave(event.id)}
+          onClick={() => {if (session?.access_token) {onSave(event.id)} else {navigate("/login")}}}
         >
           {saved? <SaveIconFilled color="#f6545c" className="icon"/>: <SaveIcon color="#f6545c" className="icon"/>}
         </button>
