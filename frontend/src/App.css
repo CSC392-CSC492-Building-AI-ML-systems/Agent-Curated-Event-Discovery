@@ -719,15 +719,15 @@ label {
 }
 
 .event-card-compact .event-card-copy h3 {
-  -webkit-line-clamp: 2; 
+  -webkit-line-clamp: 2;
 }
 
 .event-card-large .event-card-copy h3 {
-  -webkit-line-clamp: 1; 
+  -webkit-line-clamp: 1;
 }
 
 .event-card-large .event-card-copy p {
-  -webkit-line-clamp: 4; 
+  -webkit-line-clamp: 4;
 }
 
 .event-card-compact h3 {
@@ -762,6 +762,10 @@ label {
   width: 34px;
   height: 34px;
   line-height: 1;
+}
+
+.event-reject {
+  top: 52px;
 }
 
 .event-card-large .event-card-open {
@@ -810,6 +814,10 @@ label {
   .event-card-large .event-save {
     top: 18px;
     right: 18px;
+  }
+
+  .event-card-large .event-reject {
+    top: 60px;
   }
 
   .event-card-large .event-card-open {
