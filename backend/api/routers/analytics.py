@@ -1,20 +1,19 @@
-# TODO: remove unused imports
 from datetime import datetime
-import json
-
-from fastapi import APIRouter, HTTPException, Depends, Query
+from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.dialects.postgresql import insert as pg_insert
-
+from pydantic import BaseModel, Field
 
 from ..db.database import get_db
 from ..models.analytics import EventClicked, TagClicked, SearchPerformed
 from ..models.event import Event, Tag
 from ..utils.auth import get_current_user
 
-
 router = APIRouter(prefix="/analytics", tags=["Analytics"])
+
+class SearchRequest(BaseModel):
+    query: str = Field(min_length=1, max_length=200)
 
 @router.post("/events/{event_id}/click", status_code=204)
 async def track_event_click(
@@ -84,14 +83,11 @@ async def track_tag_click(
 
 @router.post("/searches", status_code=204)
 async def track_search(
-    payload,
+    payload: SearchRequest,
     user: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    query = payload.get("query")
-    if query is None:
-        from fastapi import HTTPException
-        raise HTTPException(status_code=400, detail="Query cannot be empty")
+    query = payload.query
 
     # clean the search query
     query = " ".join(query.strip().lower().split())
@@ -115,3 +111,5 @@ async def track_search(
             "last_searched": stmt.excluded.last_searched,
         },
     )
+    await db.execute(stmt)
+    await db.commit()

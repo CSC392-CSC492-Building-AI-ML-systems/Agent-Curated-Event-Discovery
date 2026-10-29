@@ -19,6 +19,7 @@ import searchIcon from "../../assets/images/search-icon.svg";
 import targetIcon from "../../assets/images/target-icon.svg";
 import backIcon from "../../assets/images/back-icon.svg";
 import TagFilters from "../../components/TagFilters";
+import { useSearchTracking } from "../../hooks/useSearchTracking";
 import "./MapPage.css";
 
 type MapCenter = [longitude: number, latitude: number];
@@ -69,6 +70,7 @@ function MapPage({
   const selectedClusterId = useRef<number | null>(null);
   const { search, range, sort, tags } = browse;
   const [visible, setVisible] = useState(events);
+  const { track } = useSearchTracking(search);
 
   //UI states
   const mapRef = useRef<mapboxgl.Map | null>(null);
@@ -620,6 +622,7 @@ function MapPage({
                       setSearch={(search) =>
                         setBrowse((previous) => ({ ...previous, search }))
                       }
+                      onSearch={() => track(search)}
                       onClose={() => setListOpen(false)}
                     />
                     <div className="map-toolbar column align-start">

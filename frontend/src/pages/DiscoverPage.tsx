@@ -11,6 +11,7 @@ import type { EventideEvent, EventPageProps } from "../interfaces/interfaces";
 import "./DiscoverPage.css";
 import filterEvents from "../utils/filterEvents";
 import TagFilters from "../components/TagFilters";
+import { useSearchTracking } from "../hooks/useSearchTracking";
 
 export default function DiscoverPage({
   events,
@@ -28,6 +29,7 @@ export default function DiscoverPage({
 
   const [selected, setSelected] = useState<EventideEvent | null>(null);
   const [now] = useState(() => Date.now());
+  const { track } = useSearchTracking(search);
 
   useEffect(() => {
     const frame = requestAnimationFrame(() =>
@@ -66,6 +68,7 @@ export default function DiscoverPage({
           <SearchBar
             search={search}
             setSearch={(search: string) => setBrowse({ ...browse, search })}
+            onSearch={() => track(search)}
             placeholder="Search events, topics, places"
           />
           <div className="discover-toolbar">

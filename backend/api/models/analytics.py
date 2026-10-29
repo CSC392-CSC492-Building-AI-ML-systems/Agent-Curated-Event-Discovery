@@ -1,8 +1,7 @@
-# TODO: remove unused imports
 from uuid import UUID
 
-from sqlalchemy import ForeignKey, Uuid, Column, Integer, Table, Text, Time, DateTime
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy import ForeignKey, Uuid, Integer, Text, DateTime
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from datetime import datetime
 
 class Base(DeclarativeBase):
@@ -19,8 +18,6 @@ class EventClicked(Base):
     num_clicks: Mapped[int] = mapped_column(Integer, nullable=False)
     last_clicked: Mapped[datetime] = mapped_column(DateTime, nullable=False)
 
-    # TODO: may need to add the back populates thing
-
 
 class TagClicked(Base):
     __tablename__ = "tag_clicked"
@@ -33,8 +30,6 @@ class TagClicked(Base):
     num_clicks: Mapped[int] = mapped_column(Integer, nullable=False)
     last_clicked: Mapped[datetime] = mapped_column(DateTime, nullable=False)
 
-    # TODO: may need to add the back populates thing
-
 
 class SearchPerformed(Base):
     __tablename__ = "search_performed"
@@ -44,5 +39,3 @@ class SearchPerformed(Base):
     query: Mapped[str] = mapped_column(Text, primary_key=True)
     num_searches: Mapped[int] = mapped_column(Integer, nullable=False)
     last_searched: Mapped[datetime] = mapped_column(DateTime, nullable=False)
-    # TODO: may need to add the back populates thing
-
