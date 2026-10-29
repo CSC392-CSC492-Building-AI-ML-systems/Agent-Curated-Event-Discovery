@@ -130,7 +130,7 @@ export default function DiscoverPage({
             ))}
           </div>
 
-          <ForYouSection />
+          <ForYouSection saved={saved} onSave={onSave} />  {/*Need to display the star and its current state*/}
 
           <EventRequestState loading={loading} error={error} retry={retry} />
 
