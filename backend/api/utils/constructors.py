@@ -1,7 +1,7 @@
 import json
 
 
-def build_event(event, coordinates_geojson):
+def build_event(event, coordinates_geojson, avg_rating=None, rating_count=0):
     event = {
         "id": event.id,
         "name": event.name,
@@ -13,6 +13,12 @@ def build_event(event, coordinates_geojson):
         "price": event.price,
         "link": event.link,
         "eighteenplus": event.eighteenplus,
+        "avg_rating": (
+            round(float(avg_rating), 2)
+            if avg_rating is not None
+            else None
+        ),
+        "rating_count": rating_count,
         "tags": [
             {"id": tag.id, "name": tag.name}
             for tag in event.tags

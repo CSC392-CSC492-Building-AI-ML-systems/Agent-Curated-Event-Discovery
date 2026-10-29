@@ -1,6 +1,10 @@
-from sqlalchemy import Boolean, Column, Date, ForeignKey, Integer, Numeric, \
-    String, \
-    Table, Text, Time
+import uuid
+
+from sqlalchemy import Boolean, CheckConstraint, Column, Date, DateTime, \
+    ForeignKey, Integer, \
+    Numeric, \
+    SmallInteger, String, \
+    Table, Text, Time, Uuid, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from datetime import datetime, date
 from decimal import Decimal
@@ -99,4 +103,21 @@ class Tag(Base):
     events: Mapped[list[Event]] = relationship(
         secondary=event_tags,
         back_populates="tags",
+    )
+
+
+class EventRating(Base):
+    __tablename__ = "event_rating"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True)
+    event_id: Mapped[int] = mapped_column(
+        ForeignKey("event.id", ondelete="CASCADE"), primary_key=True, index=True
+    )
+    rating: Mapped[int] = mapped_column(SmallInteger, nullable=False)
+    timestamp: Mapped[datetime] = mapped_column(
+        DateTime(timezone=False), nullable=False, server_default=func.now()
+    )
+
+    __table_args__ = (
+        CheckConstraint("rating BETWEEN 1 AND 5", name="ck_event_rating_range"),
     )
