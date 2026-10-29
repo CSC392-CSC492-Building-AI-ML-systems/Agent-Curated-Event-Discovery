@@ -13,6 +13,8 @@ def build_event(event, coordinates_geojson):
         "price": event.price,
         "link": event.link,
         "eighteenplus": event.eighteenplus,
+        "likes": event.likes,
+        "saves": event.saves,
         "tags": [
             {"id": tag.id, "name": tag.name}
             for tag in event.tags
