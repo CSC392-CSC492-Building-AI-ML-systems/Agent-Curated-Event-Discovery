@@ -30,7 +30,7 @@
 .discover-page h2 { font-size: 38px; line-height: 1.2; font-weight: 400; color: inherit; margin: 36px 0 16px; display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
 .discover-page h2 > span { font-size: 16px; color: #d63a45; }
 .discover-page #discover-following > .discover-tags { position: relative; top: 4px; }
-.discover-page p, .discover-dialog p { color: inherit; }
+.discover-page p, .discover-dialog p { color: inherit; margin: 0 }
 .discover-header { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 32px; }
 .discover-header > .logo { justify-self: start; }
 .discover-header > .navbar { justify-self: center; }
