@@ -13,6 +13,7 @@ export default function EventDetails({
   onSave,
   liked,
   onLike,
+  onReject,
   onClose,
   popup = true,
   style,
@@ -22,6 +23,8 @@ export default function EventDetails({
   onSave: (id: number) => void;
   liked: boolean;
   onLike: (id: number) => void;
+  // Only recommended events pass this, so the reject button stays off other events.
+  onReject?: (id: number) => void;
   onClose: () => void;
   popup?: boolean;
   style?: React.CSSProperties;
@@ -45,7 +48,6 @@ export default function EventDetails({
           <TagLink key={tag.id} tag={tag} onNavigate={onClose} />
         ))}
       </div>
-      
       <div className="row small-gap">
         <button
           type="button"
@@ -65,8 +67,16 @@ export default function EventDetails({
         >
           {saved? <SaveIconFilled height="20px" width="20px"/>: <SaveIcon height="20px" width="20px"/> }<p style={{margin: 0}}>{saved ? "Saved" : "Save event"}</p>
         </button>
+        {onReject && (
+          <button
+            type="button"
+            className="pill"
+            onClick={() => onReject(event.id)}
+          >
+            ✕ Reject
+          </button>
+        )}
       </div>
-      
     </>
   );
 
