@@ -6,6 +6,7 @@ export default function EventDetails({
   event,
   saved,
   onSave,
+  onReject,
   onClose,
   popup = true,
   style,
@@ -13,6 +14,8 @@ export default function EventDetails({
   event: EventideEvent;
   saved: boolean;
   onSave: (id: number) => void;
+  // Only recommended events pass this, so the reject button stays off other events.
+  onReject?: (id: number) => void;
   onClose: () => void;
   popup?: boolean;
   style?: React.CSSProperties;
@@ -37,14 +40,26 @@ export default function EventDetails({
         ))}
       </div>
 
-      <button
-        type="button"
-        className="pill"
-        aria-pressed={saved}
-        onClick={() => onSave(event.id)}
-      >
-        {saved ? "★ Saved" : "☆ Save event"}
-      </button>
+      <div className="row small-gap">
+        <button
+          type="button"
+          className="pill"
+          aria-pressed={saved}
+          onClick={() => onSave(event.id)}
+        >
+          {saved ? "★ Saved" : "☆ Save event"}
+        </button>
+
+        {onReject && (
+          <button
+            type="button"
+            className="pill"
+            onClick={() => onReject(event.id)}
+          >
+            ✕ Reject
+          </button>
+        )}
+      </div>
     </>
   );
 

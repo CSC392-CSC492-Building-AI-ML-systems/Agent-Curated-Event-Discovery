@@ -2,16 +2,19 @@ import logging
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import delete, select
+from sqlalchemy import delete, func, select, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from ..db.database import get_db
-from ..models.event import Tag
+from ..models.event import Event, Tag, Venue
 from ..models.preferences import UserPreferences, UserPreferenceTag
+from ..models.recommendations import UserRecommendedEvent
 from ..schemas.preferences import PreferencesResponse, PreferencesUpdate
 from ..utils.auth import get_current_user
+from ..utils.constructors import build_event
 
 router = APIRouter(prefix="/users", tags=["Users"])
 logger = logging.getLogger(__name__)
@@ -86,3 +89,47 @@ async def put_preferences(
         raise HTTPException(status_code=500, detail="Unable to save preferences; please retry") from None
 
     return PreferencesResponse(**payload.model_dump(), onboarding_completed=True)
+
+
+@router.get("/me/recommended-events")
+async def get_recommended_events(
+    user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    rec_events = await db.execute(
+        select(Event, func.ST_AsGeoJSON(Venue.coordinates).label("coordinates_geojson"))
+        .join(Event.venue_obj)
+        .join(UserRecommendedEvent, UserRecommendedEvent.event_id == Event.id)
+        .options(selectinload(Event.tags), selectinload(Event.organizer_obj), selectinload(Event.venue_obj))
+        .where(UserRecommendedEvent.user_id == UUID(user["sub"]), UserRecommendedEvent.rejected.is_(False))
+        .order_by(Event.id)
+    )
+
+    return [build_event(event, coordinates_geojson) for event, coordinates_geojson in rec_events.all()]
+
+
+@router.put("/me/recommended-events/{event_id}/rejected")
+async def reject_recommended_event(
+    event_id: int,
+    user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    try:
+        result = await db.execute(
+            update(UserRecommendedEvent)
+            .where(UserRecommendedEvent.user_id == UUID(user["sub"]), UserRecommendedEvent.event_id == event_id)
+            .values(rejected=True)
+        )
+        
+        if result.rowcount == 0:  # Only an event recommended to the user can be rejected
+            raise HTTPException(status_code=404, detail="Event was not recommended to this user")
+        await db.commit()
+    except HTTPException:
+        await db.rollback()
+        raise
+    except SQLAlchemyError:
+        await db.rollback()
+        logger.error("Recommended event rejection failed")
+        raise HTTPException(status_code=500, detail="Unable to reject event; please retry") from None
+
+    return {"event_id": event_id, "rejected": True}

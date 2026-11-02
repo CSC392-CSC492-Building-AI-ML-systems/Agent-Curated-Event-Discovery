@@ -9,6 +9,8 @@ type Props = {
   saved: boolean;
   onOpen: (event: EventideEvent) => void;
   onSave: (id: number) => void;
+  // Only recommended events pass this so the reject button not on regular upcoming section events
+  onReject?: (id: number) => void;
 };
 
 export default function DiscoverEventCard({
@@ -17,6 +19,7 @@ export default function DiscoverEventCard({
   saved,
   onOpen,
   onSave,
+  onReject,
 }: Props) {
   return (
     <article
@@ -68,6 +71,15 @@ export default function DiscoverEventCard({
       >
         {saved ? "★" : "☆"}
       </button>
+      {onReject && (
+        <button
+          className="event-save event-reject"
+          aria-label={`Not interested in ${event.title}`}
+          onClick={() => onReject(event.id)}
+        >
+          ✕
+        </button>
+      )}
     </article>
   );
 }
