@@ -3,11 +3,14 @@ import type { ConflictNotification } from "../hooks/useConflictNotifications";
 import "./ConflictNotifications.css";
 
 const LIFETIME_MS = 6000;
+const BUBBLE_STYLE = { animationDuration: `${LIFETIME_MS}ms` };
 
-function ConflictBubble({ notification, onDismiss }: {
+type ConflictBubbleProps = {
   notification: ConflictNotification;
   onDismiss: (id: number) => void;
-}) {
+};
+
+function ConflictBubble({ notification, onDismiss }: ConflictBubbleProps) {
   const { id, eventTitle, conflictingTitle, additionalCount } = notification;
   useEffect(() => {
     const timer = window.setTimeout(() => onDismiss(id), LIFETIME_MS);
@@ -15,29 +18,44 @@ function ConflictBubble({ notification, onDismiss }: {
   }, [id, onDismiss]);
 
   return (
-    <div className="conflict-bubble" style={{ animationDuration: `${LIFETIME_MS}ms` }}>
+    <div className="conflict-bubble" style={BUBBLE_STYLE}>
       <strong>Time conflict</strong>
       <p className="conflict-summary">
-        <span className="conflict-event-title" title={eventTitle}>{eventTitle}</span>
+        <span className="conflict-event-title" title={eventTitle}>
+          {eventTitle}
+        </span>
         <span>conflicts with</span>
       </p>
       <p className="conflict-existing">
-        <span className="conflict-event-title" title={conflictingTitle}>{conflictingTitle}</span>
+        <span className="conflict-event-title" title={conflictingTitle}>
+          {conflictingTitle}
+        </span>
         {additionalCount > 0 && <span>+{additionalCount} more</span>}
       </p>
     </div>
   );
 }
 
-export default function ConflictNotifications({ notifications, onDismiss }: {
-  notifications: ConflictNotification[];
+type Props = {
+  notifications: readonly ConflictNotification[];
   onDismiss: (id: number) => void;
-}) {
+};
+
+export default function ConflictNotifications({ notifications, onDismiss }: Props) {
   return (
-    <aside className="conflict-notifications" aria-label="Calendar conflict notifications"
-      aria-live="polite" aria-relevant="additions" aria-atomic="false">
+    <aside
+      className="conflict-notifications"
+      aria-label="Calendar conflict notifications"
+      aria-live="polite"
+      aria-relevant="additions"
+      aria-atomic="false"
+    >
       {notifications.map(notification => (
-        <ConflictBubble key={notification.id} notification={notification} onDismiss={onDismiss} />
+        <ConflictBubble
+          key={notification.id}
+          notification={notification}
+          onDismiss={onDismiss}
+        />
       ))}
     </aside>
   );

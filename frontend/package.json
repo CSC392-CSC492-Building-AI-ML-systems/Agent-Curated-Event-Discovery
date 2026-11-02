@@ -8,11 +8,13 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "test:onboarding": "playwright test --config playwright.onboarding.config.ts"
+    "test:onboarding": "playwright test --config playwright.onboarding.config.ts",
+    "test:scheduling": "playwright test --config playwright.scheduling.config.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.118.0",
+    "ics": "^3.12.1",
     "lucide-react": "^1.61.0",
     "mapbox-gl": "^3.32.0",
     "oxlint-tsgolint": "^7.0.2003",

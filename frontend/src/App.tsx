@@ -68,9 +68,12 @@ function EventRoutes() {
     const event = events.find((event) => event.id === id);
     // Saved events currently populate the calendar. Include the saved catalogue
     // even when those events aren't in the main Discover results.
-    const scheduled = [...new Map([...savedInfo.events, ...events]
-      .filter(existing => saved.includes(existing.id))
-      .map(existing => [existing.id, existing])).values()];
+    const savedIds = new Set(saved);
+    const scheduled = [...new Map(
+      [...savedInfo.events, ...events]
+        .filter(existing => savedIds.has(existing.id))
+        .map(existing => [existing.id, existing]),
+    ).values()];
     const overlapping = save && event ? findEventConflicts(event, scheduled) : [];
     if (event ) {if (save) {event.saves +=1} else{event.saves -= 1} }
     const controller = new AbortController();

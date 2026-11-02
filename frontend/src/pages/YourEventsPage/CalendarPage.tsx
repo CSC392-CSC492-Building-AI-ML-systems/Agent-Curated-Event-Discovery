@@ -4,6 +4,7 @@ import CalendarDayEvents from "../../components/CalendarDayEvents";
 import type { EventideEvent } from "../../interfaces/interfaces";
 import EventDetails from "../../components/EventDetails";
 import CalendarDayDialog from "../../components/CalendarDayDialog";
+import CalendarExportButton from "../../components/CalendarExportButton";
 
 type CalendarPageProps = {
     events: EventideEvent[]; //my saved events
@@ -54,6 +55,7 @@ function CalendarPage({events, saved, onSave, liked, onLike}: CalendarPageProps)
                 {monthName}
                 </h2>
                 <div className="your-events-month-controls">
+                <CalendarExportButton events={mine} />
                 <button
                     className="pill"
                     aria-label="Previous month"

@@ -1,6 +1,9 @@
 import type { EventideEvent } from "../interfaces/interfaces";
 
-type EventTime = Pick<EventideEvent, "id" | "startDate" | "endDate" | "startTimeKnown" | "endTimeKnown">;
+type EventTime = Pick<
+  EventideEvent,
+  "id" | "startDate" | "endDate" | "startTimeKnown" | "endTimeKnown"
+>;
 
 function interval(event: EventTime): [number, number] | null {
   // Date-only values are anchored at midnight by the API adapter, not real times.
@@ -12,7 +15,10 @@ function interval(event: EventTime): [number, number] | null {
     : null;
 }
 
-export function findEventConflicts<T extends EventTime>(event: EventTime, scheduled: T[]): T[] {
+export function findEventConflicts<T extends EventTime>(
+  event: EventTime,
+  scheduled: readonly T[],
+): T[] {
   const candidate = interval(event);
   if (!candidate) return [];
   return scheduled.filter(existing => {
