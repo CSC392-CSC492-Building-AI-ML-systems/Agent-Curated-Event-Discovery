@@ -18,6 +18,9 @@ import { eventLiked, eventSaved } from "./api/user_actions";
 import { createClient } from "./lib/supabase/client";
 import { ApiError } from "./api/client";
 import Popup from "./components/Popup";
+import ConflictNotifications from "./components/ConflictNotifications";
+import useConflictNotifications from "./hooks/useConflictNotifications";
+import { findEventConflicts } from "./utils/eventConflicts";
 
 function App() {
   return <AuthProvider><PreferencesProvider><BrowserRouter><SessionRoutes /></BrowserRouter></PreferencesProvider></AuthProvider>;
@@ -40,6 +43,7 @@ function EventRoutes() {
   // hooks always run, in the same order every render
   const likedInfo = useEventsLiked(session?.access_token?? null);
   const savedInfo = useEventsSaved(session?.access_token?? null);
+  const conflicts = useConflictNotifications();
   
   
   const [followed, setFollowed] = useState<EventideTag[]>([]);
@@ -62,6 +66,12 @@ function EventRoutes() {
     setSaved(save ? [...saved, id]: saved.filter((value) => value !== id)
     );
     const event = events.find((event) => event.id === id);
+    // Saved events currently populate the calendar. Include the saved catalogue
+    // even when those events aren't in the main Discover results.
+    const scheduled = [...new Map([...savedInfo.events, ...events]
+      .filter(existing => saved.includes(existing.id))
+      .map(existing => [existing.id, existing])).values()];
+    const overlapping = save && event ? findEventConflicts(event, scheduled) : [];
     if (event ) {if (save) {event.saves +=1} else{event.saves -= 1} }
     const controller = new AbortController();
     try {
@@ -71,6 +81,7 @@ function EventRoutes() {
         const result = await eventSaved(save? "PUT": "DELETE", { id: id }, data.session?.access_token, { signal: controller.signal });
         if (controller.signal.aborted) return;
         if (!result.message) throw new Error("Could not save event. Please retry.");
+        if (save && event) conflicts.notify(event.title, overlapping.map(existing => existing.title));
       } catch (error) {
         if (!controller.signal.aborted) {
           setShowPopup(true);
@@ -162,6 +173,7 @@ function EventRoutes() {
         <Route path="/calendar" element={<YourEventsPage {...likedSavedEventProps} route="calendar"/>}/>
       </Routes>
       <Popup visible={showPopup} message={popupMessage} duration={3000} onClose={handlePopupClose}/>
+      <ConflictNotifications notifications={conflicts.notifications} onDismiss={conflicts.dismiss} />
     </>
   );
 }

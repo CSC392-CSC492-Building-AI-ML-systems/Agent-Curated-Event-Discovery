@@ -1,0 +1,54 @@
+.conflict-notifications {
+  position: fixed;
+  top: max(1rem, env(safe-area-inset-top));
+  right: max(1rem, env(safe-area-inset-right));
+  z-index: 2000;
+  display: grid;
+  gap: 0.75rem;
+  width: min(23rem, calc(100vw - 2rem));
+  pointer-events: none;
+}
+
+.conflict-bubble {
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid var(--accent);
+  border-radius: 12px;
+  background: #fff5f5;
+  color: #2c2039;
+  box-shadow: var(--shadow);
+  animation: conflict-lifetime ease both;
+}
+
+.conflict-bubble p {
+  margin: 0.4rem 0 0;
+}
+
+.conflict-summary,
+.conflict-existing {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+}
+
+.conflict-event-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.conflict-summary > :last-child,
+.conflict-existing > :nth-child(2) {
+  flex-shrink: 0;
+}
+
+@keyframes conflict-lifetime {
+  0% { opacity: 0; transform: translateY(-0.5rem); }
+  5%, 90% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-0.25rem); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .conflict-bubble { animation: none; }
+}
