@@ -95,16 +95,17 @@ export default function DiscoverEventCard({
         >
           {saved? <SaveIconFilled color="#f6545c" className="icon"/>: <SaveIcon color="#f6545c" className="icon"/>}
         </button>
+        {onReject && (
+          <button
+            className="event-save event-reject"
+            aria-label={`Not interested in ${event.title}`}
+            onClick={() => onReject(event.id)}
+          >
+            ✕
+          </button>
+        )}
       </div>
-      {onReject && (
-        <button
-          className="event-save event-reject"
-          aria-label={`Not interested in ${event.title}`}
-          onClick={() => onReject(event.id)}
-        >
-          ✕
-        </button>
-      )}
+      
     </article>
   );
 }
