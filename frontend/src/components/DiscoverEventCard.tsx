@@ -2,6 +2,7 @@ import TagLink from "./TagLink";
 import type { EventideEvent } from "../interfaces/interfaces";
 
 import { formatEventDate } from "../utils/eventDate";
+import { useNavigate } from "react-router-dom";
 
 type Props = {
   event: EventideEvent;
@@ -11,6 +12,7 @@ type Props = {
   onSave: (id: number) => void;
   // Only recommended events pass this so the reject button not on regular upcoming section events
   onReject?: (id: number) => void;
+  isRecommended?: boolean;
 };
 
 export default function DiscoverEventCard({
@@ -20,14 +22,27 @@ export default function DiscoverEventCard({
   onOpen,
   onSave,
   onReject,
+  isRecommended,
 }: Props) {
+    const navigate = useNavigate();
+    const navigateToEvent = () => {
+      if (isRecommended && !compact) {
+        navigate(`/events/${event.id}`, { state: { origin: { path: "/discover" }, isRecommended: true } });
+      }
+      else if (!compact) {
+        navigate(`/events/${event.id}`, { state: { origin: { path: "/discover" } } });
+      }
+      else {
+        onOpen(event);
+      }
+    };
   return (
     <article
       className={`event-card ${compact ? "event-card-compact" : "event-card-large"}`}
     >
       <button
         className="event-card-open"
-        onClick={() => onOpen(event)}
+        onClick={navigateToEvent}
         aria-label={`View ${event.title}`}
       >
         {event.imageUrl ? (

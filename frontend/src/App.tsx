@@ -4,7 +4,7 @@ import DiscoverPage from "./pages/DiscoverPage";
 import YourEventsPage from "./pages/YourEventsPage";
 import TagPage from "./pages/TagPage";
 import MapPage from "./pages/MapPage/MapPage";
-
+import EventPage from "./pages/EventPage/EventPage";
 import SignupPage from "./pages/SignupPage/SignupPage";
 import LoginPage from "./pages/LoginPage/LoginPage";
 import OnboardingPage from "./pages/OnboardingPage";
@@ -84,6 +84,15 @@ function EventRoutes() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/onboarding" element={<OnboardingPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route
+          path="/events/:eventId"
+          element={
+            <EventPage
+              saved={saved}
+              onSave={onSave}
+            />
+          }
+        />
       </Routes>
   );
 }

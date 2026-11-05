@@ -79,6 +79,7 @@ export default function ForYouSection({ saved, onSave }: Props) {
                 onSave={onSave}
                 onOpen={setSelected}
                 onReject={onReject}
+                isRecommended={true}
               />
             ))}
           </div>

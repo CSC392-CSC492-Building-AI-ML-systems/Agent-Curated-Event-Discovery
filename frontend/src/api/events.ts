@@ -23,10 +23,10 @@ export function getEvents({
 
 export function getEvent(
   id: number,
-  options: RequestOptions = {},
+  signal?: AbortSignal,
 ): Promise<ApiEvent> {
   return getJson<ApiEvent>(
     `/events/${encodeURIComponent(String(id))}`,
-    options,
+    { signal }
   );
 }
