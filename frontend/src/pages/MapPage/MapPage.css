@@ -227,3 +227,20 @@
     background: white;
     border-radius: 50px;
 }
+
+.event-page-back {
+  display: inline-flex;
+  align-items: center;
+
+  color: #080707;
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-decoration: underline;
+
+  transition: opacity 0.2s ease;
+}
+
+.event-page-back:hover {
+  /* text-decoration: underline; */
+  color: #fa4e60;
+}

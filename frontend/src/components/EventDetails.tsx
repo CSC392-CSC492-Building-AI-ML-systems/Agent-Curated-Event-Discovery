@@ -1,6 +1,7 @@
 import TagLink from "./TagLink";
 import React, { useEffect, useRef } from "react";
 import type { EventideEvent } from "../interfaces/interfaces";
+import { useNavigate } from "react-router-dom";
 
 export default function EventDetails({
   event,
@@ -22,6 +23,11 @@ export default function EventDetails({
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
 
+  const navigate = useNavigate();
+  const navigateToEvent = () => {
+      navigate(`/events/${event.id}`, { state: { origin: { path: "/discover" } } });
+  };
+
   const content = (
     <>
       {event.imageUrl && <img src={event.imageUrl} alt="" loading="lazy" />}
@@ -33,7 +39,9 @@ export default function EventDetails({
       </p>
 
       <p>{event.description}</p>
-
+      <p className="event-page-back"onClick={navigateToEvent}>
+        View More Details →
+      </p>
       <div className="discover-tags">
         {event.tags.map((tag) => (
           <TagLink key={tag.id} tag={tag} onNavigate={onClose} />
