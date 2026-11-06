@@ -1,15 +1,23 @@
 import TagLink from "./TagLink";
 import type { EventideEvent } from "../interfaces/interfaces";
+import SaveIcon from '../assets/images/save-icon.svg?react';
+import SaveIconFilled from '../assets/images/save-icon-filled.svg?react';
+import HeartIcon from '../assets/images/heart-icon.svg?react';
+import HeartIconFilled from '../assets/images/heart-icon-filled.svg?react';
 import { useAnalytics } from "../hooks/useAnalytics";
 
 import { formatEventDate } from "../utils/eventDate";
+import { useAuth } from "../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 type Props = {
   event: EventideEvent;
   compact?: boolean;
   saved: boolean;
-  onOpen: (event: EventideEvent) => void;
   onSave: (id: number) => void;
+  liked: boolean;
+  onLike: (id: number) => void;
+  onOpen: (event: EventideEvent) => void;
   // Only recommended events pass this so the reject button not on regular upcoming section events
   onReject?: (id: number) => void;
 };
@@ -18,10 +26,14 @@ export default function DiscoverEventCard({
   event,
   compact = false,
   saved,
-  onOpen,
   onSave,
+  liked, 
+  onLike,
+  onOpen,
   onReject,
 }: Props) {
+  const { session } = useAuth();
+  const navigate = useNavigate();
   const { logEventClick } = useAnalytics();
   const handleEventOpen = (event: EventideEvent) => {
     onOpen(event);
@@ -72,23 +84,37 @@ export default function DiscoverEventCard({
           </div>
         </div>
       )}
-      <button
-        className="event-save"
-        aria-label={`${saved ? "Unsave" : "Save"} ${event.title}`}
-        aria-pressed={saved}
-        onClick={() => onSave(event.id)}
-      >
-        {saved ? "★" : "☆"}
-      </button>
-      {onReject && (
+      <div className="event-actions">
+        <div className="event-like-wrap">
+          <button
+            className="event-like"
+            aria-label={`${liked ? "Unlike" : "Like"} ${event.title}`}
+            aria-pressed={liked}
+            onClick={() => {if (session?.access_token) {onLike(event.id)} else {navigate("/login")}}}
+          >
+            {liked? <HeartIconFilled color="#f6545c" className="icon"/>: <HeartIcon color="#f6545c" className="icon"/>}
+          </button>
+          {!compact && event.likes > 0 && <p className="mini-text">{event.likes}</p>}
+        </div>
         <button
-          className="event-save event-reject"
-          aria-label={`Not interested in ${event.title}`}
-          onClick={() => onReject(event.id)}
+          className="event-save"
+          aria-label={`${saved ? "Unsave" : "Save"} ${event.title}`}
+          aria-pressed={saved}
+          onClick={() => {if (session?.access_token) {onSave(event.id)} else {navigate("/login")}}}
         >
-          ✕
+          {saved? <SaveIconFilled color="#f6545c" className="icon"/>: <SaveIcon color="#f6545c" className="icon"/>}
         </button>
-      )}
+        {onReject && (
+          <button
+            className="event-save event-reject"
+            aria-label={`Not interested in ${event.title}`}
+            onClick={() => onReject(event.id)}
+          >
+            ✕
+          </button>
+        )}
+      </div>
+      
     </article>
   );
 }

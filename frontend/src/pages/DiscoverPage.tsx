@@ -17,6 +17,8 @@ export default function DiscoverPage({
   events,
   saved,
   onSave,
+  liked, 
+  onLike,
   followed,
   browse,
   setBrowse,
@@ -56,6 +58,8 @@ export default function DiscoverPage({
       compact={compact}
       saved={saved.includes(event.id)}
       onSave={onSave}
+      liked={liked.includes(event.id)}
+      onLike={onLike}
       onOpen={setSelected}
     />
   );
@@ -64,7 +68,7 @@ export default function DiscoverPage({
     <div className="discover-page">
       <div className="discover-wrap">
         <Header savedCount={saved.length} />
-        <main>
+        <main className="column small-gap">
           <SearchBar
             search={search}
             setSearch={(search: string) => setBrowse({ ...browse, search })}
@@ -117,7 +121,7 @@ export default function DiscoverPage({
             />
           </div>
 
-          <ForYouSection saved={saved} onSave={onSave} />  {/*Need to display the star and its current state*/}
+          <ForYouSection liked={liked} onLike={onLike} saved={saved} onSave={onSave} />  {/*Need to display the star and its current state*/}
 
           <EventRequestState loading={loading} error={error} retry={retry} />
 
@@ -220,6 +224,8 @@ export default function DiscoverPage({
             event={selected}
             saved={saved.includes(selected.id)}
             onSave={onSave}
+            liked={liked.includes(selected.id)}
+            onLike={onLike}
             onClose={() => setSelected(null)}
           />
         )}
