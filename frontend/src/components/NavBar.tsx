@@ -1,5 +1,6 @@
 import { Link, NavLink, useLocation } from "react-router-dom";
 import EventideLogo from "./EventideLogo";
+import NotificationsPanel from "./NotificationsPanel";
 import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -49,6 +50,7 @@ export function Header({ savedCount }: { savedCount?: number }) {
           <button className="pill" disabled={signingOut} onClick={handleSignOut}>{signingOut ? "Logging out…" : "Log out"}</button>
         </> : <Link className="discover-auth-button" to="/signup">Sign Up / Log In</Link>}
         {error && <span role="alert">{error}</span>}
+        <NotificationsPanel />
       </div>
     </header>
   );

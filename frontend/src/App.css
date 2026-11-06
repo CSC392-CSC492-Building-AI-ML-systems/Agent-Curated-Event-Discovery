@@ -317,8 +317,6 @@ h1 {
   width: 100%;
 }
 
-<<<<<<< HEAD
-=======
 .floatingButtonContainer {
   position: absolute;
   top: 30px;
@@ -337,7 +335,6 @@ h1 {
   box-shadow: 1px 1px 10px 0 rgb(0, 0, 0, 0.2);
 }
 
->>>>>>> 7e6d8ca (feat(frontend): make target)
 .searchAndFilters {
   width: 100%;
 }
@@ -810,7 +807,64 @@ label {
   padding: 0 20px 16px;
 }
 
+.notifications-bell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid #f6545c;
+  border-radius: 50%;
+  background: white;
+  color: #2a1f33;
+  transition: background-color .2s ease, color .2s ease;
+}
+
+.notifications-bell.active {
+  background: #f6545c;
+  color: white;
+  border-color: #f6545c;
+}
+
+.notifications-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: min(380px, 100%);
+  height: 100dvh;
+  padding: 28px 24px;
+  overflow-y: auto;
+  background: #fffaf7;
+  border-right: 1px solid #f2cdd2;
+  box-shadow: 8px 0 24px #2a1f3320;
+  transform: translateX(-100%);
+  visibility: hidden;
+  transition: transform .25s ease, visibility 0s linear .25s;
+  z-index: 10;
+}
+
+.notifications-panel.open {
+  transform: translateX(0);
+  visibility: visible;
+  transition: transform .25s ease, visibility 0s;
+}
+
+#notifications-panel h2 {
+  font-size: 22px;
+  margin: 0 0 16px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .notifications-panel {
+    transition: visibility 0s;
+  }
+}
+
 @media (max-width: 650px) {
+  .notifications-panel {
+    width: 100%;
+  }
+
   .event-card-large .event-save {
     top: 18px;
     right: 18px;
