@@ -1,9 +1,13 @@
 import TagLink from "./TagLink";
 import type { EventideEvent } from "../interfaces/interfaces";
+<<<<<<< HEAD
 import SaveIcon from '../assets/images/save-icon.svg?react';
 import SaveIconFilled from '../assets/images/save-icon-filled.svg?react';
 import HeartIcon from '../assets/images/heart-icon.svg?react';
 import HeartIconFilled from '../assets/images/heart-icon-filled.svg?react';
+=======
+import { useAnalytics } from "../hooks/useAnalytics";
+>>>>>>> origin/milestone-3
 
 import { formatEventDate } from "../utils/eventDate";
 import { useAuth } from "../contexts/AuthContext";
@@ -33,13 +37,21 @@ export default function DiscoverEventCard({
 }: Props) {
   const { session } = useAuth();
   const navigate = useNavigate();
+  const { logEventClick } = useAnalytics();
+  const handleEventOpen = (event: EventideEvent) => {
+    onOpen(event);
+
+    void logEventClick(Number(event.id)).catch((error) => {
+      console.error("Failed to track event click:", error);
+    });
+  };
   return (
     <article
       className={`event-card ${compact ? "event-card-compact" : "event-card-large"}`}
     >
       <button
         className="event-card-open"
-        onClick={() => onOpen(event)}
+        onClick={() => handleEventOpen(event)}
         aria-label={`View ${event.title}`}
       >
         {event.imageUrl ? (
