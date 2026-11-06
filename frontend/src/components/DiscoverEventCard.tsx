@@ -1,13 +1,10 @@
 import TagLink from "./TagLink";
 import type { EventideEvent } from "../interfaces/interfaces";
-<<<<<<< HEAD
 import SaveIcon from '../assets/images/save-icon.svg?react';
 import SaveIconFilled from '../assets/images/save-icon-filled.svg?react';
 import HeartIcon from '../assets/images/heart-icon.svg?react';
 import HeartIconFilled from '../assets/images/heart-icon-filled.svg?react';
-=======
 import { useAnalytics } from "../hooks/useAnalytics";
->>>>>>> origin/milestone-3
 
 import { formatEventDate } from "../utils/eventDate";
 import { useAuth } from "../contexts/AuthContext";
