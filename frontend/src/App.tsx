@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 import DiscoverPage from "./pages/DiscoverPage";
 import YourEventsPage from "./pages/YourEventsPage";
@@ -11,6 +11,7 @@ import OnboardingPage from "./pages/OnboardingPage";
 import ProfilePage from "./pages/ProfilePage";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { PreferencesProvider } from "./contexts/PreferencesContext";
+import { SavedEventsProvider } from "./contexts/SavedEventsContext";
 import useEvents from "./hooks/useEvents";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import type { BrowseState, EventideTag } from "./interfaces/interfaces";
@@ -26,6 +27,7 @@ function SessionRoutes() {
 }
 
 function EventRoutes() {
+  const { session } = useAuth();
   const { events, loading, error, retry } = useEvents();
   const [calendarView, setCalendarView] = useState<"list" | "calendar">("list");
   const [calendarMonth, setCalendarMonth] = useState<Date | null>(null);
@@ -43,7 +45,19 @@ function EventRoutes() {
         ? current.filter((value) => value.id !== tag.id)
         : [...current, tag],
     );
-  const [saved, setSaved] = useState<number[]>([]);
+  const storageKey = session ? `eventide:saved:${session.user.id}` : null;
+  const [saved, setSaved] = useState<number[]>(() => {
+    try {
+      return storageKey
+        ? JSON.parse(localStorage.getItem(storageKey) ?? "[]")
+        : [];
+    } catch {
+      return [];
+    }
+  });
+  useEffect(() => {
+    if (storageKey) localStorage.setItem(storageKey, JSON.stringify(saved));
+  }, [storageKey, saved]);
   const onSave = (id: number) =>
     setSaved((current) =>
       current.includes(id)
@@ -63,6 +77,7 @@ function EventRoutes() {
     setBrowse,
   };
   return (
+    <SavedEventsProvider events={events} saved={saved}>
       <Routes>
         <Route path="/" element={<DiscoverPage {...eventProps} />} />
         <Route
@@ -85,6 +100,7 @@ function EventRoutes() {
         <Route path="/onboarding" element={<OnboardingPage />} />
         <Route path="/profile" element={<ProfilePage />} />
       </Routes>
+    </SavedEventsProvider>
   );
 }
 
