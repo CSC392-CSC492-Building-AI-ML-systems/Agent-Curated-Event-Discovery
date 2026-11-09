@@ -156,6 +156,7 @@ function EventRoutes() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/onboarding" element={<OnboardingPage />} />
         <Route path="/profile" element={<ProfilePage route="settings" />} />
+        <Route path="/profile/availability" element={<ProfilePage route="availability" />} />
         {/* <Route path="/likes" element={<ProfilePage route="likes" />} />
         <Route path="/saves" element={<ProfilePage route="saves" />} /> */}
         <Route path="/saves" element={<YourEventsPage {...likedSavedEventProps} route="saves"/>}/>

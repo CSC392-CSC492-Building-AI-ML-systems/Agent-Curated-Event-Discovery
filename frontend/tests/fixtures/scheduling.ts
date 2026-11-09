@@ -1,4 +1,5 @@
 import type { BrowserContext, Page } from "@playwright/test";
+import type { WeeklyAvailability } from "../../src/api/availabilityTypes";
 import type { ApiEvent } from "../../src/api/types";
 
 const TEST_TIME = new Date("2026-11-01T12:00:00Z");
@@ -24,14 +25,14 @@ export function makeEvent(id: number, overrides: Partial<ApiEvent> = {}): ApiEve
   };
 }
 
-export async function setupScheduling(page: Page, context: BrowserContext) {
+function schedulingSession(userId = "00000000-0000-4000-8000-000000000001", email = "test@example.com") {
   const encode = (value: unknown) => Buffer.from(JSON.stringify(value)).toString("base64url");
   const expires = Math.floor(TEST_TIME.getTime() / 1000) + 3600;
   const user = {
-    id: "00000000-0000-4000-8000-000000000001",
+    id: userId,
     aud: "authenticated",
     role: "authenticated",
-    email: "test@example.com",
+    email,
     app_metadata: {},
     user_metadata: {},
     identities: [],
@@ -45,6 +46,12 @@ export async function setupScheduling(page: Page, context: BrowserContext) {
     expires_at: expires,
     user,
   };
+  return session;
+}
+
+export async function setupScheduling(page: Page, context: BrowserContext) {
+  const encode = (value: unknown) => Buffer.from(JSON.stringify(value)).toString("base64url");
+  const session = schedulingSession();
   await page.clock.install({ time: TEST_TIME });
   await context.addCookies([{
     name: "sb-onboarding-test-auth-token",
@@ -67,10 +74,38 @@ export async function setupScheduling(page: Page, context: BrowserContext) {
     subscriptionRequests: [] as string[],
     failSubscriptionRead: false,
     failSubscriptionWrite: false,
+    availability: new Map<string, WeeklyAvailability>(),
+    availabilityRequests: [] as { method: string; userId: string; body?: WeeklyAvailability }[],
+    failAvailabilityRead: false,
+    failAvailabilityWrite: false,
   };
+  await page.route("https://onboarding-test.supabase.co/auth/v1/**", async route => {
+    if (route.request().url().includes("/logout")) return route.fulfill({ status: 204 });
+    const email = route.request().postDataJSON()?.email;
+    return route.fulfill({ json: email === "b@example.com"
+      ? schedulingSession("00000000-0000-4000-8000-000000000002", email)
+      : schedulingSession() });
+  });
   await page.route("**/test-api/**", async route => {
     const request = route.request();
     const path = new URL(request.url()).pathname.replace("/test-api", "");
+    if (path === "/users/me/availability") {
+      const token = request.headers().authorization?.replace("Bearer ", "");
+      if (!token) return route.fulfill({ status: 401 });
+      const userId = JSON.parse(Buffer.from(token.split(".")[1], "base64url").toString()).sub as string;
+      const method = request.method();
+      const body = method === "PUT" ? request.postDataJSON() as WeeklyAvailability : undefined;
+      state.availabilityRequests.push({ method, userId, body });
+      if (method === "GET") {
+        return state.failAvailabilityRead
+          ? route.fulfill({ status: 500, json: { detail: "Schedule unavailable. Please retry." } })
+          : route.fulfill({ json: state.availability.get(userId) ?? { windows: [] } });
+      }
+      if (method !== "PUT") return route.fulfill({ status: 405 });
+      if (state.failAvailabilityWrite) return route.fulfill({ status: 500, json: { detail: "Schedule save failed. Please retry." } });
+      state.availability.set(userId, structuredClone(body!));
+      return route.fulfill({ json: body });
+    }
     if (path === "/users/me/calendar-subscription") {
       if (!request.headers().authorization) return route.fulfill({ status: 401 });
       const method = request.method();

@@ -188,3 +188,25 @@ test("preference-read errors show retry rather than an incomplete-onboarding pro
   await page.getByRole("button", { name: "Retry", exact: true }).click();
   await expect(page.getByRole("link", { name: "Start", exact: true })).toBeVisible();
 });
+
+test("profile panel keeps its dimensions while preferences load", async ({ page, context }) => {
+  const server = await mockBackend(page);
+  server.profiles.set(USER_A, { age_group: "30_39", budget: "under_25", interest_tag_ids: [7, 23], onboarding_completed: true });
+  await signIn(context);
+  let release!: () => void;
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  await page.route("**/test-api/users/me/preferences", async route => {
+    await gate;
+    return route.fallback();
+  });
+  await page.goto("/profile");
+  await expect(page.getByText("Loading preferences…", { exact: true })).toBeVisible();
+  await page.evaluate(() => document.fonts.ready);
+  const panel = page.locator(".profile-settings-content");
+  const loadingBounds = (await panel.boundingBox())!;
+  release();
+  await expect(page.getByRole("link", { name: "Edit preferences", exact: true })).toBeVisible();
+  const readyBounds = (await panel.boundingBox())!;
+  expect(Math.abs(loadingBounds.width - readyBounds.width)).toBeLessThan(1);
+  expect(Math.abs(loadingBounds.height - readyBounds.height)).toBeLessThan(1);
+});

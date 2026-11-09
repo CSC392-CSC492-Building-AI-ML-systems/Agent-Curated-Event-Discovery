@@ -9,6 +9,7 @@ import HeartIconFilled from '../assets/images/heart-icon-filled.svg?react';
 import SettingIcon from '../assets/images/setting-icon.svg?react';
 import SettingIconFilled from '../assets/images/setting-icon-filled.svg?react';
 import CalendarIcon from '../assets/images/calendar-icon.svg?react';
+import { Clock } from "lucide-react";
 
 export default function NavBar({ savedCount }: { savedCount?: number }) {
   const location = useLocation();
@@ -78,15 +79,21 @@ export function Header({ savedCount }: { savedCount?: number }) {
 
 export function ProfileNavBar ({ route }: { route: string }) {
   return <div>
-            <nav aria-label="Main navigation" className="profile-navbar">
-              <NavLink to="/profile">
+            <nav aria-label="Profile navigation" className="profile-navbar">
+              <NavLink to="/profile" end aria-label="Profile settings" title="Profile settings">
                 {route == "settings" ? <SettingIconFilled className="setting-icon"/>: <SettingIcon className="setting-icon"/> }
              </NavLink>
-              <NavLink to="/likes">
+              <NavLink to="/likes" aria-label="Liked events" title="Liked events">
                 {route == "likes" ? <HeartIconFilled className="heart-icon"/>: <HeartIcon className="heart-icon"/> }
               </NavLink>
-              <NavLink to="/saves">
+              <NavLink to="/saves" aria-label="Saved events" title="Saved events">
                 {route == "saves" ? <SaveIconFilled className="save-icon"/>: <SaveIcon className="save-icon"/> }
+              </NavLink>
+              <NavLink to="/calendar" aria-label="Your Calendar" title="Your Calendar">
+                <CalendarIcon width="35px" height="35px" aria-hidden="true" />
+              </NavLink>
+              <NavLink to="/profile/availability" aria-label="Availability" title="Availability">
+                <Clock size={35} strokeWidth={2} aria-hidden="true" />
               </NavLink>
             </nav>
           </div>

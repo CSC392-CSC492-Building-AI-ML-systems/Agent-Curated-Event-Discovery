@@ -331,3 +331,18 @@ CALENDAR_FEED_BASE_URL=http://localhost:8000
 ```with cte as (select id, name, startdate, enddate, locationname, inserteddate, row_number() over (partition by name, startdate, enddate, locationname order by inserteddate desc) as rn from togatherevent)
 delete from togatherevent using cte where togatherevent.id = cte.id and rn > 1;
 ```
+
+### Weekly availability contract
+
+The availability selector uses Sunday=0 through Saturday=6, with Toronto-local
+30-minute ranges and exclusive end times. Adjacent selections merge into ranges;
+separate selections remain separate. The frontend and backend contract, examples,
+and recommendation handoff are documented in [docs/weekly-availability.md](docs/weekly-availability.md).
+The storage migration is `backend/database/migrations/004_user_availability.sql`;
+apply it in Supabase after team approval. Authenticated
+`GET /users/me/availability` reads ranges and `PUT /users/me/availability`
+replaces them atomically. Both return `{"windows": [...]}`; an empty array clears
+the schedule preference. Restart the backend for the new routes. Profile's
+Availability editor restores saved ranges and submits them through Save schedule,
+with loading, saving, confirmation, and retry states. Recommendation integration
+is the remaining step; empty schedules add no availability preference.

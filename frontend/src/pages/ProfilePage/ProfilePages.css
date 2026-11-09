@@ -6,6 +6,41 @@
     justify-content: center;
 }
 
+.availability-content {
+    min-width: 0;
+}
+
+.availability-feedback {
+    display: flow-root;
+    min-height: calc(1lh + 32px);
+}
+
+.profile-settings-content {
+    flex: 1 1 760px;
+    width: 100%;
+    min-width: 0;
+    min-height: 480px;
+    align-self: flex-start;
+}
+
+.profile-navbar a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: 8px;
+}
+
+.profile-navbar a[aria-current="page"] {
+    color: #000;
+}
+
+.profile-navbar a:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+
 .profile-navbar {
     box-sizing: border-box;
     margin: 20px 0;
@@ -14,4 +49,24 @@
     height: 100%;
     gap: 20px;
     align-items: center;
+}
+
+@media (max-width: 600px) {
+    .profile-settings-content {
+        min-height: 600px;
+    }
+
+    .profile-availability-wrap {
+        flex-direction: column;
+        padding: 0;
+        margin-top: 24px;
+    }
+
+    .profile-availability-wrap .profile-navbar {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 12px;
+        margin: 0;
+    }
 }

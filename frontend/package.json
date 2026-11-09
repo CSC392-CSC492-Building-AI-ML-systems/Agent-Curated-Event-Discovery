@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
+    "test:availability": "playwright test --config playwright.availability.config.ts",
     "test:onboarding": "playwright test --config playwright.onboarding.config.ts",
     "test:scheduling": "playwright test --config playwright.scheduling.config.ts"
   },
