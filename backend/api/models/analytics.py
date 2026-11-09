@@ -1,11 +1,10 @@
 from uuid import UUID
 
 from sqlalchemy import ForeignKey, Uuid, Integer, Text, DateTime, Float
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column
 from datetime import datetime
+from .base import Base
 
-class Base(DeclarativeBase):
-    pass
 
 class EventClicked(Base):
     __tablename__ = "event_clicked"
@@ -43,7 +42,7 @@ class SearchPerformed(Base):
 class EventTrending(Base):
     __tablename__ = "event_trending"
     event_id: Mapped[int] = mapped_column(ForeignKey("event.id", ondelete="CASCADE"), primary_key=True)
-    score: Mapped[int] = mapped_column(Integer, nullable=False)
+    score: Mapped[float] = mapped_column(Float, nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
 
 class EventPopular(Base):

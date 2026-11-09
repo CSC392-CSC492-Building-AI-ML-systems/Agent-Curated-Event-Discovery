@@ -2,8 +2,7 @@ from uuid import UUID
 
 from sqlalchemy import Boolean, CheckConstraint, ForeignKey, String, Uuid
 from sqlalchemy.orm import Mapped, mapped_column
-
-from .event import Base
+from .base import Base
 
 
 class UserPreferences(Base):

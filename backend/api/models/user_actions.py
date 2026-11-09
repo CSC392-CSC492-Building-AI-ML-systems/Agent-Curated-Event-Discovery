@@ -2,7 +2,8 @@ from uuid import UUID
 from sqlalchemy import DateTime, ForeignKey, Uuid, Integer, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
-from .event import Base, Event
+from .base import Base
+from .event import Event
 
 class EventLiked(Base):
     __tablename__ = "event_liked"
