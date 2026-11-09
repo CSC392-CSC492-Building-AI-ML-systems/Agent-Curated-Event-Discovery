@@ -36,7 +36,7 @@ async def put_create(
     db: AsyncSession = Depends(get_db)
 ):
     # creates the user's preferences row in table to track onboarding status
-    user_id = user["sub"]
+    user_id = UUID(user["sub"])
     await db.execute(insert(UserPreferences).values(user_id=user_id, onboarding_completed=False))
     await db.commit()
     return { id: user_id } 
@@ -322,3 +322,8 @@ async def delete_save(
         raise HTTPException(status_code=500, detail="Unable to unsave event; please retry") from None
 
     return LikeOrSaveResponse(message="Successfully unsaved", id=payload.id)
+
+# CONTEXT INFORMATION
+@router.put("/me/location")
+async def put_location():
+    pass
