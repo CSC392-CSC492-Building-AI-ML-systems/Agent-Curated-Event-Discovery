@@ -1,6 +1,3 @@
-// src/pages/EventPage.tsx
-
-import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import TagLink from "../../components/TagLink";
 import { Header } from "../../components/NavBar";
@@ -58,18 +55,14 @@ export default function EventPage({ saved, onSave }: Props) {
   const isRecommended = location.state?.isRecommended === true;
   const navigate = useNavigate();
   const origin = location.state?.origin;
-  const returnPath = origin?.path ? "/your-events" : "/";
-  const returnLabel =
-    returnPath === "/your-events" ? "Your Events" : "Discover";
   const { session, loading: checkingSession } = useAuth();
 
   const token = session?.access_token;
 
-  const { event, loading, error, retry } = useEvent(id);
+  const { event, loading, error } = useEvent(id);
 
   function onReject(id: number) {
     if (!token) return;
-    // The rejection is done instantly upon button click
     void rejectRecommendedEvent(id, token).catch(() => {});
   }
 

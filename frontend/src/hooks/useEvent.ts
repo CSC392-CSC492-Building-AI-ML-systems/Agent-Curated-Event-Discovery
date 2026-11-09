@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getEvent } from "../api/events";
 import { toEventideEvent } from "../api/adapters";
-import type { EventideEvent, EventideTag } from "../interfaces/interfaces";
+import type { EventideEvent } from "../interfaces/interfaces";
 
 type RequestState =
   | { status: "idle" }
