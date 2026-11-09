@@ -30,6 +30,16 @@ def get_active_user(user: dict = Depends(get_current_user)):
 
 
 # USER PREFERENCES
+@router.put("/me/create", response_model=PreferencesResponse)
+async def put_create(
+    user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    # creates the user's preferences row in table to track onboarding status
+    user_id = user["sub"]
+    await db.execute(insert(UserPreferences).values(user_id=user_id, onboarding_completed=False))
+    await db.commit()
+    return { id: user_id } 
 
 @router.get("/me/preferences", response_model=PreferencesResponse)
 async def get_preferences(
@@ -52,8 +62,7 @@ async def get_preferences(
         interest_tag_ids=[tag_id for _, tag_id in rows if tag_id is not None],
         onboarding_completed=preferences.onboarding_completed,
     )
-
-
+    
 @router.put("/me/preferences", response_model=PreferencesResponse)
 async def put_preferences(
     payload: PreferencesUpdate,

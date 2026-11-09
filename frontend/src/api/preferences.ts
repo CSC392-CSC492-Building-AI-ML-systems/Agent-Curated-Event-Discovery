@@ -6,6 +6,14 @@ export type Budget = "free" | "under_25" | "25_to_50" | "50_to_100" | "100_to_20
 export type PreferencesInput = { age_group: AgeGroup | null; budget: Budget | null; interest_tag_ids: number[] };
 export type Preferences = PreferencesInput & { onboarding_completed: boolean };
 
+
+export function createUser(accessToken: string) {
+  return requestJson<{ user_id: number }>(
+    "/users/me/create",
+    { method: "PUT", accessToken },
+  );
+}
+
 export function getPreferences(accessToken: string, options: RequestOptions = {}) {
   return requestJson<Preferences>("/users/me/preferences", { ...options, accessToken: accessToken });
 }

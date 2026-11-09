@@ -3,10 +3,13 @@
 import { createClient } from "../lib/supabase/client";
 import { useState } from "react";
 import { GoogleLoginButton as GoogleButton } from "react-social-login-buttons";
+import { createUser } from "../api/preferences";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function GoogleLoginButton() {
   const [loading, setLoading] = useState(false);
-
+  const { session } = useAuth();
+  const token = session?.access_token;
   const handleGoogleLogin = async () => {
     setLoading(true);
 
@@ -22,6 +25,9 @@ export default function GoogleLoginButton() {
     if (error) {
       console.error("Google login failed:", error.message);
       setLoading(false);
+    }else{
+      // login succeeded
+      createUser(token??"")
     }
   };
   return (

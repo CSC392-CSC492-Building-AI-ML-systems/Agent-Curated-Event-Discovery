@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import "./App.css";
 import DiscoverPage from "./pages/DiscoverPage";
 import YourEventsPage from "./pages/YourEventsPage/YourEventsPage";
@@ -10,14 +10,15 @@ import OnboardingPage from "./pages/OnboardingPage";
 import ProfilePage from "./pages/ProfilePage/ProfilePage";
 
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
-import { PreferencesProvider } from "./contexts/PreferencesContext";
+import { PreferencesProvider, usePreferences, } from "./contexts/PreferencesContext";
 import useEvents, { useEventsLiked, useEventsSaved } from "./hooks/useEvents";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import type { BrowseState, EventideTag } from "./interfaces/interfaces";
 import { eventLiked, eventSaved } from "./api/user_actions";
 import { createClient } from "./lib/supabase/client";
 import { ApiError } from "./api/client";
 import Popup from "./components/Popup";
+import { useNavigate } from "react-router-dom";
 
 function App() {
   return <AuthProvider><PreferencesProvider><BrowserRouter><SessionRoutes /></BrowserRouter></PreferencesProvider></AuthProvider>;
@@ -30,6 +31,10 @@ function SessionRoutes() {
 }
 
 function EventRoutes() {
+  const navigate = useNavigate();
+  const pathname = useLocation()
+  
+  const preferences = usePreferences().preferences
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
   const handlePopupClose = useCallback(() => setShowPopup(false), []);
@@ -146,6 +151,13 @@ function EventRoutes() {
     browse,
     setBrowse,
   };
+
+
+  useEffect(() => {
+  if (preferences?.onboarding_completed === false && pathname !== "/onboarding") {
+    navigate("/onboarding", { replace: true });
+  }
+}, [preferences, pathname, navigate]);
   return (
     <>
       <Routes>
