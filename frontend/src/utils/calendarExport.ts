@@ -48,7 +48,7 @@ function toCalendarEntry(event: DatedEvent): EventAttributes {
 
 export async function createCalendarExport(events: readonly EventideEvent[]) {
   const dated = events.filter(hasExportableDate);
-  if (!dated.length) throw new Error("No saved events have a start date to export.");
+  if (!dated.length) throw new Error("No calendar events have a start date to export.");
 
   // Keep the formatter and its dependencies out of the initial page download.
   const { createEvents } = await import("ics");

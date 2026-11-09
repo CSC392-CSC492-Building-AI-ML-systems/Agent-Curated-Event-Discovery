@@ -57,5 +57,5 @@ test("ICS excludes undated events without guessing unknown end times or location
   expect(content.match(/BEGIN:VEVENT/g)).toHaveLength(1);
   expect(content).not.toContain("DTEND");
   expect(content).not.toContain("LOCATION");
-  await expect(createCalendarExport([{ ...base, startDate: undefined }])).rejects.toThrow("No saved events");
+  await expect(createCalendarExport([{ ...base, startDate: undefined }])).rejects.toThrow("No calendar events");
 });

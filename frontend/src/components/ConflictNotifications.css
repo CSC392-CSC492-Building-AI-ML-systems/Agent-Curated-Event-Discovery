@@ -20,8 +20,13 @@
   animation: conflict-lifetime ease both;
 }
 
+.conflict-bubble > strong {
+  font-size: 1.25rem;
+}
+
 .conflict-bubble p {
   margin: 0.4rem 0 0;
+  color: #000;
 }
 
 .conflict-summary,

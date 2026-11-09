@@ -59,16 +59,66 @@ export async function setupScheduling(page: Page, context: BrowserContext) {
     })),
     saved: new Set([1]),
     failSave: false,
+    calendar: new Set([1]),
+    failCalendar: false,
+    failCalendarRead: false,
+    subscription: { enabled: false, created_at: null as string | null },
+    subscriptionVersion: 0,
+    subscriptionRequests: [] as string[],
+    failSubscriptionRead: false,
+    failSubscriptionWrite: false,
   };
   await page.route("**/test-api/**", async route => {
     const request = route.request();
     const path = new URL(request.url()).pathname.replace("/test-api", "");
+    if (path === "/users/me/calendar-subscription") {
+      if (!request.headers().authorization) return route.fulfill({ status: 401 });
+      const method = request.method();
+      state.subscriptionRequests.push(method);
+      if (method === "GET") {
+        return state.failSubscriptionRead
+          ? route.fulfill({ status: 500, json: { detail: "Subscription unavailable" } })
+          : route.fulfill({ json: state.subscription });
+      }
+      if (state.failSubscriptionWrite) {
+        return route.fulfill({ status: 500, json: { detail: "Subscription update failed. Please retry." } });
+      }
+      if (method === "DELETE") {
+        state.subscription = { enabled: false, created_at: null };
+        return route.fulfill({ status: 204 });
+      }
+      state.subscription = { enabled: true, created_at: TEST_TIME.toISOString() };
+      const token = String(++state.subscriptionVersion).padStart(43, "x");
+      return route.fulfill({ json: {
+        ...state.subscription,
+        subscription_url: `http://127.0.0.1:5178/test-api/calendar/feeds/${token}/eventide-events.ics`,
+      } });
+    }
     if (path === "/events") return route.fulfill({ json: state.events });
     if (path === "/tags" || path === "/users/me/likes") {
       return route.fulfill({ json: [] });
     }
     if (path === "/users/me/saves") {
       return route.fulfill({ json: state.events.filter(event => state.saved.has(event.id)) });
+    }
+    if (path === "/users/me/calendar") {
+      if (request.method() === "GET") {
+        if (state.failCalendarRead) {
+          return route.fulfill({ status: 500, json: { detail: "Calendar unavailable" } });
+        }
+        const params = new URL(request.url()).searchParams;
+        const skip = Number(params.get("skip") ?? 0);
+        const limit = Number(params.get("limit") ?? 100);
+        const events = state.events.filter(event => state.calendar.has(event.id));
+        return route.fulfill({ json: events.slice(skip, skip + limit) });
+      }
+      if (state.failCalendar) {
+        return route.fulfill({ status: 500, json: { detail: "Calendar update failed. Please retry." } });
+      }
+      const { id } = request.postDataJSON();
+      if (request.method() === "DELETE") state.calendar.delete(id);
+      else state.calendar.add(id);
+      return route.fulfill({ json: { id, message: "Success" } });
     }
     if (path === "/users/me/preferences") {
       return route.fulfill({ json: {

@@ -45,7 +45,7 @@ export default function CalendarExportButton({ events }: { events: readonly Even
       {state.status === "error" && <p role="alert">{state.message}</p>}
       {state.status === "complete" && state.excludedCount > 0 && (
         <p role="status">
-          {state.excludedCount} saved {state.excludedCount === 1 ? "event was" : "events were"}
+          {state.excludedCount} calendar {state.excludedCount === 1 ? "event was" : "events were"}
           {" "}excluded because no start date is available.
         </p>
       )}

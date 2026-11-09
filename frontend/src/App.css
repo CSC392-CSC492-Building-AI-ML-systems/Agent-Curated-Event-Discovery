@@ -520,6 +520,11 @@ label {
   color: white;
 }
 
+.discover-dialog .pill:hover:not(:disabled),
+.discover-dialog .pill:focus-visible:not(:disabled) {
+  background: #ffe3e6;
+}
+
 .chip {
   border: 0;
   background: #b9dcf3;
@@ -759,6 +764,10 @@ label {
   justify-content: center;
   align-items: center;
   height: 20px;
+}
+
+:is(.event-like, .event-save)[aria-pressed="false"]:is(:hover, :focus-visible):not(:disabled) svg {
+  fill: #ffe3e6;
 }
 
 .event-card-large .event-card-open {

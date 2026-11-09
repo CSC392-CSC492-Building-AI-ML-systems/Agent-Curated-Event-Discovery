@@ -68,6 +68,106 @@ The backend allows `http://localhost:5173` and `http://127.0.0.1:5173` by defaul
 For another frontend port, set `FRONTEND_ORIGINS` to a comma-separated list of
 allowed origins when starting the backend. Restart the backend after changes.
 
+### Calendar events
+
+Saved events and calendar events are independent. The bookmark keeps an event
+in **Saved**; the **+** button beside it adds the event to **Your Calendar** and
+becomes **−** to remove it. Removing a bookmark does not remove a calendar entry,
+and removing a calendar entry does not remove its bookmark.
+
+Before using the calendar API, apply
+`backend/database/migrations/002_event_calendar.sql` in the Supabase SQL editor,
+then restart the backend. The migration creates `public.event_calendar` and
+does not copy or modify existing saved events. Existing bookmarks stay saved;
+calendar membership starts empty. FastAPI's database connection needs access
+to this table and must bypass its RLS, as with the preferences tables.
+
+The authenticated API is:
+
+- `GET /users/me/calendar?skip=0&limit=100` — list the current user's calendar events.
+- `PUT /users/me/calendar` with `{ "id": 123 }` — add an event, idempotently.
+- `DELETE /users/me/calendar` with `{ "id": 123 }` — remove an event, idempotently.
+
+All requests require `Authorization: Bearer <Supabase access token>`; the user ID
+comes from the verified token. Calendar actions do not affect like/save counts.
+Calendar membership persists across reloads. Failed requests leave the calendar
+unchanged and display an error. The calendar screen supports retry if loading
+fails.
+
+Conflict notifications compare calendar entries only, after a successful addition.
+ICS export downloads calendar entries only as `eventide-events.ics`.
+
+Validate with `npm run test:scheduling` from `frontend`, and
+`PYTHONPATH=backend python -m unittest discover -s backend/tests -p test_calendar.py -v`
+from the project root. Tests use isolated data and do not apply the migration to
+the shared database.
+
+### iCal subscriptions
+
+**Subscribe to calendar** beside **Export events** opens the subscription dialog.
+It can create a private link, copy it, or disable the subscription with
+confirmation. To generate a new link, disable the subscription and enable it again. The feed contains **calendar entries**, not bookmarks or
+external Google appointments. The existing download remains a one-time snapshot.
+
+Setup, after the tables are approved:
+
+1. Install the backend dependencies with `python -m pip install -r backend/requirements.txt`.
+   The feed formatter uses `icalendar==7.3.0`.
+2. Apply `002_event_calendar.sql`, then
+   `backend/database/migrations/003_calendar_subscription.sql` in Supabase.
+   The latter creates `public.calendar_subscription`; only a SHA-256 hash of
+   each user's randomly generated feed token is stored. These scripts are not
+   applied automatically.
+3. Set `CALENDAR_FEED_BASE_URL=http://localhost:8000` in the root `.env` for local
+   testing (this is also the default). For external subscriptions, use the
+   public HTTPS backend URL, including an API path prefix if applicable.
+4. Restart the backend. No Google OAuth credentials or Google API keys are needed.
+
+Authenticated subscription-management endpoints:
+
+- `GET /users/me/calendar-subscription` returns `{ "enabled": false, "created_at": null }`
+  or the active subscription's status and creation time. It never returns a token.
+- `POST /users/me/calendar-subscription` creates or replaces the link, returning
+  `enabled`, `created_at`, and `subscription_url`. Replacement revokes the old
+  link only after the transaction succeeds.
+- `DELETE /users/me/calendar-subscription` disables it and returns HTTP 204.
+
+These management endpoints require a Supabase user access token. The private
+`GET /calendar/feeds/{token}/eventide-events.ics` endpoint instead uses the feed
+token in its URL, allowing calendar apps to fetch it without a login cookie or
+Supabase session. Invalid/revoked links return 404. Empty calendars return valid
+ICS; database failures return 503 rather than an empty feed. Feed responses are
+not cached by Eventide. Calendar apps may still retain and refresh their own
+copies on their own schedules.
+
+Copy a generated link before closing the dialog. The raw token is not stored,
+so after reopening the dialog, users can see status but must disable and re-enable
+the subscription if they have lost the link. Existing subscribers must use the new link.
+Anyone with the link can read the feed. Revoking a link
+stops future access; it does not erase already downloaded copies. Uvicorn access
+logging redacts feed tokens; configure any external proxy/access logs to redact
+these paths too.
+
+The feed exports timed events in UTC using Toronto's timezone, date-only events
+as all-day entries with exclusive end dates, available venue information, and
+stable event IDs. Events without start dates are omitted. Known start times
+without end times are kept without guessing an end. Additions, source-event
+edits, and removals are reflected on the next feed request.
+
+Local validation:
+
+```bash
+PYTHONPATH=backend python -m unittest discover -s backend/tests -p 'test_calendar*.py' -v
+```
+
+Run `npm run test:scheduling` from `frontend` for calendar and subscription UI
+tests. These tests use isolated SQLite and mocked browser responses, not the
+shared Supabase database. Real Google/Apple/Outlook subscription testing is
+deferred until a publicly reachable HTTPS backend (or development tunnel) is
+available. Google cannot fetch localhost; on its desktop website, add the public
+feed via **Other calendars → + → From URL**. Refresh timing is controlled by the
+calendar app, so updates are not guaranteed to be immediate.
+
 ### User preferences API
 
 The backend now supports `GET /users/me`, `GET /users/me/preferences`, and
@@ -155,12 +255,6 @@ as the backend. Both providers fetch data only after a session is available;
 the page provides loading and retry states instead of guessing completion status
 when the preferences request fails.
 
-Isolated tests (SQLite storage and locally signed tokens; no Supabase access):
-
-```bash
-PYTHONPATH=backend python -m unittest discover -s backend/tests -p test_preferences.py -v
-```
-
 Browser integration tests use a separate Vite server with fake Supabase
 credentials and intercepted API responses, never live accounts or database
 writes. They cover reload persistence, account isolation, skips, saving/retry,
@@ -230,6 +324,7 @@ DATABASE_URL=
 DATABASE_URL_SYNC=
 TYPESAFE_API_KEY=
 SUPABASE_URL=
+CALENDAR_FEED_BASE_URL=http://localhost:8000
 ```
 
 ### SQL script for deduplication

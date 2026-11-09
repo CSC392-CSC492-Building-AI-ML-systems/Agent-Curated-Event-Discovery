@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Header, YourEventsNavBar } from "../../components/NavBar";
 import EventRequestState from "../../components/EventRequestState";
@@ -47,7 +47,7 @@ events,
     }else if (route === "saves") {
         return <SavesPage events={events} saved={saved} onSave={onSave} liked={liked} onLike={onLike}/>
     }else if (route === "calendar") {
-        return <CalendarPage events={events} saved={saved} onSave={onSave} liked={liked} onLike={onLike}/>
+        return <CalendarPage saved={saved} onSave={onSave} liked={liked} onLike={onLike}/>
     }
   }
   const location = useLocation();
@@ -58,10 +58,8 @@ events,
     return () => cancelAnimationFrame(frame);
   }, [location.key, location.state]);
   
-  const error = "";
-  if (errorLiked) error.concat(errorLiked);
-  if (errorLiked && errorSaved)error.concat("\n")
-  if (errorSaved) error.concat(errorSaved);
+  const error = route === "calendar" ? null : route === "likes" ? errorLiked : errorSaved;
+  const loading = route === "calendar" ? false : route === "likes" ? loadingLiked : loadingSaved;
 
   return (
     <div className="discover-page">
@@ -69,8 +67,8 @@ events,
         <Header savedCount={saved.length} />
         <main>
           <YourEventsNavBar route={route}/>
-          <EventRequestState loading={loadingLiked && loadingSaved} error={error} retry={()=>{retryLiked(accessToken??null);retrySaved(accessToken??null);}} />
-          {!(loadingLiked && loadingSaved) &&
+          <EventRequestState loading={loading} error={error} retry={()=>{retryLiked(accessToken??null);retrySaved(accessToken??null);}} />
+          {!(loading) &&
             !(error) &&
             routePage(route)
           }
