@@ -703,7 +703,7 @@ label {
 
 .event-card-large .event-card-copy h3 {
   -webkit-line-clamp: 1; 
-  width: 90%;
+  width: calc(100% - 90px);
   -webkit-line-clamp: 1;
 }
 
@@ -736,6 +736,7 @@ label {
   position: absolute;
   color: #d63a45 !important;
   font-size: 25px !important;
+  gap: 5px;
 }
 .event-card-large .event-actions {
   right: 20px;
@@ -760,6 +761,7 @@ label {
   justify-content: center;
   align-items: center;
   height: 20px;
+  padding: 0;
 }
 
 .event-reject {
@@ -840,7 +842,9 @@ label {
     padding: 0 8px;
     text-align: left;
   }
-
+  .event-card-large .event-card-copy h3 {
+    width: 100%;
+  }
   .event-card-large h3 {
     font-size: 25px;
   }

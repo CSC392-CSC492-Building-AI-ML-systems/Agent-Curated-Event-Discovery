@@ -1,4 +1,4 @@
-import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import EventideLogo from "./EventideLogo";
 import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
@@ -13,7 +13,6 @@ import CalendarIcon from '../assets/images/calendar-icon.svg?react';
 export default function NavBar({ savedCount }: { savedCount?: number }) {
   const location = useLocation();
   const { session } = useAuth();
-  const navigate = useNavigate();
   return (
     <div className="navbar">
       <nav aria-label="Main navigation">
