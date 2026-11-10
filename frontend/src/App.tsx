@@ -154,7 +154,7 @@ function EventRoutes() {
 
 
   useEffect(() => {
-  if (preferences?.onboarding_completed === false && pathname !== "/onboarding") {
+  if (preferences?.onboarding_completed === false && pathname.pathname !== "/onboarding") {
     navigate("/onboarding", { replace: true });
   }
 }, [preferences, pathname, navigate]);

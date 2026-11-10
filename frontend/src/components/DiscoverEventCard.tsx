@@ -92,7 +92,7 @@ export default function DiscoverEventCard({
             aria-pressed={liked}
             onClick={() => {if (session?.access_token) {onLike(event.id)} else {navigate("/login")}}}
           >
-            {liked? <HeartIconFilled color="#f6545c" className="icon"/>: <HeartIcon color="#f6545c" className="icon"/>}
+            {liked? <HeartIconFilled fill="#f6545c" stroke="#f6545c" className="icon"/>: <HeartIconFilled fill="white" stroke="#f6545c" className="icon"/>}
           </button>
           {!compact && event.likes > 0 && <p className="mini-text">{event.likes}</p>}
         </div>
@@ -102,7 +102,7 @@ export default function DiscoverEventCard({
           aria-pressed={saved}
           onClick={() => {if (session?.access_token) {onSave(event.id)} else {navigate("/login")}}}
         >
-          {saved? <SaveIconFilled color="#f6545c" className="icon"/>: <SaveIcon color="#f6545c" className="icon"/>}
+          {saved? <SaveIconFilled fill="#f6545c" stroke="#f6545c" className="icon"/>: <SaveIconFilled fill="white" stroke="#f6545c" className="icon"/>}
         </button>
         {onReject && (
           <button

@@ -10,7 +10,7 @@ import SettingIcon from '../assets/images/setting-icon.svg?react';
 import SettingIconFilled from '../assets/images/setting-icon-filled.svg?react';
 import CalendarIcon from '../assets/images/calendar-icon.svg?react';
 
-export default function NavBar({ savedCount }: { savedCount?: number }) {
+export default function NavBar() {
   const location = useLocation();
   const { session } = useAuth();
   return (
@@ -63,7 +63,7 @@ export function Header({ savedCount }: { savedCount?: number }) {
   return (
     <header className="discover-header">
       <EventideLogo />
-      <NavBar savedCount={savedCount} />{" "}
+      <NavBar/>{" "}
       <div className="header-account">
         {loading ? <span role="status">Checking login…</span> : session ? <>
           <Link className="discover-auth-button" to="/profile">Profile</Link>
