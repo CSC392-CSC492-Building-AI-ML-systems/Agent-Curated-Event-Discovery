@@ -54,6 +54,7 @@ export default function DiscoverEventCard({
           <img src={event.imageUrl} alt="" loading="lazy" />
         ) : (
           <span className="event-image-placeholder" aria-hidden="true">
+            {!compact?
             <div className="row tiny-gap" style={{position: "absolute", left: 10, top: 10}}>             
               { event.eighteenPlus? 
                 <span className="pill2invert">
@@ -65,7 +66,7 @@ export default function DiscoverEventCard({
                   ${event.price}
                 </span>: <></>
               }
-            </div>
+            </div>: <></>}
             ✦
           </span>
         )}
@@ -83,6 +84,19 @@ export default function DiscoverEventCard({
             </span>
           )}
         </div>
+        {compact?
+        <div className="row tiny-gap" style={{position: "absolute", right: 10, bottom: 10}}>             
+          { event.eighteenPlus? 
+            <span className="pill2invert" style={{fontSize: "11px", lineHeight: "11px"}}>
+              18+
+            </span>: <></>
+          }
+          { showPrice? 
+            <span className="pill2" style={{fontSize: "11px", lineHeight: "11px"}}>
+              ${event.price}
+            </span>: <></>
+          }
+        </div>: <></>}
       </button>
       {!compact && (
         <div className="event-card-footer">
