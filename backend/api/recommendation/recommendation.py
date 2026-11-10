@@ -8,15 +8,18 @@ from models.analytics import EventClicked, EventPopular, EventTrending
 from models.preferences import UserPreferences
 from models.recommendations import UserRecommendedEvent
 from typesafe_sdk import TypeSafeClient, Score
-def update_trends() -> None:
+
+def update_trends(number: int = 50) -> None:
     """
-    Update the 'trending' and 'popular' tables.
-    Popularity is calculated by weighted score with saves > likes > clicks.
+    Update the 'event_trending' and 'event_popular' tables with a given <number> of events.
+
+    Popularity is calculated by summing up all event saves, likes and clicks.
+    So popularity_score = saves*3 + likes*2 + clicks.
     Trending is calculated by the same weighted score as popularity but with an added 'recency bias', 
-    a decay function with a half-life of 3 days.
+    a decay function with a half-life of 3 days. 
+    So trending_score = sum(save*0.5^(age/3))*3 + sum(like*0.5^(age/3))*3 + sum(click*0.5^(age/3))*3
     """
     HALF_LIFE_DAYS = 3
-    NUM_EVENTS = 50 #only take 50 top events
 
     print("Starting updates...")
     with SessionLocal() as session:
@@ -42,13 +45,12 @@ def update_trends() -> None:
             )
             .group_by(interactions.c.event_id)
             .order_by(score.desc(), last_interaction.desc(), interactions.c.event_id)
-            .limit(NUM_EVENTS)
+            .limit(number)
         )
         
         stmt = insert(EventPopular).from_select(
             ["event_id", "score", "updated_at"], popularity_scores
-        )
-        
+        )        
         session.execute(delete(EventPopular))
         session.execute(stmt)
         
@@ -71,7 +73,7 @@ def update_trends() -> None:
             .group_by(interactions.c.event_id)
             .having(score > 0.1)   
             .order_by(score.desc(), last_interaction.desc(), interactions.c.event_id)
-            .limit(NUM_EVENTS)
+            .limit(number)
         )
 
         stmt = insert(EventTrending).from_select(
@@ -150,7 +152,6 @@ def retrieve(user_id: str, number: int=50, location: int=None) -> list[dict]:
     # LOW_DATA: weights when we don't know lots about the user - prioritise current trends
     WEIGHTS_LOW_DATA = {"trending": 0.3, "recency": 0.3, "tag": 0.3, "popularity": 0, "price": 0.1 } 
     WEIGHTS = {"tag": 0.4, "recency": 0.2, "trending": 0.1, "popularity": 0.1, "price": 0.1 } 
-    SCORES = {"trending": 0, "popularity": 0, "recency": 0, "price": 0, "tag": 0}
     filtered_events = (
         select(Event)
         .where(Event.enddate >= func.now(), Event.startdate < func.now() + text(f"INTERVAL '{INTERVAL} days'"))
@@ -315,3 +316,6 @@ def insert_recommendations_for_user(user_id: str, num_retrieved: int=50, num_ran
 if __name__ == "__main__":
     USER_ID = "6a383d0b-7fbf-481d-877a-607fb78fa8a2"
     insert_recommendations_for_user(USER_ID)
+
+    # Run update_trends() daily, to update event_popular and event_trending tables
+    # Run insert_recommendations_for_user(user_id) each time user tries to retrieve recommendations
