@@ -78,7 +78,6 @@
 }
 
 .onboarding-option { position: relative; grid-column: span 2; }
-.onboarding-options-age .onboarding-option:nth-of-type(5) { grid-column: 2 / span 2; }
 .onboarding-options-budget { grid-template-columns: repeat(6, minmax(0, 1fr)); max-width: 740px; width: 100%; align-self: center; }
 .onboarding-options-interests { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; max-width: 760px; align-self: center; }
 

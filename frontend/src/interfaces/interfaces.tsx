@@ -48,10 +48,12 @@ export interface EventideEvent {
   venue: EventideVenue;
   organizer?: EventideOrganizer | null;
   // Preserve the API's numeric or decimal-string representation.
-  price?: number | string | null;
+  price?: number | null;
   link: string;
   eighteenPlus: boolean;
   imageUrl?: string;
+  likes: number;
+  saves: number;
 }
 
 export interface EventideFilters {
@@ -69,6 +71,8 @@ export interface BrowseState {
   range: string;
   sort: string;
   tags: EventideTag[];
+  price: number[],
+  eighteenPlus: boolean;
 }
 
 export type EventRequestProps = {
@@ -81,6 +85,8 @@ export type EventPageProps = EventRequestProps & {
   events: EventideEvent[];
   saved: number[];
   onSave: (id: number) => void;
+  liked: number[];
+  onLike: (id: number) => void;
   followed: EventideTag[];
   onFollow: (tag: EventideTag) => void;
   browse: BrowseState;

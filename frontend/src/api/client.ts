@@ -36,7 +36,7 @@ function getErrorMessage(body: unknown, status: number): string {
 export async function requestJson<T>(
   path: string,
   { signal, method = "GET", body, accessToken }: RequestOptions & {
-    method?: "GET" | "PUT";
+    method?: "GET" | "PUT" | "DELETE";
     body?: unknown;
     accessToken?: string;
   } = {},

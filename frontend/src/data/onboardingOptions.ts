@@ -1,7 +1,7 @@
 import type { AgeGroup, Budget } from "../api/preferences";
 
 export const AGE_GROUPS = [
-  { value: "20_29", label: "20–29" }, { value: "30_39", label: "30–39" },
+  { value: "under_20", label: "Under 20" }, { value: "20_29", label: "20–29" }, { value: "30_39", label: "30–39" },
   { value: "40_49", label: "40–49" }, { value: "50_59", label: "50–59" },
   { value: "60_69", label: "60–69" }, { value: "70_79", label: "70–79" },
   { value: "80_plus", label: "80+" },

@@ -2,9 +2,17 @@ import { Link, NavLink, useLocation } from "react-router-dom";
 import EventideLogo from "./EventideLogo";
 import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
+import SaveIcon from '../assets/images/save-icon.svg?react';
+import SaveIconFilled from '../assets/images/save-icon-filled.svg?react';
+import HeartIcon from '../assets/images/heart-icon.svg?react';
+import HeartIconFilled from '../assets/images/heart-icon-filled.svg?react';
+import SettingIcon from '../assets/images/setting-icon.svg?react';
+import SettingIconFilled from '../assets/images/setting-icon-filled.svg?react';
+import CalendarIcon from '../assets/images/calendar-icon.svg?react';
 
-export default function NavBar({ savedCount }: { savedCount?: number }) {
+export default function NavBar() {
   const location = useLocation();
+  const { session } = useAuth();
   return (
     <div className="navbar">
       <nav aria-label="Main navigation">
@@ -18,9 +26,22 @@ export default function NavBar({ savedCount }: { savedCount?: number }) {
         >
           Discover
         </NavLink>
-        <NavLink to="/your-events">
-          Your Events{savedCount ? ` (${savedCount})` : ""}
+        {session?.access_token? <NavLink 
+          to="/saves"
+          className={
+            location.pathname === "/likes" || location.pathname === "/calendar"
+              ? "active"
+              : ""
+          }
+          >
+          Your Events
+        </NavLink>: 
+        <NavLink 
+          to="/login"
+          >
+          Your Events
         </NavLink>
+        }
       </nav>
     </div>
   );
@@ -42,7 +63,7 @@ export function Header({ savedCount }: { savedCount?: number }) {
   return (
     <header className="discover-header">
       <EventideLogo />
-      <NavBar savedCount={savedCount} />{" "}
+      <NavBar/>{" "}
       <div className="header-account">
         {loading ? <span role="status">Checking login…</span> : session ? <>
           <Link className="discover-auth-button" to="/profile">Profile</Link>
@@ -53,3 +74,36 @@ export function Header({ savedCount }: { savedCount?: number }) {
     </header>
   );
 }
+
+export function ProfileNavBar ({ route }: { route: string }) {
+  return <div>
+            <nav aria-label="Main navigation" className="profile-navbar">
+              <NavLink to="/profile">
+                {route == "settings" ? <SettingIconFilled className="setting-icon"/>: <SettingIcon className="setting-icon"/> }
+             </NavLink>
+              <NavLink to="/likes">
+                {route == "likes" ? <HeartIconFilled className="heart-icon"/>: <HeartIcon className="heart-icon"/> }
+              </NavLink>
+              <NavLink to="/saves">
+                {route == "saves" ? <SaveIconFilled className="save-icon"/>: <SaveIcon className="save-icon"/> }
+              </NavLink>
+            </nav>
+          </div>
+}
+
+export function YourEventsNavBar ({ route }: { route: string }) {
+  return <div>
+            <nav aria-label="Main navigation" className="your-events-switch">
+              <NavLink to="/saves" className={`pill ${route === "saves" ? "active" : ""}`} aria-pressed={route === "saves"}>
+                <SaveIcon width="20px" height="20px" color={route === "saves" ? "white": "black"}  className="save-icon"/><p>Saved</p>
+              </NavLink>
+              <NavLink to="/likes" className={`pill ${route === "likes" ? "active" : ""}`} aria-pressed={route === "likes"}>
+                <HeartIcon  width="20px" height="20px" color={route === "likes" ? "white": "black"} className="heart-icon"/><p>Liked</p>
+              </NavLink>
+              <NavLink to="/calendar" className={`pill ${route === "calendar" ? "active" : ""}`} aria-pressed={route === "calendar"}>
+                <CalendarIcon  width="20px" height="20px" color={route === "calendar" ? "white": "black"}  className="save-icon"/><p>Your Calendar</p>
+              </NavLink>
+            </nav>
+          </div>
+}
+

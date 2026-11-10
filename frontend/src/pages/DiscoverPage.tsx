@@ -10,11 +10,21 @@ import ForYouSection from "../components/ForYouSection";
 import type { EventideEvent, EventPageProps } from "../interfaces/interfaces";
 import "./DiscoverPage.css";
 import filterEvents from "../utils/filterEvents";
+import TagFilters from "../components/TagFilters";
+import { useSearchTracking } from "../hooks/useSearchTracking";
+import { INITIAL_FILTERS, MAX_PRICE, MIN_PRICE } from "../interfaces/constants";
+
+const handlePosition = (value: number) => {
+  const pct = (value - MIN_PRICE) / (MAX_PRICE - MIN_PRICE);
+  return `calc(${pct * 100}% + ${(0.5 - pct) * 18}px)`;
+};
 
 export default function DiscoverPage({
   events,
   saved,
   onSave,
+  liked, 
+  onLike,
   followed,
   browse,
   setBrowse,
@@ -22,11 +32,14 @@ export default function DiscoverPage({
   error,
   retry,
 }: EventPageProps) {
+  
   const { search, range, sort, tags } = browse;
   const location = useLocation();
-
+  const [tempMin, setTempMin] = useState(MIN_PRICE)
+  const [tempMax, setTempMax] = useState(MAX_PRICE)
   const [selected, setSelected] = useState<EventideEvent | null>(null);
   const [now] = useState(() => Date.now());
+  const { track } = useSearchTracking(search);
 
   useEffect(() => {
     const frame = requestAnimationFrame(() =>
@@ -53,6 +66,8 @@ export default function DiscoverPage({
       compact={compact}
       saved={saved.includes(event.id)}
       onSave={onSave}
+      liked={liked.includes(event.id)}
+      onLike={onLike}
       onOpen={setSelected}
     />
   );
@@ -61,10 +76,11 @@ export default function DiscoverPage({
     <div className="discover-page">
       <div className="discover-wrap">
         <Header savedCount={saved.length} />
-        <main>
+        <main className="column small-gap">
           <SearchBar
             search={search}
             setSearch={(search: string) => setBrowse({ ...browse, search })}
+            onSearch={() => track(search)}
             placeholder="Search events, topics, places"
           />
           <div className="discover-toolbar">
@@ -92,6 +108,34 @@ export default function DiscoverPage({
                 <option value="title">Title A–Z</option>
               </select>
             </label>
+            <label>
+              Price
+              <div className="column small-gap" style={{width: "120px"}}>
+                <div style={{display: "block"}}>
+                  <div className="discover-page-slider-progress">
+                    <div className="coloured-progress" style={{ left: `${((tempMin - MIN_PRICE) / (MAX_PRICE - MIN_PRICE)) * 100}%`, right: `${100 - ((tempMax - MIN_PRICE) / (MAX_PRICE - MIN_PRICE)) * 100}%` }}></div>
+                  </div>
+                  <div className="discover-page-slider-range">
+                    <span className="slider-price-label" style={{ left: handlePosition(tempMin) }}>
+                      ${tempMin}
+                    </span>
+                    <span className="slider-price-label" style={{ left: handlePosition(tempMax) }}>
+                      ${tempMax}
+                    </span>
+                    <input type="range" id="minPrice" min={MIN_PRICE} max={MAX_PRICE} list="tickmarks" value={tempMin} onChange={(event) => {if (Number(event.target.value) <= tempMax - 10) setTempMin(Number(event.target.value))}} onPointerUp={() => setBrowse({ ...browse, price: [tempMin, browse.price[1]] })} onKeyUp={() => setBrowse({ ...browse, price: [tempMin, browse.price[1]] })}/>
+                    <input type="range" id="maxPrice" min={MIN_PRICE} max={MAX_PRICE} list="tickmarks" value={tempMax} onChange={(event) => {if (Number(event.target.value) >= tempMin + 10) setTempMax(Number(event.target.value))}} onPointerUp={() => setBrowse({ ...browse, price: [browse.price[0], tempMax] })} onKeyUp={() => setBrowse({ ...browse, price: [browse.price[0], tempMax] })}/>
+                  </div>
+                </div>
+              </div>
+            </label>
+            <label>
+              Allow 18+
+              <label className="switch">
+                <input type="checkbox" onChange={(e)=>{setBrowse({...browse, eighteenPlus: e.target.checked})}}/>
+                <span className="slider round"></span>
+              </label>
+            </label>
+
             <div className="discover-view">
               <span className={"pill active"} aria-current="page">
                 List
@@ -106,37 +150,19 @@ export default function DiscoverPage({
             role="group"
             aria-label="Filter by topic"
           >
-            <span>Include</span>
-            {allTags.map((tag) => (
-              <button
-                key={tag.name}
-                className={`discover-chip ${tags.includes(tag) ? "active" : ""}`}
-                aria-pressed={tags.includes(tag)}
-                onClick={() =>
-                  setBrowse({
-                    ...browse,
-                    tags: browse.tags.some(
-                      (selectedTag) => selectedTag.id === tag.id,
-                    )
-                      ? browse.tags.filter(
-                          (selectedTag) => selectedTag.id !== tag.id,
-                        )
-                      : [...browse.tags, tag],
-                  })
-                }
-              >
-                #{tag.name}
-              </button>
-            ))}
+            <TagFilters
+              allTags={allTags}
+              selectedTags={tags}
+              setBrowse={setBrowse}
+            />
           </div>
 
-          <ForYouSection />
+          <ForYouSection liked={liked} onLike={onLike} saved={saved} onSave={onSave} />  {/*Need to display the star and its current state*/}
 
           <EventRequestState loading={loading} error={error} retry={retry} />
 
           {!loading && !error && (
             <>
-
               <section aria-labelledby="discover-upcoming">
                 <div className="discover-section-heading">
                   <h2 id="discover-upcoming">
@@ -173,12 +199,7 @@ export default function DiscoverPage({
                     <button
                       className="pill"
                       onClick={() => {
-                        setBrowse({
-                          search: "",
-                          tags: [],
-                          range: "all-dates",
-                          sort: "upcoming",
-                        });
+                        setBrowse(INITIAL_FILTERS);
                       }}
                     >
                       Browse all events
@@ -234,6 +255,8 @@ export default function DiscoverPage({
             event={selected}
             saved={saved.includes(selected.id)}
             onSave={onSave}
+            liked={liked.includes(selected.id)}
+            onLike={onLike}
             onClose={() => setSelected(null)}
           />
         )}

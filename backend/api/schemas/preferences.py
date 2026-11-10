@@ -2,7 +2,7 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-AgeGroup = Literal["20_29", "30_39", "40_49", "50_59", "60_69", "70_79", "80_plus"]
+AgeGroup = Literal["under_20", "20_29", "30_39", "40_49", "50_59", "60_69", "70_79", "80_plus"]
 Budget = Literal["free", "under_25", "25_to_50", "50_to_100", "100_to_200", "over_200"]
 TagId = Annotated[int, Field(strict=True, gt=0)]
 
