@@ -34,7 +34,7 @@ export default function NavBar() {
               : ""
           }
           >
-          Your Events{savedCount ? ` (${savedCount})` : ""}
+          Your Events
         </NavLink>: 
         <NavLink 
           to="/login"
