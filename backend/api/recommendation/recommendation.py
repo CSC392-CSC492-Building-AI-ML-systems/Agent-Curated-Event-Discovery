@@ -1,5 +1,6 @@
 from db.database_sync import SessionLocal
 from sqlalchemy import select, delete, func, union_all, literal, extract, text
+from sqlalchemy.orm import selectinload
 from sqlalchemy.dialects.postgresql import insert
 from models.event import Event, Tag, Venue
 from models.user_actions import EventLiked, EventSaved
@@ -275,8 +276,8 @@ def rank(events: list[dict], user_id: str, number: int) -> list[dict]:
             
             score = response.answers["event_attendance"]
             print(f"score: {score}, event: {event["id"]}")
-            if score.confidence > 0.5:
-                if score.score > 2:
+            if score.confidence >= 0.5:
+                if score.score >= 1.8:
                     scores.append((event["id"], score.score))
     except Exception as e:
         print(f"An error occurred while scoring events: {e}")
@@ -289,29 +290,28 @@ def rank(events: list[dict], user_id: str, number: int) -> list[dict]:
         results.append(result)
     return results
 
-def get_recommendations():
+def insert_recommendations_for_user(user_id: str, num_retrieved: int=50, num_ranked: int=10) -> None:
     """
-    Get <number> of ranked, top recommendations for each user. Populate the recommended_events table in PostgreSQL accordingly.
+    Get <number> of ranked, top recommendations for the user <user_id>. 
+    Populate the recommended_events table in PostgreSQL accordingly.
     """
-
-if __name__ == "__main__":
-    USER_ID = "6a383d0b-7fbf-481d-877a-607fb78fa8a2"
-    event_scores = retrieve(USER_ID, number=50)
+    event_scores = retrieve(USER_ID, number=num_retrieved)
     events = []
     with SessionLocal() as session:
-        for event in event_scores:
-            event_details = session.execute(select(Event.id, Event.name, Event.description,
-                                                   Event.startdate, Event.enddate, Event.price, Event.eighteenplus,
-                                                   Event.tags, Event.clicks, Event.likes, Event.saves)
-                                                   .where(Event.id == event["id"])).first()
-            events.append({"id": event_details[0], "name": event_details[1], "description": event_details[2],
-                           "startdate": event_details[3], "enddate": event_details[4], "price": event_details[5],
-                           "eighteenplus": event_details[6], "tags": event_details[7], "clicks": event_details[8],
-                           "likes": event_details[9], "saves": event_details[10]
-                           })
-        ranked = rank(events, USER_ID, number=10)
+        rows = session.scalars(select(Event).options(selectinload(Event.tags)).where(Event.id.in_([event["id"] for event in event_scores]))).all()
+        events = [{"id": event.id, "name": event.name, "description": event.description,
+                        "startdate": event.startdate, "enddate": event.enddate, "price": event.price,
+                        "eighteenplus": event.eighteenplus, "tags": event.tags, "clicks": event.clicks,
+                        "likes": event.likes, "saves": event.saves
+                        } for event in rows]
+        ranked = rank(events, USER_ID, number=num_ranked)
+        print(f"ranked: {ranked}")
         session.execute(delete(UserRecommendedEvent).where(UserRecommendedEvent.user_id == USER_ID))
         for event in ranked:
             stmt = insert(UserRecommendedEvent).values(user_id=USER_ID, event_id = event["id"])
             session.execute(stmt)
         session.commit()
+
+if __name__ == "__main__":
+    USER_ID = "6a383d0b-7fbf-481d-877a-607fb78fa8a2"
+    insert_recommendations_for_user(USER_ID)
