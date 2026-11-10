@@ -4,7 +4,7 @@ BEGIN;
 CREATE TABLE IF NOT EXISTS public.user_preferences (
     user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
     age_group TEXT CHECK (age_group IS NULL OR age_group IN
-        ('20_29', '30_39', '40_49', '50_59', '60_69', '70_79', '80_plus')),
+        ('under_20', '20_29', '30_39', '40_49', '50_59', '60_69', '70_79', '80_plus')),
     budget TEXT CHECK (budget IS NULL OR budget IN
         ('free', 'under_25', '25_to_50', '50_to_100', '100_to_200', 'over_200')),
     onboarding_completed BOOLEAN NOT NULL DEFAULT FALSE
