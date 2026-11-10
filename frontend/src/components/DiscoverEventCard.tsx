@@ -1,8 +1,6 @@
 import TagLink from "./TagLink";
 import type { EventideEvent } from "../interfaces/interfaces";
-import SaveIcon from '../assets/images/save-icon.svg?react';
 import SaveIconFilled from '../assets/images/save-icon-filled.svg?react';
-import HeartIcon from '../assets/images/heart-icon.svg?react';
 import HeartIconFilled from '../assets/images/heart-icon-filled.svg?react';
 import { useAnalytics } from "../hooks/useAnalytics";
 
@@ -42,6 +40,7 @@ export default function DiscoverEventCard({
       console.error("Failed to track event click:", error);
     });
   };
+  const showPrice = event.price && event.price != 0
   return (
     <article
       className={`event-card ${compact ? "event-card-compact" : "event-card-large"}`}
@@ -55,6 +54,18 @@ export default function DiscoverEventCard({
           <img src={event.imageUrl} alt="" loading="lazy" />
         ) : (
           <span className="event-image-placeholder" aria-hidden="true">
+            <div className="row tiny-gap" style={{position: "absolute", left: 10, top: 10}}>             
+              { event.eighteenPlus? 
+                <span className="pill2invert">
+                  18+
+                </span>: <></>
+              }
+              { showPrice? 
+                <span className="pill2" >
+                  ${event.price}
+                </span>: <></>
+              }
+            </div>
             ✦
           </span>
         )}

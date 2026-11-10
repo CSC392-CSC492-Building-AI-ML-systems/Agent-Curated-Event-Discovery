@@ -6,7 +6,7 @@ export default function filterEvents(
   browse: BrowseState,
   now = Date.now(),
 ): EventideEvent[] {
-  const { search, range, sort, tags } = browse;
+  const { search, range, sort, tags, price, eighteenPlus } = browse;
   const query = search.trim().toLowerCase();
   const today = eventDayKey(new Date(now).toISOString());
 
@@ -46,8 +46,9 @@ export default function filterEvents(
         event.tags.some((eventTag) =>
           tags.some((selectedTag) => selectedTag.id === eventTag.id),
         );
-
-      return matchesDate && matchesSearch && matchesTags;
+      const matchesPrice = event.price == null || price[0] <= event.price && event.price <= price[1]
+      const matchesEighteenPlus = eighteenPlus == true || !event.eighteenPlus
+      return matchesDate && matchesSearch && matchesTags && matchesPrice && matchesEighteenPlus;
     })
     .sort((a, b) =>
       sort === "title"

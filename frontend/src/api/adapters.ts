@@ -29,7 +29,7 @@ export function toEventideEvent(event: ApiEvent): EventideEvent {
 
     venue: event.venue,
     organizer: event.organizer,
-    price: event.price,
+    price: Number(event.price),
     link: event.link,
     eighteenPlus: event.eighteenplus,
 

@@ -19,6 +19,7 @@ import { createClient } from "./lib/supabase/client";
 import { ApiError } from "./api/client";
 import Popup from "./components/Popup";
 import { useNavigate } from "react-router-dom";
+import { INITIAL_FILTERS } from "./interfaces/constants";
 
 function App() {
   return <AuthProvider><PreferencesProvider><BrowserRouter><SessionRoutes /></BrowserRouter></PreferencesProvider></AuthProvider>;
@@ -48,12 +49,7 @@ function EventRoutes() {
   
   
   const [followed, setFollowed] = useState<EventideTag[]>([]);
-  const [browse, setBrowse] = useState<BrowseState>({
-    search: "",
-    range: "30",
-    sort: "upcoming",
-    tags: [] as EventideTag[],
-  });
+  const [browse, setBrowse] = useState<BrowseState>(INITIAL_FILTERS);
 
   const onFollow = (tag: EventideTag) =>
     setFollowed((current) =>

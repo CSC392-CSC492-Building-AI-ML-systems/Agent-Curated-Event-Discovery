@@ -48,7 +48,7 @@ export interface EventideEvent {
   venue: EventideVenue;
   organizer?: EventideOrganizer | null;
   // Preserve the API's numeric or decimal-string representation.
-  price?: number | string | null;
+  price?: number | null;
   link: string;
   eighteenPlus: boolean;
   imageUrl?: string;
@@ -71,6 +71,8 @@ export interface BrowseState {
   range: string;
   sort: string;
   tags: EventideTag[];
+  price: number[],
+  eighteenPlus: boolean;
 }
 
 export type EventRequestProps = {

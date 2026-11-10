@@ -12,6 +12,12 @@ import "./DiscoverPage.css";
 import filterEvents from "../utils/filterEvents";
 import TagFilters from "../components/TagFilters";
 import { useSearchTracking } from "../hooks/useSearchTracking";
+import { INITIAL_FILTERS, MAX_PRICE, MIN_PRICE } from "../interfaces/constants";
+
+const handlePosition = (value: number) => {
+  const pct = (value - MIN_PRICE) / (MAX_PRICE - MIN_PRICE);
+  return `calc(${pct * 100}% + ${(0.5 - pct) * 18}px)`;
+};
 
 export default function DiscoverPage({
   events,
@@ -26,9 +32,11 @@ export default function DiscoverPage({
   error,
   retry,
 }: EventPageProps) {
+  
   const { search, range, sort, tags } = browse;
   const location = useLocation();
-
+  const [tempMin, setTempMin] = useState(MIN_PRICE)
+  const [tempMax, setTempMax] = useState(MAX_PRICE)
   const [selected, setSelected] = useState<EventideEvent | null>(null);
   const [now] = useState(() => Date.now());
   const { track } = useSearchTracking(search);
@@ -100,6 +108,34 @@ export default function DiscoverPage({
                 <option value="title">Title A–Z</option>
               </select>
             </label>
+            <label>
+              Price
+              <div className="column small-gap" style={{width: "120px"}}>
+                <div style={{display: "block"}}>
+                  <div className="discover-page-slider-progress">
+                    <div className="coloured-progress" style={{ left: `${((tempMin - MIN_PRICE) / (MAX_PRICE - MIN_PRICE)) * 100}%`, right: `${100 - ((tempMax - MIN_PRICE) / (MAX_PRICE - MIN_PRICE)) * 100}%` }}></div>
+                  </div>
+                  <div className="discover-page-slider-range">
+                    <span className="slider-price-label" style={{ left: handlePosition(tempMin) }}>
+                      ${tempMin}
+                    </span>
+                    <span className="slider-price-label" style={{ left: handlePosition(tempMax) }}>
+                      ${tempMax}
+                    </span>
+                    <input type="range" id="minPrice" min={MIN_PRICE} max={MAX_PRICE} list="tickmarks" value={tempMin} onChange={(event) => {if (Number(event.target.value) <= tempMax - 10) setTempMin(Number(event.target.value))}} onPointerUp={() => setBrowse({ ...browse, price: [tempMin, browse.price[1]] })} onKeyUp={() => setBrowse({ ...browse, price: [tempMin, browse.price[1]] })}/>
+                    <input type="range" id="maxPrice" min={MIN_PRICE} max={MAX_PRICE} list="tickmarks" value={tempMax} onChange={(event) => {if (Number(event.target.value) >= tempMin + 10) setTempMax(Number(event.target.value))}} onPointerUp={() => setBrowse({ ...browse, price: [browse.price[0], tempMax] })} onKeyUp={() => setBrowse({ ...browse, price: [browse.price[0], tempMax] })}/>
+                  </div>
+                </div>
+              </div>
+            </label>
+            <label>
+              Allow 18+
+              <label className="switch">
+                <input type="checkbox" onChange={(e)=>{setBrowse({...browse, eighteenPlus: e.target.checked})}}/>
+                <span className="slider round"></span>
+              </label>
+            </label>
+
             <div className="discover-view">
               <span className={"pill active"} aria-current="page">
                 List
@@ -163,12 +199,7 @@ export default function DiscoverPage({
                     <button
                       className="pill"
                       onClick={() => {
-                        setBrowse({
-                          search: "",
-                          tags: [],
-                          range: "all-dates",
-                          sort: "upcoming",
-                        });
+                        setBrowse(INITIAL_FILTERS);
                       }}
                     >
                       Browse all events
