@@ -208,3 +208,26 @@ test("keyboard focus stays visible below the sticky day header", async ({ page, 
     Math.max(...cells.map(cell => cell.getBoundingClientRect().bottom)));
   expect(slot.y).toBeGreaterThanOrEqual(Math.max(header.y, headerBottom));
 });
+
+for (const width of [1280, 390]) {
+  test(`availability panel keeps its loaded dimensions while fetching at ${width}px`, async ({ page, context }) => {
+    await page.setViewportSize({ width, height: 844 });
+    await setupScheduling(page, context);
+    let release!: () => void;
+    const gate = new Promise<void>(resolve => { release = resolve; });
+    await page.route("**/test-api/users/me/availability", async route => {
+      await gate;
+      return route.fallback();
+    });
+    await page.goto("/profile/availability");
+    await expect(page.getByRole("status")).toHaveText("Loading schedule…");
+    await page.evaluate(() => document.fonts.ready);
+    const panel = page.locator(".availability-content");
+    const before = (await panel.boundingBox())!;
+    release();
+    await expect(page.getByRole("button", { name: "Save schedule", exact: true })).toBeEnabled();
+    const after = (await panel.boundingBox())!;
+    expect(Math.abs(before.width - after.width)).toBeLessThan(1);
+    expect(Math.abs(before.height - after.height)).toBeLessThan(1);
+  });
+}

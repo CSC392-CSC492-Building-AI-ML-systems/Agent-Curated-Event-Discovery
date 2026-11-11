@@ -7,7 +7,28 @@
 }
 
 .availability-content {
+    flex: 1 1 760px;
+    width: 100%;
     min-width: 0;
+    align-self: flex-start;
+}
+
+.availability-loading {
+    position: relative;
+}
+
+.availability-loading-placeholder {
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.profile-content .availability-loading-message {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    margin: 0;
+    color: var(--muted);
 }
 
 .availability-feedback {
@@ -19,29 +40,43 @@
     flex: 1 1 760px;
     width: 100%;
     min-width: 0;
-    min-height: 480px;
+    min-height: 680px;
     align-self: flex-start;
 }
 
-.profile-navbar a {
+.profile-overview-content {
+    padding-block: 64px;
+    min-height: 728px;
+}
+
+.profile-navbar a,
+.profile-navbar button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     min-width: 44px;
     min-height: 44px;
-    border-radius: 8px;
+    border-radius: 10px;
+    border: 0;
+    padding: 0;
+    background: transparent;
+    color: #3f7695;
+    text-decoration: none;
 }
 
 .profile-navbar a[aria-current="page"] {
-    color: #000;
+    color: #2a1f33;
+    background: var(--accent-2);
 }
 
-.profile-navbar a:focus-visible {
+.profile-navbar a:focus-visible,
+.profile-navbar button:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 3px;
 }
 
 .profile-navbar {
+    color: #3f7695;
     box-sizing: border-box;
     margin: 20px 0;
     display: flex;
@@ -56,17 +91,70 @@
         min-height: 600px;
     }
 
-    .profile-availability-wrap {
+    .profile-overview-content {
+        padding-block: 32px;
+        min-height: 624px;
+    }
+
+    .profile-wrap {
         flex-direction: column;
         padding: 0;
         margin-top: 24px;
     }
 
-    .profile-availability-wrap .profile-navbar {
+    .profile-wrap .profile-navbar {
         flex-direction: row;
         flex-wrap: wrap;
         justify-content: center;
         gap: 12px;
         margin: 0;
+    }
+}
+
+.profile-navbar a:hover {
+    background: #eef7fc;
+}
+
+.profile-navbar button:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
+.profile-section-divider {
+    margin: 0;
+    border: 0;
+    border-top: 1px solid var(--line);
+}
+
+.profile-preferences-section {
+    min-height: 280px;
+    margin-top: 24px;
+}
+
+.profile-section-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.profile-content .profile-section-heading h2 {
+    margin: 0;
+    font-size: 28px;
+}
+
+.profile-overview-preferences {
+    grid-template-columns: minmax(100px, 0.4fr) minmax(0, 1fr);
+    line-height: 1.6;
+}
+
+.profile-overview-preferences dd {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 600px) {
+    .profile-overview-preferences {
+        grid-template-columns: 1fr;
     }
 }

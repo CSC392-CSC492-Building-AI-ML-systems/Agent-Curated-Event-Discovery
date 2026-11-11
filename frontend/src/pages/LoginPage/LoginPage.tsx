@@ -44,7 +44,7 @@ export default function LoginPage({}: LoginPageProps) {
 
       if (data.user) {
         setSuccess("You have been logged in successfully!");
-        void navigate(returnTo === "/onboarding" || returnTo === "/profile" || returnTo === "/profile/availability" || returnTo === "/calendar" ? returnTo : "/", { replace: true });
+        void navigate(returnTo === "/onboarding" || returnTo === "/profile" || returnTo === "/profile/availability" || returnTo === "/profile/security" || returnTo === "/calendar" ? returnTo : "/", { replace: true });
       }
 
       setEmail("");

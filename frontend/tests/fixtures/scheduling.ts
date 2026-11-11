@@ -1,6 +1,7 @@
 import type { BrowserContext, Page } from "@playwright/test";
 import type { WeeklyAvailability } from "../../src/api/availabilityTypes";
 import type { ApiEvent } from "../../src/api/types";
+import type { UserProfile } from "../../src/api/profile";
 
 const TEST_TIME = new Date("2026-11-01T12:00:00Z");
 
@@ -78,6 +79,9 @@ export async function setupScheduling(page: Page, context: BrowserContext) {
     availabilityRequests: [] as { method: string; userId: string; body?: WeeklyAvailability }[],
     failAvailabilityRead: false,
     failAvailabilityWrite: false,
+    profiles: new Map<string, UserProfile>(),
+    failProfileRead: false,
+    failProfileWrite: false,
   };
   await page.route("https://onboarding-test.supabase.co/auth/v1/**", async route => {
     if (route.request().url().includes("/logout")) return route.fulfill({ status: 204 });
@@ -89,6 +93,24 @@ export async function setupScheduling(page: Page, context: BrowserContext) {
   await page.route("**/test-api/**", async route => {
     const request = route.request();
     const path = new URL(request.url()).pathname.replace("/test-api", "");
+    if (path === "/users/me/profile") {
+      const token = request.headers().authorization?.replace("Bearer ", "");
+      if (!token) return route.fulfill({ status: 401 });
+      const userId = JSON.parse(Buffer.from(token.split(".")[1], "base64url").toString()).sub as string;
+      const empty = { first_name: null, last_name: null, username: null, updated_at: null };
+      if (request.method() === "GET") return state.failProfileRead
+        ? route.fulfill({ status: 500, json: { detail: "Unable to load profile" } })
+        : route.fulfill({ json: state.profiles.get(userId) ?? empty });
+      if (request.method() !== "PUT") return route.fulfill({ status: 405 });
+      if (state.failProfileWrite) return route.fulfill({ status: 500, json: { detail: "Unable to save profile" } });
+      const body = request.postDataJSON() as UserProfile;
+      if ([...state.profiles].some(([id, profile]) => id !== userId && body.username && body.username === profile.username)) {
+        return route.fulfill({ status: 409, json: { detail: "This username is already taken." } });
+      }
+      const saved = { ...body, updated_at: TEST_TIME.toISOString() };
+      state.profiles.set(userId, saved);
+      return route.fulfill({ json: saved });
+    }
     if (path === "/users/me/availability") {
       const token = request.headers().authorization?.replace("Bearer ", "");
       if (!token) return route.fulfill({ status: 401 });

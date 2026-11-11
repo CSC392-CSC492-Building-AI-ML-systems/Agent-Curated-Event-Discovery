@@ -8,6 +8,7 @@ from .routers import users
 from .routers import calendar
 from .routers import calendar_subscriptions
 from .routers import availability
+from .routers import profile
 from .utils.calendar_logging import install_calendar_log_filter
 
 app = FastAPI()
@@ -30,6 +31,7 @@ app.include_router(users.router)
 app.include_router(calendar.router)
 app.include_router(calendar_subscriptions.router)
 app.include_router(availability.router)
+app.include_router(profile.router)
 
 
 @app.get("/")

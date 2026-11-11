@@ -3,6 +3,7 @@ import SettingsPage from "./SettingsPage";
 import LikesPage from "./LikesPage";
 import SavesPage from "./SavesPage";
 import AvailabilityPage from "./AvailabilityPage";
+import SecurityPage from "./SecurityPage";
 
 function routePage(route: string){
     if (route === "settings") {
@@ -13,14 +14,16 @@ function routePage(route: string){
         return <SavesPage/>
     }else if (route === "availability") {
         return <AvailabilityPage/>
+    }else if (route === "security") {
+        return <SecurityPage/>
     }
 }
 export default function ProfilePage( {route}: {route: string} ) {
   return  <div className="discover-page">
             <div className="discover-wrap">
               <Header />
-              <div className={`profile-wrap${route === "availability" ? " profile-availability-wrap" : ""}`}>
-                <ProfileNavBar route={route}/>
+              <div className="profile-wrap">
+                <ProfileNavBar/>
                 {routePage(route)}
               </div>
             </div>

@@ -346,3 +346,39 @@ the schedule preference. Restart the backend for the new routes. Profile's
 Availability editor restores saved ranges and submits them through Save schedule,
 with loading, saving, confirmation, and retry states. Recommendation integration
 is the remaining step; empty schedules add no availability preference.
+
+### Profile settings
+
+The profile overview includes an avatar placeholder, name/username, and
+existing event preferences. The profile pencil opens inline first-name,
+last-name, and username fields; the check saves changes and Escape discards edits.
+The form loads and saves through authenticated `GET` and `PUT /users/me/profile`.
+PUT replaces all three fields: `first_name`, `last_name`, and `username` (each
+nullable). Responses contain these fields plus `updated_at` (null before the
+first save). A new account starts with empty profile details; existing auth
+metadata is not automatically copied into the profile table.
+
+Names are trimmed, optional, and at most 100 characters. Usernames are optional,
+trimmed, stored lowercase, and restricted to 3–30 ASCII letters, numbers, or
+underscores. The database enforces unique usernames; blank usernames become null.
+A duplicate returns HTTP 409 with `{"detail":"This username is already taken."}`;
+invalid input returns HTTP 422. Requests cannot specify another user's ID: the
+backend derives ownership from the verified access token. Failed saves retain
+the form's draft and allow retry; changes appear only after a successful save.
+
+The preferences pencil opens the existing onboarding editor, which retains its
+current persistence behavior. Profile navigation includes availability, account
+security, liked/saved events, Your Calendar, and a disabled Friends placeholder.
+Security forms and photo uploads are not implemented.
+
+**Setup:** Apply `backend/database/migrations/005_user_profile.sql` in Supabase,
+then restart the backend. This creates `public.user_profile`, enables RLS, and
+restricts direct public-client access. No new dependencies or environment
+variables are required; use the existing backend database/Supabase configuration
+and frontend API/Supabase configuration.
+
+Run `npm run test:profile` from `frontend` for desktop/mobile profile interaction
+checks, including persistence, account isolation, duplicate usernames, and failed
+saves. From `backend`, run `python -m unittest discover -s tests -p test_profile.py`
+for isolated database/API tests. These tests use SQLite and locally signed JWTs;
+they do not apply the migration or verify concurrent writes on live PostgreSQL.
