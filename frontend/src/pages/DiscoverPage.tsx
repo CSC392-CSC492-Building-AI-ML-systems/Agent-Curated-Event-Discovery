@@ -10,11 +10,15 @@ import ForYouSection from "../components/ForYouSection";
 import type { EventideEvent, EventPageProps } from "../interfaces/interfaces";
 import "./DiscoverPage.css";
 import filterEvents from "../utils/filterEvents";
+import TagFilters from "../components/TagFilters";
+import { useSearchTracking } from "../hooks/useSearchTracking";
 
 export default function DiscoverPage({
   events,
   saved,
   onSave,
+  liked, 
+  onLike,
   followed,
   browse,
   setBrowse,
@@ -27,6 +31,7 @@ export default function DiscoverPage({
 
   const [selected, setSelected] = useState<EventideEvent | null>(null);
   const [now] = useState(() => Date.now());
+  const { track } = useSearchTracking(search);
 
   useEffect(() => {
     const frame = requestAnimationFrame(() =>
@@ -53,6 +58,8 @@ export default function DiscoverPage({
       compact={compact}
       saved={saved.includes(event.id)}
       onSave={onSave}
+      liked={liked.includes(event.id)}
+      onLike={onLike}
       onOpen={setSelected}
     />
   );
@@ -61,10 +68,11 @@ export default function DiscoverPage({
     <div className="discover-page">
       <div className="discover-wrap">
         <Header savedCount={saved.length} />
-        <main>
+        <main className="column small-gap">
           <SearchBar
             search={search}
             setSearch={(search: string) => setBrowse({ ...browse, search })}
+            onSearch={() => track(search)}
             placeholder="Search events, topics, places"
           />
           <div className="discover-toolbar">
@@ -106,37 +114,19 @@ export default function DiscoverPage({
             role="group"
             aria-label="Filter by topic"
           >
-            <span>Include</span>
-            {allTags.map((tag) => (
-              <button
-                key={tag.name}
-                className={`discover-chip ${tags.includes(tag) ? "active" : ""}`}
-                aria-pressed={tags.includes(tag)}
-                onClick={() =>
-                  setBrowse({
-                    ...browse,
-                    tags: browse.tags.some(
-                      (selectedTag) => selectedTag.id === tag.id,
-                    )
-                      ? browse.tags.filter(
-                          (selectedTag) => selectedTag.id !== tag.id,
-                        )
-                      : [...browse.tags, tag],
-                  })
-                }
-              >
-                #{tag.name}
-              </button>
-            ))}
+            <TagFilters
+              allTags={allTags}
+              selectedTags={tags}
+              setBrowse={setBrowse}
+            />
           </div>
 
-          <ForYouSection />
+          <ForYouSection liked={liked} onLike={onLike} saved={saved} onSave={onSave} />  {/*Need to display the star and its current state*/}
 
           <EventRequestState loading={loading} error={error} retry={retry} />
 
           {!loading && !error && (
             <>
-
               <section aria-labelledby="discover-upcoming">
                 <div className="discover-section-heading">
                   <h2 id="discover-upcoming">
@@ -234,6 +224,8 @@ export default function DiscoverPage({
             event={selected}
             saved={saved.includes(selected.id)}
             onSave={onSave}
+            liked={liked.includes(selected.id)}
+            onLike={onLike}
             onClose={() => setSelected(null)}
           />
         )}

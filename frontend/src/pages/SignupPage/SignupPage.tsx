@@ -4,7 +4,8 @@ import { Eye, EyeOff } from "lucide-react";
 import { supabase_client } from "../../lib/supabase/client";
 import GoogleLoginButton from "../../components/GoogleLoginButton";
 import "./SignupPage.css";
-
+import { useAuth } from "../../contexts/AuthContext";
+import { createUser } from "../../api/preferences";
 type SignupPageProps = {
   onSignup?: (details: {
     email: string;
@@ -23,6 +24,8 @@ export default function SignupPage({}: SignupPageProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const { session } = useAuth();
+  const token = session?.access_token;
 
   async function handleSubmit(event: SyntheticEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -67,7 +70,10 @@ export default function SignupPage({}: SignupPageProps) {
         setError(signupError.message);
         return;
       }
-
+      
+      if(token){
+        createUser(token)
+      }
       if (data.user && !data.session) {
         setSuccess(
           "Account created! Check your email for a confirmation link before logging in (this might end up in your spam folder). If you already have an account, please log in instead.",
