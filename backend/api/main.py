@@ -6,6 +6,7 @@ from .routers import events
 from .routers import tags
 from .routers import users
 from .routers import analytics
+from .routers import friendships
 
 app = FastAPI()
 
@@ -16,7 +17,7 @@ origins = [origin.strip() for origin in os.getenv(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_methods=["GET", "PUT", "POST"],
+    allow_methods=["GET", "PUT", "POST", "DELETE"],
     allow_headers=["Accept", "Authorization", "Content-Type"],
 )
 
@@ -24,6 +25,7 @@ app.include_router(events.router)
 app.include_router(tags.router)
 app.include_router(users.router)
 app.include_router(analytics.router)
+app.include_router(friendships.router)
 
 
 @app.get("/")
