@@ -84,6 +84,7 @@ function EventRoutes() {
   const [liked, setLiked] = useState<number[]>([]);
   const onLike = async(id: number) =>{
     const like = !liked.includes(id)
+    console.log("liked")
     setLiked(like ? [...liked, id]: liked.filter((value) => value !== id));
     const event = events.find((event) => event.id === id);
     if (event ) {if (like) {event.likes +=1} else{event.likes -= 1} }

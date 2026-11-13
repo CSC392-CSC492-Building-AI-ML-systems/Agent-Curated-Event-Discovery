@@ -28,7 +28,7 @@ export default function DiscoverEventCard({
   compact = false,
   saved,
   onSave,
-  liked, 
+  liked,
   onLike,
   onOpen,
   onReject,

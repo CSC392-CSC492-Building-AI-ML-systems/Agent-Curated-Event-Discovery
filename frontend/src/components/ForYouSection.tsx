@@ -12,11 +12,14 @@ import EventDetails from "./EventDetails";
 import type { EventideEvent } from "../interfaces/interfaces";
 
 type Props = {
+  liked: number[];
+  onLike: (id: number) => void;
   saved: number[];
   onSave: (id: number) => void;
   liked: number[];
   onLike: (id: number) => void;
 };
+
 
 export default function ForYouSection({ saved, onSave, liked, onLike }: Props) {
   const { session, loading: checkingSession } = useAuth();
@@ -77,6 +80,8 @@ export default function ForYouSection({ saved, onSave, liked, onLike }: Props) {
               <DiscoverEventCard
                 key={event.id}
                 event={event}
+                liked={liked.includes(event.id)}
+                onLike={onLike}
                 saved={saved.includes(event.id)}
                 onSave={onSave}
                 liked={liked.includes(event.id)}
@@ -109,6 +114,8 @@ export default function ForYouSection({ saved, onSave, liked, onLike }: Props) {
     {selected && (
       <EventDetails
         event={selected}
+        liked= {liked.includes(selected.id)}
+        onLike={onLike}
         saved={saved.includes(selected.id)}
         onSave={onSave}
         liked={liked.includes(selected.id)}
