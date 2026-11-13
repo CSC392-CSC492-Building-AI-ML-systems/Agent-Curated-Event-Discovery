@@ -808,6 +808,7 @@ label {
 }
 
 .notifications-bell {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -824,6 +825,26 @@ label {
   background: #f6545c;
   color: white;
   border-color: #f6545c;
+}
+
+/* The white ring keeps the blue off the coral fill when the panel is open. */
+.notifications-count {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border: 2px solid white;
+  border-radius: 999px;
+  background: #2f6fed;
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
 }
 
 .notifications-panel {
@@ -862,14 +883,25 @@ label {
   gap: 14px;
 }
 
-.notifications-list li {
+
+.notifications-list button {
   display: grid;
   gap: 4px;
+  width: 100%;
   padding: 12px 14px;
   background: white;
   border: 1px solid #f2cdd2;
   border-radius: 12px;
+  font: inherit;
   font-size: 14px;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .2s ease;
+}
+
+.notifications-list button:hover {
+  border-color: #f6545c;
 }
 
 .notifications-label {

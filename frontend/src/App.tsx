@@ -77,7 +77,7 @@ function EventRoutes() {
     setBrowse,
   };
   return (
-    <SavedEventsProvider events={events} saved={saved}>
+    <SavedEventsProvider events={events} saved={saved} onSave={onSave}>
       <Routes>
         <Route path="/" element={<DiscoverPage {...eventProps} />} />
         <Route
