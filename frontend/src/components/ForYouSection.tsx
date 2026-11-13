@@ -14,9 +14,11 @@ import type { EventideEvent } from "../interfaces/interfaces";
 type Props = {
   saved: number[];
   onSave: (id: number) => void;
+  liked: number[];
+  onLike: (id: number) => void;
 };
 
-export default function ForYouSection({ saved, onSave }: Props) {
+export default function ForYouSection({ saved, onSave, liked, onLike }: Props) {
   const { session, loading: checkingSession } = useAuth();
   const { preferences, loading, error, retry } = usePreferences();
   const token = session?.access_token;
@@ -77,6 +79,8 @@ export default function ForYouSection({ saved, onSave }: Props) {
                 event={event}
                 saved={saved.includes(event.id)}
                 onSave={onSave}
+                liked={liked.includes(event.id)}
+                onLike={onLike}
                 onOpen={setSelected}
                 onReject={onReject}
               />
@@ -107,6 +111,8 @@ export default function ForYouSection({ saved, onSave }: Props) {
         event={selected}
         saved={saved.includes(selected.id)}
         onSave={onSave}
+        liked={liked.includes(selected.id)}
+        onLike={onLike}
         onReject={onReject}
         onClose={() => setSelected(null)}
       />
