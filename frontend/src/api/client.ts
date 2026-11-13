@@ -36,7 +36,7 @@ function getErrorMessage(body: unknown, status: number): string {
 export async function requestJson<T>(
   path: string,
   { signal, method = "GET", body, accessToken }: RequestOptions & {
-    method?: "GET" | "PUT";
+    method?: "GET" | "POST" | "PUT" | "DELETE";
     body?: unknown;
     accessToken?: string;
   } = {},
@@ -61,6 +61,8 @@ export async function requestJson<T>(
     }
     throw new ApiError(response.status, getErrorMessage(body, response.status));
   }
+
+  if (response.status === 204) return undefined as T;
 
   // These types describe the expected response; they don't validate JSON at runtime.
   return response.json() as Promise<T>;

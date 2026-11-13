@@ -1,11 +1,20 @@
 import TagLink from "./TagLink";
+import CalendarEventButton from "./CalendarEventButton";
+import { formatEventDate } from "../utils/eventDate";
 import React, { useEffect, useRef } from "react";
 import type { EventideEvent } from "../interfaces/interfaces";
+import closeIcon from "../assets/images/close-icon.svg";
+import SaveIcon from '../assets/images/save-icon.svg?react';
+import SaveIconFilled from '../assets/images/save-icon-filled.svg?react';
+import HeartIcon from '../assets/images/heart-icon.svg?react';
+import HeartIconFilled from '../assets/images/heart-icon-filled.svg?react';
 
 export default function EventDetails({
   event,
   saved,
   onSave,
+  liked,
+  onLike,
   onReject,
   onClose,
   popup = true,
@@ -14,6 +23,8 @@ export default function EventDetails({
   event: EventideEvent;
   saved: boolean;
   onSave: (id: number) => void;
+  liked: boolean;
+  onLike: (id: number) => void;
   // Only recommended events pass this, so the reject button stays off other events.
   onReject?: (id: number) => void;
   onClose: () => void;
@@ -29,7 +40,7 @@ export default function EventDetails({
       <h2 id="discover-detail-title">{event.title}</h2>
 
       <p className="event-date">
-        {event.startDate} · {event.venue.name}
+        {formatEventDate(event.startDate, event.startTimeKnown)} · {event.venue.name || "Location to be announced"}
       </p>
 
       <p>{event.description}</p>
@@ -39,17 +50,26 @@ export default function EventDetails({
           <TagLink key={tag.id} tag={tag} onNavigate={onClose} />
         ))}
       </div>
-
       <div className="row small-gap">
+        <button
+          type="button"
+          className="pill"
+          aria-pressed={liked}
+          onClick={() => onLike(event.id)}
+          style={{display: "flex", justifyContent: "center", alignItems: "center", gap: "10px"}}
+        >
+          {liked? <HeartIconFilled height="20px" width="20px"/>: <HeartIcon height="20px" width="20px"/> }<p style={{margin: 0}}>{liked ? "Liked" : "Like event"}</p>
+        </button>
         <button
           type="button"
           className="pill"
           aria-pressed={saved}
           onClick={() => onSave(event.id)}
+          style={{display: "flex", justifyContent: "center", alignItems: "center", gap: "10px"}}
         >
-          {saved ? "★ Saved" : "☆ Save event"}
+          {saved? <SaveIconFilled height="20px" width="20px"/>: <SaveIcon height="20px" width="20px"/> }<p style={{margin: 0}}>{saved ? "Saved" : "Save event"}</p>
         </button>
-
+        <CalendarEventButton event={event} variant="label" />
         {onReject && (
           <button
             type="button"
@@ -71,7 +91,7 @@ export default function EventDetails({
     return () => {
       if (element.open) element.close();
     };
-  }, []);
+  }, [popup]);
 
   if (!popup) {
     return (
@@ -100,7 +120,7 @@ export default function EventDetails({
         aria-label="Close event details"
         onClick={onClose}
       >
-        ×
+        <img className="close-icon" src={closeIcon} alt="" />
       </button>
 
       {content}
