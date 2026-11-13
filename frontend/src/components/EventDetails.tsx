@@ -1,4 +1,6 @@
 import TagLink from "./TagLink";
+import CalendarEventButton from "./CalendarEventButton";
+import { formatEventDate } from "../utils/eventDate";
 import React, { useEffect, useRef } from "react";
 import type { EventideEvent } from "../interfaces/interfaces";
 import closeIcon from "../assets/images/close-icon.svg";
@@ -38,7 +40,7 @@ export default function EventDetails({
       <h2 id="discover-detail-title">{event.title}</h2>
 
       <p className="event-date">
-        {event.startDate} · {event.venue.name}
+        {formatEventDate(event.startDate, event.startTimeKnown)} · {event.venue.name || "Location to be announced"}
       </p>
 
       <p>{event.description}</p>
@@ -67,6 +69,7 @@ export default function EventDetails({
         >
           {saved? <SaveIconFilled height="20px" width="20px"/>: <SaveIcon height="20px" width="20px"/> }<p style={{margin: 0}}>{saved ? "Saved" : "Save event"}</p>
         </button>
+        <CalendarEventButton event={event} variant="label" />
         {onReject && (
           <button
             type="button"
@@ -88,7 +91,7 @@ export default function EventDetails({
     return () => {
       if (element.open) element.close();
     };
-  }, []);
+  }, [popup]);
 
   if (!popup) {
     return (

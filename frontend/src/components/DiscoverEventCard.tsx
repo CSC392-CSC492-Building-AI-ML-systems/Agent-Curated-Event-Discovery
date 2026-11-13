@@ -1,4 +1,5 @@
 import TagLink from "./TagLink";
+import CalendarEventButton from "./CalendarEventButton";
 import type { EventideEvent } from "../interfaces/interfaces";
 import SaveIcon from '../assets/images/save-icon.svg?react';
 import SaveIconFilled from '../assets/images/save-icon-filled.svg?react';
@@ -27,7 +28,7 @@ export default function DiscoverEventCard({
   compact = false,
   saved,
   onSave,
-  liked, 
+  liked,
   onLike,
   onOpen,
   onReject,
@@ -104,6 +105,7 @@ export default function DiscoverEventCard({
         >
           {saved? <SaveIconFilled color="#f6545c" className="icon"/>: <SaveIcon color="#f6545c" className="icon"/>}
         </button>
+        <CalendarEventButton event={event} />
         {onReject && (
           <button
             className="event-save event-reject"
@@ -114,7 +116,6 @@ export default function DiscoverEventCard({
           </button>
         )}
       </div>
-      
     </article>
   );
 }

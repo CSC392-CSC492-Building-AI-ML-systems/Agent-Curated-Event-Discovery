@@ -18,6 +18,7 @@ import { eventLiked, eventSaved } from "./api/user_actions";
 import { createClient } from "./lib/supabase/client";
 import { ApiError } from "./api/client";
 import Popup from "./components/Popup";
+import CalendarProvider from "./contexts/CalendarProvider";
 
 function App() {
   return <AuthProvider><PreferencesProvider><BrowserRouter><SessionRoutes /></BrowserRouter></PreferencesProvider></AuthProvider>;
@@ -26,7 +27,7 @@ function App() {
 function SessionRoutes() {
   const { session } = useAuth();
   // Do not carry account-specific in-memory selections into a different login.
-  return <EventRoutes key={session?.user.id ?? "guest"} />;
+  return <CalendarProvider key={session?.user.id ?? "guest"}><EventRoutes /></CalendarProvider>;
 }
 
 function EventRoutes() {
@@ -156,6 +157,7 @@ function EventRoutes() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/onboarding" element={<OnboardingPage />} />
         <Route path="/profile" element={<ProfilePage route="settings" />} />
+        <Route path="/profile/availability" element={<ProfilePage route="availability" />} />
         {/* <Route path="/likes" element={<ProfilePage route="likes" />} />
         <Route path="/saves" element={<ProfilePage route="saves" />} /> */}
         <Route path="/saves" element={<YourEventsPage {...likedSavedEventProps} route="saves"/>}/>

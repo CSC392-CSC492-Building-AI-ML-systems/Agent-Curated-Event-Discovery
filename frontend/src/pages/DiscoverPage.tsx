@@ -17,7 +17,7 @@ export default function DiscoverPage({
   events,
   saved,
   onSave,
-  liked, 
+  liked,
   onLike,
   followed,
   browse,
@@ -121,8 +121,7 @@ export default function DiscoverPage({
             />
           </div>
 
-          <ForYouSection liked={liked} onLike={onLike} saved={saved} onSave={onSave} />  {/*Need to display the star and its current state*/}
-
+          <ForYouSection saved={saved} onSave={onSave} liked={liked} onLike={onLike} />  {/*Need to display the star and its current state*/}
           <EventRequestState loading={loading} error={error} retry={retry} />
 
           {!loading && !error && (

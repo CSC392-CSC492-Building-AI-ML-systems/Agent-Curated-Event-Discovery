@@ -2,8 +2,9 @@ import { useEffect, useRef } from 'react';
 import DiscoverEventCard from './DiscoverEventCard';
 import type { EventideEvent } from '../interfaces/interfaces';
 
-export default function CalendarDayDialog({ dayKey, events, onOpen, onSave, onClose }: {
+export default function CalendarDayDialog({ dayKey, events, saved, liked, onLike, onOpen, onSave, onClose }: {
     dayKey: string; events: EventideEvent[];
+    saved: number[]; liked: number[]; onLike: (id: number) => void;
     onOpen: (event: EventideEvent) => void; onSave: (id: number) => void; onClose: () => void;
 }) {
     const dialog = useRef<HTMLDialogElement>(null);
@@ -16,7 +17,7 @@ export default function CalendarDayDialog({ dayKey, events, onOpen, onSave, onCl
     return <dialog ref={dialog} className="discover-dialog your-events-day-dialog" aria-labelledby="calendar-day-title" onCancel={onClose} onClick={event => { if (event.target === event.currentTarget) onClose(); }}>
         <button className="discover-dialog-close" aria-label="Close day events" onClick={onClose}>×</button>
         <h2 id="calendar-day-title">{title}</h2>
-        <p>{events.length} saved {events.length === 1 ? 'event' : 'events'}</p>
-        <div className="discover-list">{events.map(event => <DiscoverEventCard key={event.id} event={event} compact saved onSave={onSave} onOpen={onOpen} />)}</div>
+        <p>{events.length} calendar {events.length === 1 ? 'event' : 'events'}</p>
+        <div className="discover-list">{events.map(event => <DiscoverEventCard key={event.id} event={event} compact saved={saved.includes(event.id)} liked={liked.includes(event.id)} onLike={onLike} onSave={onSave} onOpen={onOpen} />)}</div>
     </dialog>;
 }

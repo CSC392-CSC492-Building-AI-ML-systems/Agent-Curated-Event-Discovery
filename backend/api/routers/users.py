@@ -10,8 +10,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from ..db.database import get_db
-from ..models.event import Tag, Venue, Event
 from ..models.event import Event, Tag, Venue
+
 from ..models.preferences import UserPreferences, UserPreferenceTag
 from ..models.user_actions import EventLiked, EventSaved
 from ..models.recommendations import UserRecommendedEvent
@@ -96,7 +96,6 @@ async def put_preferences(
 
     return PreferencesResponse(**payload.model_dump(), onboarding_completed=True)
 
-
 @router.get("/me/recommended-events")
 async def get_recommended_events(
     user: dict = Depends(get_current_user),
@@ -149,7 +148,6 @@ async def get_likes(
     user: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    print(f"user:{UUID(user['sub'])}")
     result = await db.execute(
         select(Event,
             func.ST_AsGeoJSON(Venue.coordinates).label("coordinates_geojson"))

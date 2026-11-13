@@ -10,7 +10,7 @@ export default function SettingsPage() {
   const auth = useAuth();
   const { preferences, loading, error, retry } = usePreferences();
   const catalogue = useTags(!!auth.session);
-  return <main className="profile-content">
+  return <main className="profile-content profile-settings-content">
           <h1>Your Profile</h1>
           {auth.loading ? <p role="status">Checking login…</p> : !auth.session ? <p>Log in to view your profile. <Link to="/login" state={{ returnTo: "/profile" }}>Log in</Link></p>
             : <>

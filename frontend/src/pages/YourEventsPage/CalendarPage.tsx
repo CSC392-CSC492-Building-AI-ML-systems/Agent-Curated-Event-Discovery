@@ -4,22 +4,25 @@ import CalendarDayEvents from "../../components/CalendarDayEvents";
 import type { EventideEvent } from "../../interfaces/interfaces";
 import EventDetails from "../../components/EventDetails";
 import CalendarDayDialog from "../../components/CalendarDayDialog";
+import CalendarExportButton from "../../components/CalendarExportButton";
+import CalendarSubscription from "../../components/CalendarSubscription";
+import { useCalendar } from "../../contexts/calendarContext";
+import EventRequestState from "../../components/EventRequestState";
 
 type CalendarPageProps = {
-    events: EventideEvent[]; //my saved events
     saved: number[];
     onSave: (id: number) => void;
     liked: number[];
     onLike: (id: number) => void;
 }
-function CalendarPage({events, saved, onSave, liked, onLike}: CalendarPageProps){
+function CalendarPage({saved, onSave, liked, onLike}: CalendarPageProps){
+    const calendar = useCalendar();
     const [calendarMonth, setCalendarMonth] = useState<Date | null>(null);
     const [selectedDay, setSelectedDay] = useState<string | null>(null);
     const [selected, setSelected] = useState<EventideEvent | null>(null);
     const [today] = useState(() => eventDayKey(new Date().toISOString()));
 
-    const mine = events
-    .filter((event) => saved.includes(event.id))
+    const mine = [...calendar.events]
     .sort((a, b) => {
       const dateA = Date.parse(a.startDate || "");
       const dateB = Date.parse(b.startDate || "");
@@ -47,6 +50,9 @@ function CalendarPage({events, saved, onSave, liked, onLike}: CalendarPageProps)
       );
       const changeMonth = (offset: number) =>
         setMonth(new Date(month.getFullYear(), month.getMonth() + offset, 1));
+    if (calendar.loading || calendar.error) {
+      return <EventRequestState loading={calendar.loading} error={calendar.error} retry={calendar.retry} />;
+    }
     return <>
         <section aria-labelledby="your-events-month">
             <div className="your-events-calendar-heading">
@@ -54,6 +60,8 @@ function CalendarPage({events, saved, onSave, liked, onLike}: CalendarPageProps)
                 {monthName}
                 </h2>
                 <div className="your-events-month-controls">
+                <CalendarExportButton events={mine} />
+                <CalendarSubscription />
                 <button
                     className="pill"
                     aria-label="Previous month"
@@ -92,7 +100,7 @@ function CalendarPage({events, saved, onSave, liked, onLike}: CalendarPageProps)
             >
                 <div
                 className="your-events-calendar"
-                aria-label={`Saved events for ${monthName}`}
+                aria-label={`Calendar events for ${monthName}`}
                 >
                 {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(
                     (day) => (
@@ -139,7 +147,7 @@ function CalendarPage({events, saved, onSave, liked, onLike}: CalendarPageProps)
             </div>
             {!monthEvents.length && (
                 <p className="your-events-calendar-note" role="status">
-                No saved events this month.
+                No calendar events this month.
                 </p>
             )}
         </section>
@@ -150,6 +158,9 @@ function CalendarPage({events, saved, onSave, liked, onLike}: CalendarPageProps)
               (event) =>
                 event.startDate && eventDayKey(event.startDate) === selectedDay,
             )}
+            saved={saved}
+            liked={liked}
+            onLike={onLike}
             onSave={onSave}
             onClose={() => setSelectedDay(null)}
             onOpen={(event) => {
