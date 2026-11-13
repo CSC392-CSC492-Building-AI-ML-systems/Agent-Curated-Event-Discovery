@@ -9,6 +9,7 @@ from .routers import calendar
 from .routers import calendar_subscriptions
 from .routers import availability
 from .utils.calendar_logging import install_calendar_log_filter
+from .routers import analytics
 
 app = FastAPI()
 install_calendar_log_filter()
@@ -30,6 +31,7 @@ app.include_router(users.router)
 app.include_router(calendar.router)
 app.include_router(calendar_subscriptions.router)
 app.include_router(availability.router)
+app.include_router(analytics.router)
 
 
 @app.get("/")

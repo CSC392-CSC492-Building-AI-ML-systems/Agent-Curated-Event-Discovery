@@ -5,6 +5,7 @@ import SaveIcon from '../assets/images/save-icon.svg?react';
 import SaveIconFilled from '../assets/images/save-icon-filled.svg?react';
 import HeartIcon from '../assets/images/heart-icon.svg?react';
 import HeartIconFilled from '../assets/images/heart-icon-filled.svg?react';
+import { useAnalytics } from "../hooks/useAnalytics";
 
 import { formatEventDate } from "../utils/eventDate";
 import { useAuth } from "../contexts/AuthContext";
@@ -18,6 +19,8 @@ type Props = {
   liked: boolean;
   onLike: (id: number) => void;
   onOpen: (event: EventideEvent) => void;
+  // Only recommended events pass this so the reject button not on regular upcoming section events
+  onReject?: (id: number) => void;
 };
 
 export default function DiscoverEventCard({
@@ -28,16 +31,25 @@ export default function DiscoverEventCard({
   liked, 
   onLike,
   onOpen,
+  onReject,
 }: Props) {
   const { session } = useAuth();
   const navigate = useNavigate();
+  const { logEventClick } = useAnalytics();
+  const handleEventOpen = (event: EventideEvent) => {
+    onOpen(event);
+
+    void logEventClick(Number(event.id)).catch((error) => {
+      console.error("Failed to track event click:", error);
+    });
+  };
   return (
     <article
       className={`event-card ${compact ? "event-card-compact" : "event-card-large"}`}
     >
       <button
         className="event-card-open"
-        onClick={() => onOpen(event)}
+        onClick={() => handleEventOpen(event)}
         aria-label={`View ${event.title}`}
       >
         {event.imageUrl ? (
@@ -94,6 +106,15 @@ export default function DiscoverEventCard({
           {saved? <SaveIconFilled color="#f6545c" className="icon"/>: <SaveIcon color="#f6545c" className="icon"/>}
         </button>
         <CalendarEventButton event={event} />
+        {onReject && (
+          <button
+            className="event-save event-reject"
+            aria-label={`Not interested in ${event.title}`}
+            onClick={() => onReject(event.id)}
+          >
+            ✕
+          </button>
+        )}
       </div>
     </article>
   );

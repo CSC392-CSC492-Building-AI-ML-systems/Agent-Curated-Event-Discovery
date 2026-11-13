@@ -703,16 +703,17 @@ label {
 }
 
 .event-card-compact .event-card-copy h3 {
-  -webkit-line-clamp: 2; 
+  -webkit-line-clamp: 2;
 }
 
 .event-card-large .event-card-copy h3 {
   -webkit-line-clamp: 1; 
   width: 90%;
+  -webkit-line-clamp: 1;
 }
 
 .event-card-large .event-card-copy p {
-  -webkit-line-clamp: 4; 
+  -webkit-line-clamp: 4;
 }
 
 .event-card-compact h3 {
@@ -770,6 +771,14 @@ label {
   fill: #ffe3e6;
 }
 
+.event-reject {
+  top: 52px;
+}
+
+.event-reject {
+  top: 52px;
+}
+
 .event-card-large .event-card-open {
   display: grid;
   grid-template-columns: 240px 1fr;
@@ -824,6 +833,10 @@ label {
   .event-card-large .event-save {
     top: 18px;
     right: 18px;
+  }
+
+  .event-card-large .event-reject {
+    top: 60px;
   }
 
   .event-card-large .event-card-open {
