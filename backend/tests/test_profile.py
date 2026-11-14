@@ -3,7 +3,7 @@ import os
 import unittest
 from datetime import datetime, timedelta, timezone
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 from uuid import uuid4
 
 import jwt
@@ -28,6 +28,9 @@ EMPTY = {"first_name": None, "last_name": None, "username": None}
 
 class ProfileTests(unittest.TestCase):
     def setUp(self):
+        active_session = patch.object(auth, "require_active_session", new=AsyncMock())
+        active_session.start()
+        self.addCleanup(active_session.stop)
         self.engine = create_engine("sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
         self.addCleanup(self.engine.dispose)
         Base.metadata.create_all(self.engine, tables=[UserProfile.__table__])

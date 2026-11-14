@@ -77,11 +77,8 @@ export function ProfileNavBar() {
     <NavLink to="/profile" end aria-label="Profile settings" title="Profile">
       <UserRound size={35} aria-hidden="true" />
     </NavLink>
-    <NavLink to="/profile/availability" aria-label="Availability" title="Availability">
-      <Clock size={35} aria-hidden="true" />
-    </NavLink>
-    <NavLink to="/profile/security" aria-label="Account security" title="Account security">
-      <Shield size={35} aria-hidden="true" />
+    <NavLink to="/profile/friends" aria-label="Friends" title="Friends">
+      <Users size={35} aria-hidden="true" />
     </NavLink>
     <NavLink to="/likes" aria-label="Liked events" title="Liked events">
       <Heart size={35} aria-hidden="true" />
@@ -92,9 +89,12 @@ export function ProfileNavBar() {
     <NavLink to="/calendar" aria-label="Your Calendar" title="Your Calendar">
       <CalendarDays size={35} aria-hidden="true" />
     </NavLink>
-    <button type="button" disabled aria-label="Friends (coming soon)" title="Friends (coming soon)">
-      <Users size={35} aria-hidden="true" />
-    </button>
+    <NavLink to="/profile/availability" aria-label="Availability" title="Availability">
+      <Clock size={35} aria-hidden="true" />
+    </NavLink>
+    <NavLink to="/profile/security" aria-label="Security" title="Security">
+      <Shield size={35} aria-hidden="true" />
+    </NavLink>
   </nav>;
 }
 

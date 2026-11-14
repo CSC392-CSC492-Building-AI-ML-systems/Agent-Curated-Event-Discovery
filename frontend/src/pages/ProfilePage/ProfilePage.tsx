@@ -4,6 +4,7 @@ import LikesPage from "./LikesPage";
 import SavesPage from "./SavesPage";
 import AvailabilityPage from "./AvailabilityPage";
 import SecurityPage from "./SecurityPage";
+import FriendsPage from "./FriendsPage";
 
 function routePage(route: string){
     if (route === "settings") {
@@ -16,6 +17,8 @@ function routePage(route: string){
         return <AvailabilityPage/>
     }else if (route === "security") {
         return <SecurityPage/>
+    }else if (route === "friends") {
+        return <FriendsPage/>
     }
 }
 export default function ProfilePage( {route}: {route: string} ) {
