@@ -317,6 +317,24 @@ h1 {
   width: 100%;
 }
 
+.floatingButtonContainer {
+  position: absolute;
+  top: 30px;
+  right: 30px;
+}
+
+.floatingButton {
+  height: auto;
+  width: 40px;
+  height: 40px;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  background: var(--bg);
+  border-radius: 50px;
+  box-shadow: 1px 1px 10px 0 rgb(0, 0, 0, 0.2);
+}
+
 .searchAndFilters {
   width: 100%;
 }
@@ -821,15 +839,123 @@ label {
   padding: 0 20px 16px;
 }
 
-.event-card-large .icon {
-  width: 25px;
-  height: 25px;
+.notifications-bell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid #f6545c;
+  border-radius: 50%;
+  background: white;
+  color: #2a1f33;
+  transition: background-color .2s ease, color .2s ease;
 }
-.event-card-compact .icon {
-  width: 20px;
-  height: 20px;
+
+.notifications-bell.active {
+  background: #f6545c;
+  color: white;
+  border-color: #f6545c;
 }
+
+/* The white ring keeps the blue off the coral fill when the panel is open. */
+.notifications-count {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border: 2px solid white;
+  border-radius: 999px;
+  background: #2f6fed;
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.notifications-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: min(380px, 100%);
+  height: 100dvh;
+  padding: 28px 24px;
+  overflow-y: auto;
+  background: #fffaf7;
+  border-right: 1px solid #f2cdd2;
+  box-shadow: 8px 0 24px #2a1f3320;
+  transform: translateX(-100%);
+  visibility: hidden;
+  transition: transform .25s ease, visibility 0s linear .25s;
+  z-index: 10;
+}
+
+.notifications-panel.open {
+  transform: translateX(0);
+  visibility: visible;
+  transition: transform .25s ease, visibility 0s;
+}
+
+#notifications-panel h2 {
+  font-size: 22px;
+  margin: 0 0 16px;
+}
+
+.notifications-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+}
+
+
+.notifications-list button {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  padding: 12px 14px;
+  background: white;
+  border: 1px solid #f2cdd2;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 14px;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .2s ease;
+}
+
+.notifications-list button:hover {
+  border-color: #f6545c;
+}
+
+.notifications-label {
+  justify-self: start;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: #f6545c;
+  color: white;
+  font-size: 12px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .notifications-panel {
+    transition: visibility 0s;
+  }
+}
+
 @media (max-width: 650px) {
+  .notifications-panel {
+    width: 100%;
+  }
+
   .event-card-large .event-save {
     top: 18px;
     right: 18px;

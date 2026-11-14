@@ -11,6 +11,7 @@ import ProfilePage from "./pages/ProfilePage/ProfilePage";
 
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { PreferencesProvider } from "./contexts/PreferencesContext";
+import { SavedEventsProvider } from "./contexts/SavedEventsContext";
 import useEvents, { useEventsLiked, useEventsSaved } from "./hooks/useEvents";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import type { BrowseState, EventideTag } from "./interfaces/interfaces";
@@ -57,7 +58,19 @@ function EventRoutes() {
         ? current.filter((value) => value.id !== tag.id)
         : [...current, tag],
     );
-  const [saved, setSaved] = useState<number[]>([]);
+  const storageKey = session ? `eventide:saved:${session.user.id}` : null;
+  const [saved, setSaved] = useState<number[]>(() => {
+    try {
+      return storageKey
+        ? JSON.parse(localStorage.getItem(storageKey) ?? "[]")
+        : [];
+    } catch {
+      return [];
+    }
+  });
+  useEffect(() => {
+    if (storageKey) localStorage.setItem(storageKey, JSON.stringify(saved));
+  }, [storageKey, saved]);
   const onSave = async(id: number) => {
     const save = !saved.includes(id);
     setSaved(save ? [...saved, id]: saved.filter((value) => value !== id)
@@ -71,7 +84,6 @@ function EventRoutes() {
         if (error || !data.session?.access_token) throw new ApiError(401, "Please log in again before saving your preferences.");
         const result = await eventSaved(save? "PUT": "DELETE", { id: id }, data.session?.access_token, { signal: controller.signal });
         if (controller.signal.aborted) return;
-        if (!result.message) throw new Error("Could not save event. Please retry.");
       } catch (error) {
         if (!controller.signal.aborted) {
           setShowPopup(true);
@@ -95,7 +107,6 @@ function EventRoutes() {
       if (error || !data.session?.access_token) throw new ApiError(401, "Please log in again before saving your preferences.");
       const result = await eventLiked(like? "PUT": "DELETE", { id: id }, data.session?.access_token, { signal: controller.signal });
       if (controller.signal.aborted) return;
-      if (!result.message) throw new Error("Could not save event. Please retry.");
     } catch (error) {
       if (!controller.signal.aborted) {
         setShowPopup(true);
@@ -149,6 +160,7 @@ function EventRoutes() {
   };
   return (
     <>
+    <SavedEventsProvider events={events} saved={saved} onSave={onSave}>
       <Routes>
         <Route path="/" element={<DiscoverPage {...eventProps} />} />
         <Route path="/tags/:tagId" element={<TagPage {...eventProps} />} />
@@ -164,6 +176,7 @@ function EventRoutes() {
         <Route path="/likes" element={<YourEventsPage {...likedSavedEventProps} route="likes"/>}/>
         <Route path="/calendar" element={<YourEventsPage {...likedSavedEventProps} route="calendar"/>}/>
       </Routes>
+    </SavedEventsProvider>
       <Popup visible={showPopup} message={popupMessage} duration={3000} onClose={handlePopupClose}/>
     </>
   );
