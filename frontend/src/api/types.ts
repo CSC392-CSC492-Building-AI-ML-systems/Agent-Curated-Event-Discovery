@@ -43,6 +43,8 @@ export interface ApiEvent {
   tags: ApiTag[];
   organizer: ApiOrganizer | null;
   venue: ApiVenue;
+  likes: number;
+  saves: number
   // The tag-events route does not currently eagerly load event tags.
 }
 

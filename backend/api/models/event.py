@@ -81,6 +81,7 @@ class Event(Base):
     link: Mapped[str] = mapped_column(Text, nullable=False)
     eighteenplus: Mapped[bool] = mapped_column(Boolean, nullable=False)
     togathereventid: Mapped[str] = mapped_column(Text, nullable=False)
+    clicks: Mapped[int] = mapped_column(Integer, default=0)
     venue_obj: Mapped["Venue"] = relationship(back_populates="events")
     organizer_obj: Mapped[Optional["Organizer"]] = relationship(
         back_populates="events"
@@ -89,6 +90,8 @@ class Event(Base):
         secondary=event_tags,
         back_populates="events",
     )
+    likes: Mapped[int] = mapped_column(Integer)
+    saves: Mapped[int] = mapped_column(Integer)
 
 
 class Tag(Base):
@@ -100,3 +103,4 @@ class Tag(Base):
         secondary=event_tags,
         back_populates="tags",
     )
+

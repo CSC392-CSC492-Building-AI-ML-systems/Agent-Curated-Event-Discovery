@@ -317,8 +317,6 @@ h1 {
   width: 100%;
 }
 
-<<<<<<< HEAD
-=======
 .floatingButtonContainer {
   position: absolute;
   top: 30px;
@@ -337,7 +335,6 @@ h1 {
   box-shadow: 1px 1px 10px 0 rgb(0, 0, 0, 0.2);
 }
 
->>>>>>> 7e6d8ca (feat(frontend): make target)
 .searchAndFilters {
   width: 100%;
 }
@@ -541,6 +538,11 @@ label {
   color: white;
 }
 
+.discover-dialog .pill:hover:not(:disabled),
+.discover-dialog .pill:focus-visible:not(:disabled) {
+  background: #ffe3e6;
+}
+
 .chip {
   border: 0;
   background: #b9dcf3;
@@ -723,6 +725,8 @@ label {
 }
 
 .event-card-large .event-card-copy h3 {
+  -webkit-line-clamp: 1; 
+  width: 90%;
   -webkit-line-clamp: 1;
 }
 
@@ -750,18 +754,43 @@ label {
   font-size: 14px;
 }
 
-.event-save {
+.event-actions {
+  display: flex;
   position: absolute;
-  right: 10px;
-  top: 10px;
-  background: white;
-  border: 0;
   color: #d63a45 !important;
   font-size: 25px !important;
-  border-radius: 50%;
-  width: 34px;
-  height: 34px;
+}
+.event-card-large .event-actions {
+  right: 20px;
+  top: 20px;
+}
+.event-card-compact .event-actions {
+  right: 5px;
+  top: 5px;
+}
+
+.event-like-wrap {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.event-save, .event-like{
+  border: 0;
   line-height: 1;
+  background: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 20px;
+}
+
+:is(.event-like, .event-save)[aria-pressed="false"]:is(:hover, :focus-visible):not(:disabled) svg {
+  fill: #ffe3e6;
+}
+
+.event-reject {
+  top: 52px;
 }
 
 .event-reject {
@@ -781,7 +810,7 @@ label {
 }
 
 .event-card-large .event-card-copy {
-  padding: 18px 44px 0 0;
+  padding: 10px 0 0 0;
   align-self: center;
   text-align: center;
 }
@@ -810,7 +839,123 @@ label {
   padding: 0 20px 16px;
 }
 
+.notifications-bell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid #f6545c;
+  border-radius: 50%;
+  background: white;
+  color: #2a1f33;
+  transition: background-color .2s ease, color .2s ease;
+}
+
+.notifications-bell.active {
+  background: #f6545c;
+  color: white;
+  border-color: #f6545c;
+}
+
+/* The white ring keeps the blue off the coral fill when the panel is open. */
+.notifications-count {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border: 2px solid white;
+  border-radius: 999px;
+  background: #2f6fed;
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.notifications-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: min(380px, 100%);
+  height: 100dvh;
+  padding: 28px 24px;
+  overflow-y: auto;
+  background: #fffaf7;
+  border-right: 1px solid #f2cdd2;
+  box-shadow: 8px 0 24px #2a1f3320;
+  transform: translateX(-100%);
+  visibility: hidden;
+  transition: transform .25s ease, visibility 0s linear .25s;
+  z-index: 10;
+}
+
+.notifications-panel.open {
+  transform: translateX(0);
+  visibility: visible;
+  transition: transform .25s ease, visibility 0s;
+}
+
+#notifications-panel h2 {
+  font-size: 22px;
+  margin: 0 0 16px;
+}
+
+.notifications-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+}
+
+
+.notifications-list button {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  padding: 12px 14px;
+  background: white;
+  border: 1px solid #f2cdd2;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 14px;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .2s ease;
+}
+
+.notifications-list button:hover {
+  border-color: #f6545c;
+}
+
+.notifications-label {
+  justify-self: start;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: #f6545c;
+  color: white;
+  font-size: 12px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .notifications-panel {
+    transition: visibility 0s;
+  }
+}
+
 @media (max-width: 650px) {
+  .notifications-panel {
+    width: 100%;
+  }
+
   .event-card-large .event-save {
     top: 18px;
     right: 18px;
@@ -881,10 +1026,56 @@ label {
   }
 }
 
+.popup {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  z-index: 1000;
+  isolation: isolate;               
+
+  display: flex;
+  gap: 10px;
+  padding: 12px;
+  font-size: 15px;
+  border-radius: 40px;
+  background-color: rgba(0, 0, 0, 0.7);
+  box-shadow: 1px 1px 10px rgba(150, 150, 150, 0.2);
+
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 100%);
+  transition: bottom 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
+}
+
+.popup.visible {
+  bottom: 45px;
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, 0);
+}
+
+/* noise layer */
+.popup::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;                      /* behind the popup's content */
+  border-radius: inherit;           /* clips the noise to the rounded corners */
+  pointer-events: none;
+  opacity: 0.6;                    /* grain strength */
+  mix-blend-mode: soft-light;       /* use soft-light/overlay on dark; multiply won't show on black */
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  background-size: 200px 200px;
+}
+
 .justify-start {
   justify-content: flex-start;
 }
 
 .align-start {
   align-items: flex-start;
+}
+
+.mini-text {
+  font-size: 10px;
 }

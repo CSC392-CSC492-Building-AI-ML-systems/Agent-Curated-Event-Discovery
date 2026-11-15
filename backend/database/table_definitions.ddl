@@ -66,6 +66,24 @@ CREATE TABLE IF NOT EXISTS EventTags (
 	FOREIGN KEY (tagId) REFERENCES Tag(id) ON DELETE CASCADE
 );
 
+
+CREATE TABLE event_liked (
+    user_id UUID NOT NULL,
+    event_id INTEGER NOT NULL,
+    timestamp TIMESTAMP NOT NULL DEFAULT now(),
+    PRIMARY KEY(user_id, event_id),
+    FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE,
+    FOREIGN KEY (event_id) REFERENCES Event(id) ON DELETE CASCADE
+);
+
+CREATE TABLE event_saved (
+    user_id UUID NOT NULL,
+    event_id INTEGER NOT NULL,
+    timestamp TIMESTAMP NOT NULL,
+    PRIMARY KEY(user_id, event_id) DEFAULT now(),
+    FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE,
+    FOREIGN KEY (event_id) REFERENCES Event(id) ON DELETE CASCADE
+);
 CREATE TABLE IF NOT EXISTS user_recommended_events (
 	user_id UUID NOT NULL,
 	event_id INTEGER NOT NULL,

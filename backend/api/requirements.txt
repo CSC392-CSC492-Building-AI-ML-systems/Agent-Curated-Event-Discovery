@@ -18,6 +18,7 @@ dotenv==0.9.9
 dynaconf==3.3.5
 email-validator==2.3.0
 fastapi==0.143.0
+icalendar==7.3.0
 fastapi-cli==0.0.32
 fastapi-cloud-cli==0.26.0
 fastar==0.12.0
