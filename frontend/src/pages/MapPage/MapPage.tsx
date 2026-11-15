@@ -621,6 +621,7 @@ function MapPage({
                               !eventInBounds(event, mapRef, infoOpen, listOpen)&&
                               mapRef.current?.easeTo({center: [event.longitude, event.latitude], duration: 500, padding: {right: (infoOpen? 376: 0) + (listOpen? 376: 0)}});
                           }}
+                          redirect={false}
                         />
                       ))}
                   </div>
@@ -651,6 +652,7 @@ function MapPage({
                             !eventInBounds(event, mapRef, infoOpen, listOpen)&&
                             mapRef.current?.easeTo({center: [event.longitude, event.latitude], duration: 500, padding: {right: (infoOpen? 376: 0) + (listOpen? 376: 0)}});
                         }}
+                        redirect={false}
                       />))
                       }
                     </div>

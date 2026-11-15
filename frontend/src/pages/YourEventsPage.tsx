@@ -127,6 +127,7 @@ export default function YourEventsPage({
                       saved
                       onSave={onSave}
                       onOpen={setSelected}
+                      redirect={true}
                     />
                   ))}
                 </div>

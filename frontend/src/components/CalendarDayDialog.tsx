@@ -17,6 +17,6 @@ export default function CalendarDayDialog({ dayKey, events, onOpen, onSave, onCl
         <button className="discover-dialog-close" aria-label="Close day events" onClick={onClose}>×</button>
         <h2 id="calendar-day-title">{title}</h2>
         <p>{events.length} saved {events.length === 1 ? 'event' : 'events'}</p>
-        <div className="discover-list">{events.map(event => <DiscoverEventCard key={event.id} event={event} compact saved onSave={onSave} onOpen={onOpen} />)}</div>
+        <div className="discover-list">{events.map(event => <DiscoverEventCard key={event.id} event={event} compact saved onSave={onSave} onOpen={onOpen} redirect={true} />)}</div>
     </dialog>;
 }

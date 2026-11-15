@@ -110,6 +110,7 @@ export default function TagPage({
                         saved={saved.includes(event.id)}
                         onSave={onSave}
                         onOpen={setSelected}
+                        redirect={true}
                       />
                     ))}
                   </div>

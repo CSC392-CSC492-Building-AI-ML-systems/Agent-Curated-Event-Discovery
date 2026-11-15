@@ -13,6 +13,7 @@ type Props = {
   // Only recommended events pass this so the reject button not on regular upcoming section events
   onReject?: (id: number) => void;
   isRecommended?: boolean;
+  redirect: boolean;
 };
 
 export default function DiscoverEventCard({
@@ -23,13 +24,14 @@ export default function DiscoverEventCard({
   onSave,
   onReject,
   isRecommended,
+  redirect,
 }: Props) {
     const navigate = useNavigate();
     const navigateToEvent = () => {
-      if (isRecommended && !compact) {
+      if (isRecommended && redirect) {
         navigate(`/events/${event.id}`, { state: { origin: { path: "/discover" }, isRecommended: true } });
       }
-      else if (!compact) {
+      else if (redirect) {
         navigate(`/events/${event.id}`, { state: { origin: { path: "/discover" } } });
       }
       else {

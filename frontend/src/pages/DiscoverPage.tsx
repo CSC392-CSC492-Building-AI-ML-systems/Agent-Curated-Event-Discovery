@@ -54,6 +54,7 @@ export default function DiscoverPage({
       saved={saved.includes(event.id)}
       onSave={onSave}
       onOpen={setSelected}
+      redirect={true}
     />
   );
 

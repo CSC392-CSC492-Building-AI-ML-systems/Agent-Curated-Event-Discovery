@@ -5,6 +5,7 @@ import type { EventideEvent } from "../../interfaces/interfaces";
 import useEvent from "../../hooks/useEvent";
 import "./EventPage.css";
 import { rejectRecommendedEvent } from "../../api/recommendedEvents";
+import { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 
 type Props = {
@@ -56,15 +57,42 @@ export default function EventPage({ saved, onSave }: Props) {
   const navigate = useNavigate();
   const origin = location.state?.origin;
   const { session, loading: checkingSession } = useAuth();
+  const [isRejected, setIsRejected] = useState(false);
+  const [isRejecting, setIsRejecting] = useState(false);
+  const [rejectNotification, setRejectNotification] = useState("");
 
   const token = session?.access_token;
 
   const { event, loading, error } = useEvent(id);
 
-  function onReject(id: number) {
-    if (!token) return;
+  async function onReject(id: number) {
+  if (!token || isRejected || isRejecting) return;
+
+  setIsRejecting(true);
+  setRejectNotification("");
+
+   if (!token) return;
+   try {
     void rejectRecommendedEvent(id, token).catch(() => {});
+    setIsRejected(true);
+    setRejectNotification("Event successfully rejected");
+  } catch (error) {
+    console.error("Failed to reject event:", error);
+    setRejectNotification("Failed to reject event. Please try again.");
+  } finally {
+    setIsRejecting(false);
   }
+}
+
+useEffect(() => {
+  if (!rejectNotification) return;
+
+  const timer = setTimeout(() => {
+    setRejectNotification("");
+  }, 3000);
+
+  return () => clearTimeout(timer);
+}, [rejectNotification]);
 
   function handleBack() {
     if (origin?.path) {
@@ -197,14 +225,33 @@ export default function EventPage({ saved, onSave }: Props) {
                       {saved.includes(event.id) ? "★ Saved" : "☆ Save event"}
                     </button>
                     {isRecommended && (
-                      <button
-                        className="event-page-save"
-                        aria-label={`Not interested in ${event.title}`}
-                        onClick={() => onReject(event.id)}
-                      >
-                        ✕ Reject event
-                      </button>
-                    )}
+  <>
+    <button
+      type="button"
+      className="event-page-save event-page-reject"
+      aria-label={`Not interested in ${event.title}`}
+      onClick={() => onReject(event.id)}
+      disabled={isRejected || isRejecting}
+    >
+      {isRejecting
+        ? "Rejecting..."
+        : isRejected
+          ? "✓ Event rejected"
+          : "✕ Reject event"}
+    </button>
+
+    {rejectNotification && (
+      <div
+        className={`event-page-notification ${
+          isRejected ? "success" : "error"
+        }`}
+        role="status"
+      >
+        {rejectNotification}
+      </div>
+    )}
+  </>
+)}
 
                     {event.link && (
                       <a
