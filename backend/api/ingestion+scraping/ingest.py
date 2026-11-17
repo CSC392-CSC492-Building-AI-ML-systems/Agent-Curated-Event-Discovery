@@ -2,7 +2,7 @@ import requests
 from dotenv import load_dotenv
 import os
 from backend.api.models.event import TogatherEvent
-from database import SessionLocal
+from .database import SessionLocal
 from sqlalchemy.dialects.postgresql import insert
 from datetime import date
 from dateutil.relativedelta import relativedelta

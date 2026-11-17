@@ -90,7 +90,6 @@ class Event(Base):
         secondary=event_tags,
         back_populates="events",
     )
-    likes: Mapped[int] = mapped_column(Integer)
     saves: Mapped[int] = mapped_column(Integer)
 
 

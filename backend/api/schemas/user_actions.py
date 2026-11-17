@@ -1,9 +1,9 @@
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel
 
-class LikeOrSaveUpdate(BaseModel):
-    id: int # event.id to like
+class SaveUpdate(BaseModel):
+    id: int # event.id to save
 
-class LikeOrSaveResponse(BaseModel):
+class SaveResponse(BaseModel):
     message: str
     id: int
 

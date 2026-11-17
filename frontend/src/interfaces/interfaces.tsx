@@ -52,7 +52,6 @@ export interface EventideEvent {
   link: string;
   eighteenPlus: boolean;
   imageUrl?: string;
-  likes: number;
   saves: number;
 }
 
@@ -83,8 +82,6 @@ export type EventPageProps = EventRequestProps & {
   events: EventideEvent[];
   saved: number[];
   onSave: (id: number) => void;
-  liked: number[];
-  onLike: (id: number) => void;
   followed: EventideTag[];
   onFollow: (tag: EventideTag) => void;
   browse: BrowseState;

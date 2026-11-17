@@ -13,10 +13,10 @@ import ProfilePage from "./pages/ProfilePage/ProfilePage";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { PreferencesProvider } from "./contexts/PreferencesContext";
 import { SavedEventsProvider } from "./contexts/SavedEventsContext";
-import useEvents, { useEventsLiked, useEventsSaved } from "./hooks/useEvents";
+import useEvents, { useEventsSaved } from "./hooks/useEvents";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import type { BrowseState, EventideTag } from "./interfaces/interfaces";
-import { eventLiked, eventSaved } from "./api/user_actions";
+import { eventSaved } from "./api/user_actions";
 import { createClient } from "./lib/supabase/client";
 import { ApiError } from "./api/client";
 import Popup from "./components/Popup";
@@ -41,7 +41,6 @@ function EventRoutes() {
   const { events, loading, error, retry } = useEvents();
   const {session} = useAuth();
   // hooks always run, in the same order every render
-  const likedInfo = useEventsLiked(session?.access_token?? null);
   const savedInfo = useEventsSaved(session?.access_token?? null);
   
   
@@ -73,6 +72,7 @@ function EventRoutes() {
     if (storageKey) localStorage.setItem(storageKey, JSON.stringify(saved));
   }, [storageKey, saved]);
   const onSave = async(id: number) => {
+    console.log(`run this!: ${id}`)
     const save = !saved.includes(id);
     setSaved(save ? [...saved, id]: saved.filter((value) => value !== id)
     );
@@ -85,6 +85,7 @@ function EventRoutes() {
         if (error || !data.session?.access_token) throw new ApiError(401, "Please log in again before saving your preferences.");
         const result = await eventSaved(save? "PUT": "DELETE", { id: id }, data.session?.access_token, { signal: controller.signal });
         if (controller.signal.aborted) return;
+        if (!Object.hasOwn(result, 'message')) throw new Error("Could not save event. Please retry."); //result only has attribute 'message' on success, for error responses it uses 'detail'
       } catch (error) {
         if (!controller.signal.aborted) {
           setShowPopup(true);
@@ -94,34 +95,7 @@ function EventRoutes() {
         setSaved(save ? saved.filter((value) => value !== id): [...saved, id]);
       } 
     }
-  const [liked, setLiked] = useState<number[]>([]);
-  const onLike = async(id: number) =>{
-    const like = !liked.includes(id)
-    console.log("liked")
-    setLiked(like ? [...liked, id]: liked.filter((value) => value !== id));
-    const event = events.find((event) => event.id === id);
-    if (event ) {if (like) {event.likes +=1} else{event.likes -= 1} }
-    const controller = new AbortController();
-    try {
-      const { data, error } = await createClient().auth.getSession();
-      if (controller.signal.aborted) return;
-      if (error || !data.session?.access_token) throw new ApiError(401, "Please log in again before saving your preferences.");
-      const result = await eventLiked(like? "PUT": "DELETE", { id: id }, data.session?.access_token, { signal: controller.signal });
-      if (controller.signal.aborted) return;
-    } catch (error) {
-      if (!controller.signal.aborted) {
-        setShowPopup(true);
-        setPopupMessage("Could not like event. Please retry later.")
-      }
-      if (event ) {if (like) {event.likes -=1} else{event.likes += 1} }
-      setLiked(like ? liked.filter((value) => value !== id): [...liked, id]);
-    } 
-  }
   
-  useEffect(()=>{
-    const liked = likedInfo.events.map((e) => e.id);
-    setLiked(liked);
-  }, [likedInfo.events])
   useEffect(()=>{
     const saved = savedInfo.events.map((e) => e.id);
     setSaved(saved);
@@ -131,8 +105,6 @@ function EventRoutes() {
     events,
     saved,
     onSave,
-    liked,
-    onLike,
     followed,
     onFollow,
     loading,
@@ -142,19 +114,14 @@ function EventRoutes() {
     setBrowse,
   };
 
-  const likedSavedEventProps = {
+  const savedEventProps = {
     events,
     saved,
     onSave,
-    liked,
-    onLike,
     followed,
     onFollow,
-    loadingLiked: likedInfo.loading,
     loadingSaved: savedInfo.loading,
-    errorLiked: likedInfo.error,
     errorSaved: savedInfo.error,
-    retryLiked: likedInfo.retry,
     retrySaved: savedInfo.retry,
     browse,
     setBrowse,
@@ -181,9 +148,8 @@ function EventRoutes() {
         />
         <Route path="/profile" element={<ProfilePage route="settings" />} />
         <Route path="/profile/availability" element={<ProfilePage route="availability" />} />
-        <Route path="/saves" element={<YourEventsPage {...likedSavedEventProps} route="saves"/>}/>
-        <Route path="/likes" element={<YourEventsPage {...likedSavedEventProps} route="likes"/>}/>
-        <Route path="/calendar" element={<YourEventsPage {...likedSavedEventProps} route="calendar"/>}/>
+        <Route path="/saves" element={<YourEventsPage {...savedEventProps} route="saves"/>}/>
+        <Route path="/calendar" element={<YourEventsPage {...savedEventProps} route="calendar"/>}/>
       </Routes>
     </SavedEventsProvider>
       <Popup visible={showPopup} message={popupMessage} duration={3000} onClose={handlePopupClose}/>

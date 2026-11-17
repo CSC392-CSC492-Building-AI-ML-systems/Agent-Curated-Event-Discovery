@@ -48,8 +48,6 @@ const eventInBounds = (
 };
 function MapPage({
   events,
-  liked,
-  onLike,
   saved,
   onSave,
   followed,
@@ -596,8 +594,6 @@ function MapPage({
                       }}
                       popup={false}
                       event={selectedEvent}
-                      liked={liked.includes(selectedEvent.id)}
-                      onLike={onLike}
                       saved={saved.includes(selectedEvent.id)}
                       onSave={onSave}
                       onClose={closeEventDetails}
@@ -682,8 +678,6 @@ function MapPage({
                           key={event.id}
                           event={event}
                           compact={true}
-                          liked={liked.includes(event.id)}
-                          onLike={onLike}
                           saved={saved.includes(event.id)}
                           onSave={onSave}
                           onOpen={(eventideEvent) => {
@@ -734,8 +728,6 @@ function MapPage({
                         key={event.id}
                         event={event}
                         compact={true}
-                        liked={liked.includes(event.id)}
-                        onLike={onLike}
                         saved={saved.includes(event.id)}
                         onSave={onSave}
                         onOpen={(eventideEvent) => {

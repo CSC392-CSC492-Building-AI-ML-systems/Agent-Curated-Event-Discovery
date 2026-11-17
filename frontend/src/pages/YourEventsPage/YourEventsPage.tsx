@@ -3,7 +3,6 @@ import { useLocation } from "react-router-dom";
 import { Header, YourEventsNavBar } from "../../components/NavBar";
 import EventRequestState from "../../components/EventRequestState";
 import SavesPage from "./SavesPage";
-import LikesPage from "./LikesPage";
 import CalendarPage from "./CalendarPage";
 import "../DiscoverPage.css";
 import "./YourEventsPage.css";
@@ -15,11 +14,6 @@ type YourEventsPageProps = {
   events: EventideEvent[];
   saved: number[];
   onSave: (id: number) => void;
-  liked: number[];
-  onLike: (id: number) => void;
-  loadingLiked: boolean;
-  errorLiked: string | null;
-  retryLiked: (token: string | null)=> void;
   loadingSaved: boolean;
   errorSaved: string | null;
   retrySaved: (token: string | null)=> void;
@@ -29,11 +23,6 @@ export default function YourEventsPage({
 events,
   saved,
   onSave,
-  liked, 
-  onLike,
-  loadingLiked,
-  errorLiked,
-  retryLiked,
   loadingSaved,
   errorSaved,
   retrySaved,
@@ -42,12 +31,10 @@ events,
   const {session} = useAuth();
   const accessToken = session?.access_token;
   function routePage(route: string){
-    if (route === "likes") {
-        return <LikesPage events={events} saved={saved} onSave={onSave} liked={liked} onLike={onLike}/>
-    }else if (route === "saves") {
-        return <SavesPage events={events} saved={saved} onSave={onSave} liked={liked} onLike={onLike}/>
+    if (route === "saves") {
+        return <SavesPage events={events} saved={saved} onSave={onSave}/>
     }else if (route === "calendar") {
-        return <CalendarPage saved={saved} onSave={onSave} liked={liked} onLike={onLike}/>
+        return <CalendarPage saved={saved} onSave={onSave}/>
     }
   }
   const location = useLocation();
@@ -58,8 +45,8 @@ events,
     return () => cancelAnimationFrame(frame);
   }, [location.key, location.state]);
   
-  const error = route === "calendar" ? null : route === "likes" ? errorLiked : errorSaved;
-  const loading = route === "calendar" ? false : route === "likes" ? loadingLiked : loadingSaved;
+  const error = route === "calendar" ? null : errorSaved;
+  const loading = route === "calendar" ? false : loadingSaved;
 
   return (
     <div className="discover-page">
@@ -67,7 +54,7 @@ events,
         <Header savedCount={saved.length} />
         <main>
           <YourEventsNavBar route={route}/>
-          <EventRequestState loading={loading} error={error} retry={()=>{retryLiked(accessToken??null);retrySaved(accessToken??null);}} />
+          <EventRequestState loading={loading} error={error} retry={()=>{retrySaved(accessToken??null);}} />
           {!(loading) &&
             !(error) &&
             routePage(route)

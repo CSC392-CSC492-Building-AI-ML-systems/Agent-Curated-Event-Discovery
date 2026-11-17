@@ -17,8 +17,6 @@ export default function DiscoverPage({
   events,
   saved,
   onSave,
-  liked,
-  onLike,
   followed,
   browse,
   setBrowse,
@@ -58,8 +56,6 @@ export default function DiscoverPage({
       compact={compact}
       saved={saved.includes(event.id)}
       onSave={onSave}
-      liked={liked.includes(event.id)}
-      onLike={onLike}
       onOpen={setSelected}
       redirect={true}
     />
@@ -122,7 +118,7 @@ export default function DiscoverPage({
             />
           </div>
 
-          <ForYouSection saved={saved} onSave={onSave} liked={liked} onLike={onLike} />  {/*Need to display the star and its current state*/}
+          <ForYouSection events={events} saved={saved} onSave={onSave}/>  {/*Need to display the star and its current state*/}
           <EventRequestState loading={loading} error={error} retry={retry} />
 
           {!loading && !error && (
@@ -224,8 +220,6 @@ export default function DiscoverPage({
             event={selected}
             saved={saved.includes(selected.id)}
             onSave={onSave}
-            liked={liked.includes(selected.id)}
-            onLike={onLike}
             onClose={() => setSelected(null)}
           />
         )}

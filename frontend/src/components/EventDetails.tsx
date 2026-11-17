@@ -14,8 +14,6 @@ export default function EventDetails({
   event,
   saved,
   onSave,
-  liked,
-  onLike,
   onReject,
   onClose,
   popup = true,
@@ -24,8 +22,6 @@ export default function EventDetails({
   event: EventideEvent;
   saved: boolean;
   onSave: (id: number) => void;
-  liked: boolean;
-  onLike: (id: number) => void;
   // Only recommended events pass this, so the reject button stays off other events.
   onReject?: (id: number) => void;
   onClose: () => void;
@@ -59,15 +55,6 @@ export default function EventDetails({
         ))}
       </div>
       <div className="row small-gap">
-        <button
-          type="button"
-          className="pill"
-          aria-pressed={liked}
-          onClick={() => onLike(event.id)}
-          style={{display: "flex", justifyContent: "center", alignItems: "center", gap: "10px"}}
-        >
-          {liked? <HeartIconFilled height="20px" width="20px"/>: <HeartIcon height="20px" width="20px"/> }<p style={{margin: 0}}>{liked ? "Liked" : "Like event"}</p>
-        </button>
         <button
           type="button"
           className="pill"

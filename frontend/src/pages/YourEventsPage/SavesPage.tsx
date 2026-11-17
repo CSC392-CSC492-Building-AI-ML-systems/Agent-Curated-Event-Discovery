@@ -9,10 +9,8 @@ type SavesPageProps = {
     events: EventideEvent[]; //my saved events\
     saved: number[];
     onSave: (id: number) => void;
-    liked: number[];
-    onLike: (id: number) => void;
 }
-function SavesPage({events, saved, onSave, liked, onLike}: SavesPageProps){
+function SavesPage({events, saved, onSave}: SavesPageProps){
     const [selected, setSelected] = useState<EventideEvent | null>(null);
     const mine = events
     .filter((event) => saved.includes(event.id))
@@ -47,9 +45,8 @@ function SavesPage({events, saved, onSave, liked, onLike}: SavesPageProps){
                       event={event}
                       saved
                       onSave={onSave}
-                      liked={liked.includes(event.id)}
-                      onLike={onLike}
                       onOpen={setSelected}
+                      redirect={false}
                     />
                   ))}
                 </div>
@@ -60,8 +57,6 @@ function SavesPage({events, saved, onSave, liked, onLike}: SavesPageProps){
                 event={selected}
                 saved={saved.includes(selected.id)}
                 onSave={onSave}
-                liked={liked.includes(selected.id)}
-                onLike={onLike}
                 onClose={() => setSelected(null)}
             />
             )}
