@@ -89,7 +89,7 @@ The authenticated API is:
 - `DELETE /users/me/calendar` with `{ "id": 123 }` — remove an event, idempotently.
 
 All requests require `Authorization: Bearer <Supabase access token>`; the user ID
-comes from the verified token. Calendar actions do not affect like/save counts.
+comes from the verified token. Calendar actions do not affect save counts.
 Calendar membership persists across reloads. Failed requests leave the calendar
 unchanged and display an error. The calendar screen supports retry if loading
 fails.
