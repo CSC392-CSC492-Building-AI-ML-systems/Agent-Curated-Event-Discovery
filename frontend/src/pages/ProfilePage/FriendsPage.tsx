@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import "../DiscoverPage.css";
 import "./ProfilePages.css";
+import FriendsPanel from "../../components/FriendsPanel";
 
 export default function FriendsPage() {
   const { session, loading, error, retry } = useAuth();
@@ -12,6 +13,6 @@ export default function FriendsPage() {
       : error ? <div role="alert"><p>{error}</p>
         <button type="button" className="pill" onClick={retry}>Retry login</button></div>
       : !session ? <p>Log in to view your friends. <Link to="/login" state={{ returnTo: "/profile/friends" }}>Log in</Link></p>
-      : <p>Your friends and friend requests will appear here.</p>}
+      : <FriendsPanel accessToken={session.access_token} />}
   </main>;
 }
