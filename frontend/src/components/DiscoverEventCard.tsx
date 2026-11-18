@@ -40,7 +40,7 @@ export default function DiscoverEventCard({
       console.error("Failed to track event click:", error);
     });
   };
-  const showPrice = event.price && event.price != 0
+  const free = event.price == 0
   return (
     <article
       className={`event-card ${compact ? "event-card-compact" : "event-card-large"}`}
@@ -61,11 +61,9 @@ export default function DiscoverEventCard({
                   18+
                 </span>: <></>
               }
-              { showPrice? 
-                <span className="pill2" >
-                  ${event.price}
-                </span>: <></>
-              }
+              <span className="pill2" >
+                {free? "Free": `$${event.price}`}
+              </span>       
             </div>: <></>}
             ✦
           </span>
@@ -91,11 +89,9 @@ export default function DiscoverEventCard({
               18+
             </span>: <></>
           }
-          { showPrice? 
-            <span className="pill2" style={{fontSize: "11px", lineHeight: "11px"}}>
-              ${event.price}
-            </span>: <></>
-          }
+          <span className="pill2" style={{fontSize: "11px", lineHeight: "11px"}}>
+            {free? "Free": `$${event.price}`}
+          </span>
         </div>: <></>}
       </button>
       {!compact && (

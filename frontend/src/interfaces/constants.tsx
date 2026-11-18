@@ -14,4 +14,4 @@ export const INITIAL_FILTERS: BrowseState = {
 }
 
 export const MIN_PRICE = 0
-export const MAX_PRICE = 50
+export const MAX_PRICE = 200
