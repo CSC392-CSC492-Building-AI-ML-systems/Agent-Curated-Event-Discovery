@@ -1,10 +1,10 @@
 import TagLink from "./TagLink";
 import CalendarEventButton from "./CalendarEventButton";
 import type { EventideEvent } from "../interfaces/interfaces";
-import SaveIcon from '../assets/images/save-icon.svg?react';
-import SaveIconFilled from '../assets/images/save-icon-filled.svg?react';
-import HeartIcon from '../assets/images/heart-icon.svg?react';
-import HeartIconFilled from '../assets/images/heart-icon-filled.svg?react';
+import SaveIcon from "../assets/images/save-icon.svg?react";
+import SaveIconFilled from "../assets/images/save-icon-filled.svg?react";
+import HeartIcon from "../assets/images/heart-icon.svg?react";
+import HeartIconFilled from "../assets/images/heart-icon-filled.svg?react";
 import { useAnalytics } from "../hooks/useAnalytics";
 
 import { formatEventDate } from "../utils/eventDate";
@@ -37,24 +37,26 @@ export default function DiscoverEventCard({
   isRecommended,
   redirect,
 }: Props) {
-    const { logEventClick } = useAnalytics();
-    const { session } = useAuth();
-    const navigate = useNavigate();
-    const navigateToEvent = () => {
-      //first log the event click
-      void logEventClick(Number(event.id)).catch((error) => {
-        console.error("Failed to track event click:", error);
+  const { logEventClick } = useAnalytics();
+  const { session } = useAuth();
+  const navigate = useNavigate();
+  const navigateToEvent = () => {
+    //first log the event click
+    void logEventClick(Number(event.id)).catch((error) => {
+      console.error("Failed to track event click:", error);
+    });
+    if (isRecommended && redirect) {
+      navigate(`/events/${event.id}`, {
+        state: { origin: { path: "/discover" }, isRecommended: true },
       });
-      if (isRecommended && redirect) {
-        navigate(`/events/${event.id}`, { state: { origin: { path: "/discover" }, isRecommended: true } });
-      }
-      else if (redirect) {
-        navigate(`/events/${event.id}`, { state: { origin: { path: "/discover" } } });
-      }
-      else {
-        onOpen(event);
-      }
-    };
+    } else if (redirect) {
+      navigate(`/events/${event.id}`, {
+        state: { origin: { path: "/discover" } },
+      });
+    } else {
+      onOpen(event);
+    }
+  };
   return (
     <article
       className={`event-card ${compact ? "event-card-compact" : "event-card-large"}`}
@@ -103,19 +105,41 @@ export default function DiscoverEventCard({
             className="event-like"
             aria-label={`${liked ? "Unlike" : "Like"} ${event.title}`}
             aria-pressed={liked}
-            onClick={() => {if (session?.access_token) {onLike(event.id)} else {navigate("/login")}}}
+            onClick={() => {
+              if (session?.access_token) {
+                onLike(event.id);
+              } else {
+                navigate("/login");
+              }
+            }}
           >
-            {liked? <HeartIconFilled color="#f6545c" className="icon"/>: <HeartIcon color="#f6545c" className="icon"/>}
+            {liked ? (
+              <HeartIconFilled color="#f6545c" className="icon" />
+            ) : (
+              <HeartIcon color="#f6545c" className="icon" />
+            )}
           </button>
-          {!compact && event.likes > 0 && <p className="mini-text">{event.likes}</p>}
+          {!compact && event.likes > 0 && (
+            <p className="mini-text">{event.likes}</p>
+          )}
         </div>
         <button
           className="event-save"
           aria-label={`${saved ? "Unsave" : "Save"} ${event.title}`}
           aria-pressed={saved}
-          onClick={() => {if (session?.access_token) {onSave(event.id)} else {navigate("/login")}}}
+          onClick={() => {
+            if (session?.access_token) {
+              onSave(event.id);
+            } else {
+              navigate("/login");
+            }
+          }}
         >
-          {saved? <SaveIconFilled color="#f6545c" className="icon"/>: <SaveIcon color="#f6545c" className="icon"/>}
+          {saved ? (
+            <SaveIconFilled color="#f6545c" className="icon" />
+          ) : (
+            <SaveIcon color="#f6545c" className="icon" />
+          )}
         </button>
         <CalendarEventButton event={event} />
         {onReject && (

@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 import os
 from backend.api.models.event import TogatherEvent
 from sqlalchemy import select, update, func
-from database import SessionLocal
+from backend.api.db.database_sync import SessionLocal
 from event_insertion import insert_event
 from helpers import enhance_description, valid_event
 from datetime import datetime

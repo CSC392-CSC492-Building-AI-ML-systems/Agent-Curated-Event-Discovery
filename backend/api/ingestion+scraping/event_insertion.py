@@ -1,4 +1,4 @@
-from database import SessionLocal
+from backend.api.db.database_sync import SessionLocal
 from sqlalchemy import insert, select, func, cast, Time
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from backend.api.models.event import Event, Venue, Organizer, Tag, event_tags
