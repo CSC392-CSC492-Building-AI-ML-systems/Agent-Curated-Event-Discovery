@@ -40,6 +40,7 @@ export default function DiscoverEventCard({
       console.error("Failed to track event click:", error);
     });
   };
+  const price_not_found = event.price == null
   const free = event.price == 0
   return (
     <article
@@ -62,7 +63,7 @@ export default function DiscoverEventCard({
                 </span>: <></>
               }
               <span className="pill2" >
-                {free? "Free": `$${event.price}`}
+                {price_not_found? "Price unavailable": free? "Free": `$${event.price}`}
               </span>       
             </div>: <></>}
             ✦
@@ -90,7 +91,7 @@ export default function DiscoverEventCard({
             </span>: <></>
           }
           <span className="pill2" style={{fontSize: "11px", lineHeight: "11px"}}>
-            {free? "Free": `$${event.price}`}
+            {price_not_found? "Price unavailable": free? "Free": `$${event.price}`}
           </span>
         </div>: <></>}
       </button>
