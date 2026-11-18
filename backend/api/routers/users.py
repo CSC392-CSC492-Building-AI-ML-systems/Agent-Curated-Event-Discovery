@@ -39,7 +39,7 @@ async def put_create(
     user_id = UUID(user["sub"])
     await db.execute(insert(UserPreferences).values(user_id=user_id, onboarding_completed=False))
     await db.commit()
-    return { id: user_id } 
+    return { id: user_id }
 
 @router.get("/me/preferences", response_model=PreferencesResponse)
 async def get_preferences(
@@ -62,7 +62,7 @@ async def get_preferences(
         interest_tag_ids=[tag_id for _, tag_id in rows if tag_id is not None],
         onboarding_completed=preferences.onboarding_completed,
     )
-    
+
 @router.put("/me/preferences", response_model=PreferencesResponse)
 async def put_preferences(
     payload: PreferencesUpdate,
@@ -135,7 +135,7 @@ async def reject_recommended_event(
             .where(UserRecommendedEvent.user_id == UUID(user["sub"]), UserRecommendedEvent.event_id == event_id)
             .values(rejected=True)
         )
-        
+
         if result.rowcount == 0:  # Only an event recommended to the user can be rejected
             raise HTTPException(status_code=404, detail="Event was not recommended to this user")
         await db.commit()
@@ -158,7 +158,7 @@ async def get_likes(
     user: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    print(f"user:{UUID(user["sub"])}")
+    print(f"user:{UUID(user['sub'])}")
     result = await db.execute(
         select(Event,
             func.ST_AsGeoJSON(Venue.coordinates).label("coordinates_geojson"))
@@ -171,7 +171,7 @@ async def get_likes(
         .offset(skip)
         .limit(limit)
     )
-    
+
     rows = result.all()
     return [
             build_event(event, coordinates_geojson)
@@ -181,7 +181,7 @@ async def get_likes(
 @router.put("/me/like", response_model=LikeOrSaveResponse)
 async def put_like(
     payload: LikeOrSaveUpdate,
-    user: dict = Depends(get_current_user), 
+    user: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     try:
@@ -208,7 +208,7 @@ async def put_like(
 @router.delete("/me/like", response_model=LikeOrSaveResponse)
 async def delete_like(
     payload: LikeOrSaveUpdate,
-    user: dict = Depends(get_current_user), 
+    user: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     try:
@@ -218,7 +218,7 @@ async def delete_like(
                     EventLiked.event_id == payload.id,
                 )
             )
-            if res.rowcount:                           
+            if res.rowcount:
                 await db.execute(
                     update(Event)
                     .where(Event.id == payload.id)
@@ -241,7 +241,7 @@ async def delete_like(
 async def get_saves(
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=100),
-    user: dict = Depends(get_current_user), 
+    user: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     result = await db.execute(
@@ -256,7 +256,7 @@ async def get_saves(
         .offset(skip)
         .limit(limit)
     )
-    
+
     rows = result.all()
     return [
             build_event(event, coordinates_geojson)
@@ -266,7 +266,7 @@ async def get_saves(
 @router.put("/me/save", response_model=LikeOrSaveResponse)
 async def put_save(
     payload: LikeOrSaveUpdate,
-    user: dict = Depends(get_current_user), 
+    user: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     try:
@@ -294,7 +294,7 @@ async def put_save(
 @router.delete("/me/save", response_model=LikeOrSaveResponse)
 async def delete_save(
     payload: LikeOrSaveUpdate,
-    user: dict = Depends(get_current_user), 
+    user: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     try:
@@ -304,7 +304,7 @@ async def delete_save(
                 EventSaved.event_id == payload.id,
             )
         )
-        if res.rowcount:                           
+        if res.rowcount:
             await db.execute(
                 update(Event)
                 .where(Event.id == payload.id)

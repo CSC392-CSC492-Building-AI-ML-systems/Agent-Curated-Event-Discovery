@@ -1,12 +1,12 @@
-from db.database_sync import SessionLocal
+from ..db.database_sync import SessionLocal
 from sqlalchemy import select, delete, func, union_all, literal, extract, text
 from sqlalchemy.orm import selectinload
 from sqlalchemy.dialects.postgresql import insert
-from models.event import Event, Tag, Venue
-from models.user_actions import EventLiked, EventSaved
-from models.analytics import EventClicked, EventPopular, EventTrending
-from models.preferences import UserPreferences
-from models.recommendations import UserRecommendedEvent
+from ..models.event import Event, Tag, Venue
+from ..models.user_actions import EventLiked, EventSaved
+from ..models.analytics import EventClicked, EventPopular, EventTrending
+from ..models.preferences import UserPreferences
+from ..models.recommendations import UserRecommendedEvent
 from typesafe_sdk import TypeSafeClient, Score
 
 def update_trends(number: int = 50) -> None:
@@ -15,8 +15,8 @@ def update_trends(number: int = 50) -> None:
 
     Popularity is calculated by summing up all event saves, likes and clicks.
     So popularity_score = saves*3 + likes*2 + clicks.
-    Trending is calculated by the same weighted score as popularity but with an added 'recency bias', 
-    a decay function with a half-life of 3 days. 
+    Trending is calculated by the same weighted score as popularity but with an added 'recency bias',
+    a decay function with a half-life of 3 days.
     So trending_score = sum(save*0.5^(age/3))*3 + sum(like*0.5^(age/3))*3 + sum(click*0.5^(age/3))*3
     """
     HALF_LIFE_DAYS = 3
@@ -47,14 +47,14 @@ def update_trends(number: int = 50) -> None:
             .order_by(score.desc(), last_interaction.desc(), interactions.c.event_id)
             .limit(number)
         )
-        
+
         stmt = insert(EventPopular).from_select(
             ["event_id", "score", "updated_at"], popularity_scores
-        )        
+        )
         session.execute(delete(EventPopular))
         session.execute(stmt)
-        
-        # update trending 
+
+        # update trending
         age_days = extract("epoch", func.now() - interactions.c.timestamp) / 86400.0
         decayed = interactions.c.w * func.power(0.5, age_days / HALF_LIFE_DAYS)
         score = func.sum(decayed).label("score")
@@ -71,7 +71,7 @@ def update_trends(number: int = 50) -> None:
                 func.now().label("updated_at"),
             )
             .group_by(interactions.c.event_id)
-            .having(score > 0.1)   
+            .having(score > 0.1)
             .order_by(score.desc(), last_interaction.desc(), interactions.c.event_id)
             .limit(number)
         )
@@ -125,7 +125,7 @@ def get_tag_scores(user_id: str, number: int=None) -> any:
         select(Tag, func.sum(event_scores.c.score).label("score"))
         .join(Event.tags)
         .join(event_scores, event_scores.c.event_id == Event.id)
-        .group_by(Tag.id) 
+        .group_by(Tag.id)
         .subquery("tag_scores")
     )
     max_score = func.max(tag_scores.c.score).over()
@@ -136,22 +136,22 @@ def get_tag_scores(user_id: str, number: int=None) -> any:
                 tag_scores.c.id,
                 normalized_scores.label("score")
             ).order_by(normalized_scores.desc(), tag_scores.c.id)
-    
+
     if number:
         result = result.limit(number)
-    return result 
+    return result
 
 def retrieve(user_id: str, number: int=50, location: int=None) -> list[dict]:
     """
-    Retrieve top <number> of events that user <user_id> would likely enjoy. 
+    Retrieve top <number> of events that user <user_id> would likely enjoy.
     Return as a list of events of type Event.
-    """ 
+    """
     INTERVAL = 30 #filter events by this number of days in the future
     DISTANCE = 10 #filter events by km away from user, if location is not None
     HALF_LIFE_DAYS = 7
     # LOW_DATA: weights when we don't know lots about the user - prioritise current trends
-    WEIGHTS_LOW_DATA = {"trending": 0.3, "recency": 0.3, "tag": 0.3, "popularity": 0, "price": 0.1 } 
-    WEIGHTS = {"tag": 0.4, "recency": 0.2, "trending": 0.1, "popularity": 0.1, "price": 0.1 } 
+    WEIGHTS_LOW_DATA = {"trending": 0.3, "recency": 0.3, "tag": 0.3, "popularity": 0, "price": 0.1 }
+    WEIGHTS = {"tag": 0.4, "recency": 0.2, "trending": 0.1, "popularity": 0.1, "price": 0.1 }
     filtered_events = (
         select(Event)
         .where(Event.enddate >= func.now(), Event.startdate < func.now() + text(f"INTERVAL '{INTERVAL} days'"))
@@ -233,7 +233,7 @@ def rank(events: list[dict], user_id: str, number: int) -> list[dict]:
     """
     Rank the given <events> for the user <user_id>, from most likely to save/like to least likely to save/like.
     Return a list of the top <number> of ranked events.
-    """    
+    """
     scores = [] #tuples, (id, score)
     user_tags = []
     user_events = []
@@ -251,7 +251,7 @@ def rank(events: list[dict], user_id: str, number: int) -> list[dict]:
         user_preferences = {"age_group": preferences[0], "budget": preferences[1]}
 
     user_details = {"top_tags": user_tags, "top_events": user_events, "preferences": user_preferences}
-    
+
     try:
         client = TypeSafeClient()
         for event in events:
@@ -274,9 +274,9 @@ def rank(events: list[dict], user_id: str, number: int) -> list[dict]:
                     ),
                 },
             )
-            
+
             score = response.answers["event_attendance"]
-            print(f"score: {score}, event: {event["id"]}")
+            print(f"score: {score}, event: {event['id']}")
             if score.confidence >= 0.5:
                 if score.score >= 1.8:
                     scores.append((event["id"], score.score))
@@ -293,7 +293,7 @@ def rank(events: list[dict], user_id: str, number: int) -> list[dict]:
 
 def insert_recommendations_for_user(user_id: str, num_retrieved: int=50, num_ranked: int=10) -> None:
     """
-    Get <number> of ranked, top recommendations for the user <user_id>. 
+    Get <number> of ranked, top recommendations for the user <user_id>.
     Populate the recommended_events table in PostgreSQL accordingly.
     """
     event_scores = retrieve(USER_ID, number=num_retrieved)
