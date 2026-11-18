@@ -23,28 +23,39 @@ import Popup from "./components/Popup";
 import CalendarProvider from "./contexts/CalendarProvider";
 
 function App() {
-  return <AuthProvider><PreferencesProvider><BrowserRouter><SessionRoutes /></BrowserRouter></PreferencesProvider></AuthProvider>;
+  return (
+    <AuthProvider>
+      <PreferencesProvider>
+        <BrowserRouter>
+          <SessionRoutes />
+        </BrowserRouter>
+      </PreferencesProvider>
+    </AuthProvider>
+  );
 }
 
 function SessionRoutes() {
   const { session } = useAuth();
   // Do not carry account-specific in-memory selections into a different login.
-  return <CalendarProvider key={session?.user.id ?? "guest"}><EventRoutes /></CalendarProvider>;
+  return (
+    <CalendarProvider key={session?.user.id ?? "guest"}>
+      <EventRoutes />
+    </CalendarProvider>
+  );
 }
 
 function EventRoutes() {
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
   const handlePopupClose = useCallback(() => setShowPopup(false), []);
-  <button onClick={() => setShowPopup(true)}>Save</button>
+  <button onClick={() => setShowPopup(true)}>Save</button>;
 
   const { events, loading, error, retry } = useEvents();
-  const {session} = useAuth();
+  const { session } = useAuth();
   // hooks always run, in the same order every render
-  const likedInfo = useEventsLiked(session?.access_token?? null);
-  const savedInfo = useEventsSaved(session?.access_token?? null);
-  
-  
+  const likedInfo = useEventsLiked(session?.access_token ?? null);
+  const savedInfo = useEventsSaved(session?.access_token ?? null);
+
   const [followed, setFollowed] = useState<EventideTag[]>([]);
   const [browse, setBrowse] = useState<BrowseState>({
     search: "",
@@ -72,60 +83,101 @@ function EventRoutes() {
   useEffect(() => {
     if (storageKey) localStorage.setItem(storageKey, JSON.stringify(saved));
   }, [storageKey, saved]);
-  const onSave = async(id: number) => {
+  const onSave = async (id: number) => {
     const save = !saved.includes(id);
-    setSaved(save ? [...saved, id]: saved.filter((value) => value !== id)
-    );
+    setSaved(save ? [...saved, id] : saved.filter((value) => value !== id));
     const event = events.find((event) => event.id === id);
-    if (event ) {if (save) {event.saves +=1} else{event.saves -= 1} }
-    const controller = new AbortController();
-    try {
-        const { data, error } = await createClient().auth.getSession();
-        if (controller.signal.aborted) return;
-        if (error || !data.session?.access_token) throw new ApiError(401, "Please log in again before saving your preferences.");
-        const result = await eventSaved(save? "PUT": "DELETE", { id: id }, data.session?.access_token, { signal: controller.signal });
-        if (controller.signal.aborted) return;
-      } catch (error) {
-        if (!controller.signal.aborted) {
-          setShowPopup(true);
-          setPopupMessage("Could not save event. Please retry later.")
-        }
-        if (event ) {if (save) {event.saves -=1} else{event.saves += 1} }
-        setSaved(save ? saved.filter((value) => value !== id): [...saved, id]);
-      } 
+    if (event) {
+      if (save) {
+        event.saves += 1;
+      } else {
+        event.saves -= 1;
+      }
     }
-  const [liked, setLiked] = useState<number[]>([]);
-  const onLike = async(id: number) =>{
-    const like = !liked.includes(id)
-    console.log("liked")
-    setLiked(like ? [...liked, id]: liked.filter((value) => value !== id));
-    const event = events.find((event) => event.id === id);
-    if (event ) {if (like) {event.likes +=1} else{event.likes -= 1} }
     const controller = new AbortController();
     try {
       const { data, error } = await createClient().auth.getSession();
       if (controller.signal.aborted) return;
-      if (error || !data.session?.access_token) throw new ApiError(401, "Please log in again before saving your preferences.");
-      const result = await eventLiked(like? "PUT": "DELETE", { id: id }, data.session?.access_token, { signal: controller.signal });
+      if (error || !data.session?.access_token)
+        throw new ApiError(
+          401,
+          "Please log in again before saving your preferences.",
+        );
+      const result = await eventSaved(
+        save ? "PUT" : "DELETE",
+        { id: id },
+        data.session?.access_token,
+        { signal: controller.signal },
+      );
       if (controller.signal.aborted) return;
     } catch (error) {
       if (!controller.signal.aborted) {
         setShowPopup(true);
-        setPopupMessage("Could not like event. Please retry later.")
+        setPopupMessage("Could not save event. Please retry later.");
       }
-      if (event ) {if (like) {event.likes -=1} else{event.likes += 1} }
-      setLiked(like ? liked.filter((value) => value !== id): [...liked, id]);
-    } 
-  }
-  
-  useEffect(()=>{
+      if (event) {
+        if (save) {
+          event.saves -= 1;
+        } else {
+          event.saves += 1;
+        }
+      }
+      setSaved(save ? saved.filter((value) => value !== id) : [...saved, id]);
+    }
+  };
+  const [liked, setLiked] = useState<number[]>([]);
+  const onLike = async (id: number) => {
+    const like = !liked.includes(id);
+    console.log("liked");
+    setLiked(like ? [...liked, id] : liked.filter((value) => value !== id));
+    const event = events.find((event) => event.id === id);
+    if (event) {
+      if (like) {
+        event.likes += 1;
+      } else {
+        event.likes -= 1;
+      }
+    }
+    const controller = new AbortController();
+    try {
+      const { data, error } = await createClient().auth.getSession();
+      if (controller.signal.aborted) return;
+      if (error || !data.session?.access_token)
+        throw new ApiError(
+          401,
+          "Please log in again before saving your preferences.",
+        );
+      const result = await eventLiked(
+        like ? "PUT" : "DELETE",
+        { id: id },
+        data.session?.access_token,
+        { signal: controller.signal },
+      );
+      if (controller.signal.aborted) return;
+    } catch (error) {
+      if (!controller.signal.aborted) {
+        setShowPopup(true);
+        setPopupMessage("Could not like event. Please retry later.");
+      }
+      if (event) {
+        if (like) {
+          event.likes -= 1;
+        } else {
+          event.likes += 1;
+        }
+      }
+      setLiked(like ? liked.filter((value) => value !== id) : [...liked, id]);
+    }
+  };
+
+  useEffect(() => {
     const liked = likedInfo.events.map((e) => e.id);
     setLiked(liked);
-  }, [likedInfo.events])
-  useEffect(()=>{
+  }, [likedInfo.events]);
+  useEffect(() => {
     const saved = savedInfo.events.map((e) => e.id);
     setSaved(saved);
-  }, [savedInfo.events])
+  }, [savedInfo.events]);
 
   const eventProps = {
     events,
@@ -161,32 +213,56 @@ function EventRoutes() {
   };
   return (
     <>
-    <SavedEventsProvider events={events} saved={saved} onSave={onSave}>
-      <Routes>
-        <Route path="/" element={<DiscoverPage {...eventProps} />} />
-        <Route path="/tags/:tagId" element={<TagPage {...eventProps} />} />
-        <Route path="/map" element={<MapPage {...eventProps} />} />
-        <Route path="/signup" element={<SignupPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/onboarding" element={<OnboardingPage />} />
-        <Route path="/profile" element={<ProfilePage route="settings"/>} />
-        <Route
-          path="/events/:eventId"
-          element={
-            <EventPage
-              saved={saved}
-              onSave={onSave}
-            />
-          }
-        />
-        <Route path="/profile" element={<ProfilePage route="settings" />} />
-        <Route path="/profile/availability" element={<ProfilePage route="availability" />} />
-        <Route path="/saves" element={<YourEventsPage {...likedSavedEventProps} route="saves"/>}/>
-        <Route path="/likes" element={<YourEventsPage {...likedSavedEventProps} route="likes"/>}/>
-        <Route path="/calendar" element={<YourEventsPage {...likedSavedEventProps} route="calendar"/>}/>
-      </Routes>
-    </SavedEventsProvider>
-      <Popup visible={showPopup} message={popupMessage} duration={3000} onClose={handlePopupClose}/>
+      <SavedEventsProvider events={events} saved={saved} onSave={onSave}>
+        <Routes>
+          <Route path="/" element={<DiscoverPage {...eventProps} />} />
+          <Route path="/tags/:tagId" element={<TagPage {...eventProps} />} />
+          <Route path="/map" element={<MapPage {...eventProps} />} />
+          <Route path="/signup" element={<SignupPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/onboarding" element={<OnboardingPage />} />
+          <Route path="/profile" element={<ProfilePage route="settings" />} />
+          <Route
+            path="/events/:eventId"
+            element={<EventPage saved={saved} onSave={onSave} />}
+          />
+          <Route path="/profile" element={<ProfilePage route="settings" />} />
+          <Route
+            path="/profile/friends"
+            element={<ProfilePage route="friends" />}
+          />
+          <Route
+            path="/profile/availability"
+            element={<ProfilePage route="availability" />}
+          />
+          <Route
+            path="/profile/security"
+            element={<ProfilePage route="security" />}
+          />
+          {/* <Route path="/likes" element={<ProfilePage route="likes" />} />
+        <Route path="/saves" element={<ProfilePage route="saves" />} /> */}
+          <Route
+            path="/saves"
+            element={<YourEventsPage {...likedSavedEventProps} route="saves" />}
+          />
+          <Route
+            path="/likes"
+            element={<YourEventsPage {...likedSavedEventProps} route="likes" />}
+          />
+          <Route
+            path="/calendar"
+            element={
+              <YourEventsPage {...likedSavedEventProps} route="calendar" />
+            }
+          />
+        </Routes>
+      </SavedEventsProvider>
+      <Popup
+        visible={showPopup}
+        message={popupMessage}
+        duration={3000}
+        onClose={handlePopupClose}
+      />
     </>
   );
 }

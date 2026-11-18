@@ -5,7 +5,7 @@ import { supabase_client } from "../lib/supabase/client";
 
 type AuthState = { session: Session | null; loading: boolean; error: string | null };
 const AuthContext = createContext<(AuthState & {
-  signOut: () => Promise<void>;
+  signOut: (scope?: "global" | "local") => Promise<void>;
   retry: () => void;
 }) | null>(null);
 
@@ -40,9 +40,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => { active = false; unsubscribe?.(); };
   }, [attempt]);
 
-  async function signOut() {
-    const { error } = await supabase_client.auth.signOut();
-    if (error) throw error;
+  async function signOut(scope: "global" | "local" = "global") {
+    const { error } = await supabase_client.auth.signOut({ scope });
+    if (error) {
+      // The SDK can clear local storage but still report a logout HTTP error.
+      // After deletion, that completed local cleanup is enough to continue.
+      if (scope !== "local") throw error;
+      const current = await supabase_client.auth.getSession();
+      if (current.error || current.data.session) throw error;
+    }
     setState({ session: null, loading: false, error: null });
   }
 

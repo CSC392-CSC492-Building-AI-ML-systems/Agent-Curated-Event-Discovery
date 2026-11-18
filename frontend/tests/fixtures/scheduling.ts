@@ -1,6 +1,7 @@
 import type { BrowserContext, Page } from "@playwright/test";
 import type { WeeklyAvailability } from "../../src/api/availabilityTypes";
 import type { ApiEvent } from "../../src/api/types";
+import type { UserProfile } from "../../src/api/profile";
 
 const TEST_TIME = new Date("2026-11-01T12:00:00Z");
 
@@ -25,7 +26,7 @@ export function makeEvent(id: number, overrides: Partial<ApiEvent> = {}): ApiEve
   };
 }
 
-function schedulingSession(userId = "00000000-0000-4000-8000-000000000001", email = "test@example.com") {
+function schedulingSession(userId = "00000000-0000-4000-8000-000000000001", email = "test@example.com", providers = ["email"]) {
   const encode = (value: unknown) => Buffer.from(JSON.stringify(value)).toString("base64url");
   const expires = Math.floor(TEST_TIME.getTime() / 1000) + 3600;
   const user = {
@@ -33,9 +34,9 @@ function schedulingSession(userId = "00000000-0000-4000-8000-000000000001", emai
     aud: "authenticated",
     role: "authenticated",
     email,
-    app_metadata: {},
+    app_metadata: { provider: providers[0], providers },
     user_metadata: {},
-    identities: [],
+    identities: providers.map(provider => ({ provider })),
     created_at: TEST_TIME.toISOString(),
   };
   const session = {
@@ -49,9 +50,9 @@ function schedulingSession(userId = "00000000-0000-4000-8000-000000000001", emai
   return session;
 }
 
-export async function setupScheduling(page: Page, context: BrowserContext) {
+export async function setupScheduling(page: Page, context: BrowserContext, options: { providers?: string[]; hasPassword?: boolean } = {}) {
   const encode = (value: unknown) => Buffer.from(JSON.stringify(value)).toString("base64url");
-  const session = schedulingSession();
+  const session = schedulingSession(undefined, undefined, options.providers);
   await page.clock.install({ time: TEST_TIME });
   await context.addCookies([{
     name: "sb-onboarding-test-auth-token",
@@ -78,17 +79,85 @@ export async function setupScheduling(page: Page, context: BrowserContext) {
     availabilityRequests: [] as { method: string; userId: string; body?: WeeklyAvailability }[],
     failAvailabilityRead: false,
     failAvailabilityWrite: false,
+    profiles: new Map<string, UserProfile>(),
+    failProfileRead: false,
+    failProfileWrite: false,
+    hasPassword: options.hasPassword ?? !(options.providers?.length === 1 && options.providers[0] === "google"),
+    requirePasswordReauthentication: false,
+    requireCurrentPassword: false,
+    confirmedEmail: null as string | null,
+    failCredentialUpdate: false,
+    credentialWrites: [] as Record<string, unknown>[],
+    failAccountDelete: false,
+    requireAccountReauthentication: false,
+    accountDeletions: [] as string[],
   };
   await page.route("https://onboarding-test.supabase.co/auth/v1/**", async route => {
     if (route.request().url().includes("/logout")) return route.fulfill({ status: 204 });
-    const email = route.request().postDataJSON()?.email;
+    const request = route.request();
+    const path = new URL(request.url()).pathname;
+    const authHeaders = { "X-Supabase-Api-Version": "2024-01-01", "Access-Control-Expose-Headers": "X-Supabase-Api-Version" };
+    if (path.endsWith("/token") && new URL(request.url()).searchParams.get("grant_type") === "pkce") {
+      state.confirmedEmail = "new@example.com";
+      return route.fulfill({ json: schedulingSession(undefined, state.confirmedEmail, options.providers) });
+    }
+    if (path.endsWith("/reauthenticate")) return route.fulfill({ json: {} });
+    if (path.endsWith("/user")) {
+      if (request.method() === "PUT") {
+        const body = request.postDataJSON();
+        state.credentialWrites.push(body);
+        if (state.failCredentialUpdate) return route.fulfill({ status: 422, headers: authHeaders, json: { code: "weak_password", msg: "Unable to update credentials. Please retry." } });
+        if (body.password && state.requirePasswordReauthentication && body.nonce !== "123456") {
+          return route.fulfill({ status: 400, headers: authHeaders, json: { code: body.nonce ? "reauthentication_not_valid" : "reauthentication_needed", msg: body.nonce ? "Invalid confirmation code." : "Reauthentication required." } });
+        }
+        if (body.password && state.requireCurrentPassword && body.current_password !== "OldPassword123!") {
+          return route.fulfill({ status: 400, headers: authHeaders, json: { code: body.current_password ? "current_password_mismatch" : "current_password_required", msg: "Current password required when setting new password." } });
+        }
+        if (body.password) state.hasPassword = true;
+      }
+      return route.fulfill({ json: { ...session.user, email: state.confirmedEmail ?? session.user.email } });
+    }
+    const email = request.postDataJSON()?.email;
     return route.fulfill({ json: email === "b@example.com"
       ? schedulingSession("00000000-0000-4000-8000-000000000002", email)
-      : schedulingSession() });
+      : schedulingSession(undefined, undefined, options.providers) });
   });
   await page.route("**/test-api/**", async route => {
     const request = route.request();
     const path = new URL(request.url()).pathname.replace("/test-api", "");
+    if (path === "/users/me/account/security") {
+      return route.fulfill({ json: { has_password: state.hasPassword } });
+    }
+    if (path === "/users/me/account") {
+      const token = request.headers().authorization?.replace("Bearer ", "");
+      if (!token) return route.fulfill({ status: 401 });
+      if (request.method() !== "DELETE") return route.fulfill({ status: 405 });
+      if (state.requireAccountReauthentication) return route.fulfill({ status: 403, json: { detail: "Please log in again before deleting your account." } });
+      if (state.failAccountDelete) return route.fulfill({ status: 502, json: { detail: "Unable to delete your account; please retry" } });
+      const userId = JSON.parse(Buffer.from(token.split(".")[1], "base64url").toString()).sub as string;
+      state.accountDeletions.push(userId);
+      state.profiles.delete(userId);
+      state.availability.delete(userId);
+      return route.fulfill({ status: 204 });
+    }
+    if (path === "/users/me/profile") {
+      const token = request.headers().authorization?.replace("Bearer ", "");
+      if (!token) return route.fulfill({ status: 401 });
+      const userId = JSON.parse(Buffer.from(token.split(".")[1], "base64url").toString()).sub as string;
+      const empty = { first_name: null, last_name: null, username: null, updated_at: null };
+      if (request.method() === "GET") return state.failProfileRead
+        ? route.fulfill({ status: 500, json: { detail: "Unable to load profile" } })
+        : route.fulfill({ json: state.profiles.get(userId) ?? empty });
+      if (request.method() !== "PUT") return route.fulfill({ status: 405 });
+      if (state.failProfileWrite) return route.fulfill({ status: 500, json: { detail: "Unable to save profile" } });
+      const body = request.postDataJSON() as UserProfile;
+      if ([...state.profiles].some(([id, profile]) => id !== userId && body.username && body.username === profile.username)) {
+        return route.fulfill({ status: 409, json: { detail: "This username is already taken." } });
+      }
+      const saved = { ...body, updated_at: TEST_TIME.toISOString() };
+      state.profiles.set(userId, saved);
+      return route.fulfill({ json: saved });
+    }
     if (path === "/users/me/availability") {
       const token = request.headers().authorization?.replace("Bearer ", "");
       if (!token) return route.fulfill({ status: 401 });

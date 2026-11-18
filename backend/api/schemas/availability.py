@@ -1,5 +1,5 @@
 """Weekly availability contract shared by the API and recommendation consumers."""
-from typing import Annotated, Self
+from typing import Annotated
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -19,7 +19,7 @@ class AvailabilityWindow(BaseModel):
     end_minute: EndMinute = Field(description="Exclusive; 1440 means the end of this day")
 
     @model_validator(mode="after")
-    def validate_range(self) -> Self:
+    def validate_range(self):
         if self.end_minute <= self.start_minute:
             raise ValueError("end_minute must be greater than start_minute; split overnight ranges at midnight")
         return self
@@ -31,7 +31,7 @@ class WeeklyAvailability(BaseModel):
     windows: list[AvailabilityWindow] = Field(max_length=MAX_WINDOWS)
 
     @model_validator(mode="after")
-    def normalize_windows(self) -> Self:
+    def normalize_windows(self):
         merged: list[AvailabilityWindow] = []
         for window in sorted(self.windows, key=lambda w: (w.day_of_week, w.start_minute, w.end_minute)):
             previous = merged[-1] if merged else None

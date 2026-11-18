@@ -5,6 +5,10 @@ from jwt import PyJWKClient
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from dotenv import load_dotenv
+from sqlalchemy.ext.asyncio import AsyncSession
+from ..db.database import get_db
+from .active_session import require_active_session
+from starlette.concurrency import run_in_threadpool
 
 load_dotenv()
 
@@ -29,15 +33,17 @@ def verify_token(token: str) -> dict:
     )
 
 
-def get_current_user(
-        credentials: HTTPAuthorizationCredentials | None= Depends(bearer_scheme)
+async def get_current_user(
+        credentials: HTTPAuthorizationCredentials | None= Depends(bearer_scheme),
+        db: AsyncSession = Depends(get_db),
 ) -> dict:
     if credentials is None:
         raise HTTPException(status_code=401, detail="Invalid or expired session")
     try:
-        claims = verify_token(credentials.credentials)
+        claims = await run_in_threadpool(verify_token, credentials.credentials)
         if claims.get("role") != "authenticated":
             raise HTTPException(status_code=401, detail="Invalid token role")
+        await require_active_session(claims, db)
         return claims
     except HTTPException:
         raise

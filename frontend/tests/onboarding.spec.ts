@@ -37,6 +37,9 @@ async function mockBackend(page: Page) {
   await page.route("**/test-api/**", async route => {
     const request = route.request();
     const url = new URL(request.url());
+    if (url.pathname === "/test-api/users/me/profile") return route.fulfill({ json: {
+      first_name: null, last_name: null, username: null, updated_at: null,
+    } });
     if (url.pathname === "/test-api/events") return route.fulfill({ json: [] });
     if (url.pathname === "/test-api/tags") return state.failTags
       ? route.fulfill({ status: 500, json: { detail: "Interests temporarily unavailable" } })

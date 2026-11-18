@@ -346,3 +346,162 @@ the schedule preference. Restart the backend for the new routes. Profile's
 Availability editor restores saved ranges and submits them through Save schedule,
 with loading, saving, confirmation, and retry states. Recommendation integration
 is the remaining step; empty schedules add no availability preference.
+
+### Profile settings
+
+The profile overview includes an avatar placeholder, name/username, and
+existing event preferences. The profile pencil opens inline first-name,
+last-name, and username fields; the check saves changes and Escape discards edits.
+The form loads and saves through authenticated `GET` and `PUT /users/me/profile`.
+PUT replaces all three fields: `first_name`, `last_name`, and `username` (each
+nullable). Responses contain these fields plus `updated_at` (null before the
+first save). A new account starts with empty profile details; existing auth
+metadata is not automatically copied into the profile table.
+
+Names are trimmed, optional, and at most 100 characters. Usernames are optional,
+trimmed, stored lowercase, and restricted to 3–30 ASCII letters, numbers, or
+underscores. The database enforces unique usernames; blank usernames become null.
+A duplicate returns HTTP 409 with `{"detail":"This username is already taken."}`;
+invalid input returns HTTP 422. Requests cannot specify another user's ID: the
+backend derives ownership from the verified access token. Failed saves retain
+the form's draft and allow retry; changes appear only after a successful save.
+
+The preferences pencil opens the existing onboarding editor, which retains its
+current persistence behavior. Profile navigation includes availability, account
+security, liked/saved events, Your Calendar, and a Friends placeholder page.
+The Friends link opens `/profile/friends`; friendship functionality is not included yet.
+Security connects Change Email and Change Password directly to Supabase Auth using
+its browser SDK and the signed-in user's session. Passwords are never sent to the
+Eventide backend or stored in profile tables. Validation errors appear below the
+forms; failed requests keep the draft for retry, and pending submissions are disabled.
+Google-linked accounts display their link status and can change their Eventide email
+or set a separate application password. This does not change their Google credentials.
+`GET /users/me/account/security` returns only `has_password`, checked against
+`auth.users`, so Set password does not depend on provider metadata. The backend
+DB role needs SELECT access to `auth.users.encrypted_password` and `auth.users.id`.
+No password hash is returned to the application.
+
+All signed-in accounts have a red Delete my account button with a confirmation
+dialog. Cancel or Escape closes it before deletion starts. Account deletion is
+connected to the backend; repeated submissions are disabled while processing and
+errors remain available for retry. Photo uploads are not implemented.
+
+**Setup:** Apply `backend/database/migrations/005_user_profile.sql` in Supabase,
+then restart the backend. This creates `public.user_profile`, enables RLS, and
+restricts direct public-client access. No new dependencies or environment
+variables are required; use the existing backend database/Supabase configuration
+and frontend API/Supabase configuration.
+
+Run `npm run test:profile` from `frontend` for desktop/mobile profile interaction
+checks, including persistence, account isolation, duplicate usernames, and failed
+saves. From `backend`, run `python -m unittest discover -s tests -p test_profile.py`
+for isolated database/API tests. These tests use SQLite and locally signed JWTs;
+they do not apply the migration or verify concurrent writes on live PostgreSQL.
+
+### Account deletion
+
+Set `SUPABASE_SECRET_KEY=sb_secret_...` in the root `.env` and restart the backend.
+Use a modern secret API key from the same Supabase project as `SUPABASE_URL` and
+`DATABASE_URL`. No legacy service-role key or new dependency is needed. Never put
+this secret in a `VITE_` variable, frontend configuration, logs, or source control.
+
+`DELETE /users/me/account` requires a Bearer access token, accepts no request body
+or query parameters, and derives the user ID exclusively from the verified JWT.
+It requires an active Auth session and an authentication-method (`amr`) timestamp
+within the past 10 minutes; refreshing an old token alone does not qualify. A
+403 asks the user to log in again, with a link back through the login page.
+
+Before deletion, the backend checks that profile, preferences, preference tags,
+availability, calendar membership/subscription, likes, and saves have the expected
+`ON DELETE CASCADE` user relationships and that the event-counter cleanup trigger
+is installed and enabled. Missing prerequisites return 503 before any deletion.
+Ensure migrations 001–006 and the team's likes/saves schema are
+applied. No new table is added. Other user-related tables added later must also
+be reviewed for cleanup, and the preflight list updated as appropriate. Supabase
+Storage-owned objects must be removed/reassigned before Auth permits deletion;
+photo uploads are not implemented here. Shared event/tag/venue data is retained.
+
+Apply `backend/database/migrations/006_account_counter_cleanup.sql` in the team's
+Supabase SQL editor as the database owner after the existing migrations and
+like/save tables. It installs `eventide_cleanup_deleted_user_counters`, a
+`BEFORE DELETE` trigger on `auth.users`. Its private, schema-qualified
+`SECURITY DEFINER` function subtracts that account's contributions to
+`event.likes` and `event.saves` before their rows cascade away. The action rows
+are locked before counting; event counters are updated in event-ID order.
+The trigger's changes roll back if any part of the account deletion fails.
+Ordinary likes, saves, unlikes, and unsaves keep their existing API counter logic;
+there are no additional counter triggers on those tables to double-subtract.
+The migration can be reapplied and does not expose a public RPC. It requires no
+new environment settings or application dependencies. It handles future account
+deletions; it does not recalculate historical counters that were already stale.
+
+The backend calls Supabase Auth's admin deletion API using the secret key only
+in the `apikey` header and explicitly requests hard deletion. It returns 204 only
+after confirmed success; configuration, cleanup, transport, and upstream errors
+are reported without exposing keys or upstream response bodies. Ambiguous
+timeouts remain errors rather than claiming success.
+
+Authenticated endpoints now verify `session_id` ownership/existence and
+`not_after` in `auth.sessions` in addition to JWT signature/issuer/audience/role/
+expiry. The backend database role must have SELECT permission on this table.
+An unavailable session check fails closed with 503; a deleted/revoked session
+returns 401 even if its JWT has not expired. The check uses the existing database
+connection, not the admin key. Public event/tag and private-token feed endpoints
+keep their existing authentication requirements.
+
+After a successful deletion, the frontend signs out locally, resets account
+state, and redirects to Discover without a notification. If local
+sign-out fails after deletion, Finish signing out retries only sign-out. Account
+deletion removes the Eventide account, not the linked Google account; future
+Google sign-in can create a new Eventide account. Previously exported calendars
+or copies already fetched by calendar apps cannot be erased by Eventide.
+
+Tests: `python -m unittest discover -s tests -p test_account.py` from `backend`, and
+`npm run test:profile` from `frontend`. Automated deletion tests use local signed
+JWTs and mocked Auth HTTP responses; they never delete a real Supabase account.
+Validate the final cascade behavior with a disposable account after reviewing
+the setup above.
+
+The counter migration also has SQL regression tests. Run these only against an
+empty, disposable PostgreSQL database with permission to create test roles and
+schemas, **never the team's Supabase database**. From the repository root:
+
+```sh
+psql "$ACCOUNT_COUNTER_TEST_DATABASE_URL" -X -v ON_ERROR_STOP=1 -f backend/tests/sql/test_account_counter_cleanup.sql
+```
+
+The script refuses an existing application schema, creates minimal test tables,
+applies migration 006 twice, and checks counter cleanup, rollback, role permissions,
+normal unlike/unsave behavior, and bulk deletion. It leaves its fixtures in the
+disposable test database. The Python account tests check that missing/disabled
+counter cleanup blocks the Auth request before any deletion.
+
+
+### Email and password updates
+
+No new migration, dependency, or environment variable is required for credential
+updates. Restart the backend for the password-availability endpoint.
+In Supabase Authentication URL Configuration, allow your frontend's exact
+`http://localhost:5173/profile/security` redirect URL (and the corresponding HTTPS
+URL for a hosted frontend). Email confirmations return to Security, where the
+existing browser client handles the PKCE exchange automatically. Open confirmation
+links in the same browser that requested the change; invalid/expired links show an
+error rather than claiming success. Follow all confirmations Supabase sends: with
+Secure email change enabled, both the old and new addresses may need confirmation.
+The displayed account email changes only when Supabase confirms it.
+
+Configure the Supabase password policy to match the form: at least 8 characters,
+an uppercase letter, a number, and a special character. Supabase still enforces
+its own policy and rate limits. If Secure password change requires reauthentication,
+the form sends a verification code and accepts it before retrying the update.
+If the project requires the current password, an additional field appears when
+Auth requests it. New passwords and confirmation fields are cleared after success.
+
+Run `npm run test:profile` from `frontend` and
+`python -m unittest discover -s tests -p test_account.py` from `backend`.
+Credential-update browser tests intercept Supabase requests; they do not send real
+emails or modify real accounts. For a live test with a disposable account, change
+its email, finish every emailed confirmation, then verify the displayed email and
+sign in with the new address. Change the password, sign out, and verify the new
+password works. Test a Google-only account separately: setting an application
+password should enable password login while retaining its Google identity.

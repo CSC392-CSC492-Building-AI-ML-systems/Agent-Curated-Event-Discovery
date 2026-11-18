@@ -1,0 +1,157 @@
+.security-content > h1 {
+  margin-bottom: 24px;
+}
+
+.profile-content .security-section h2 {
+  font-size: 24px;
+  margin: 0 0 16px;
+}
+
+.security-section + .security-section {
+  border-top: 1px solid var(--line);
+  padding-top: 20px;
+  padding-bottom: 20px;
+  margin-top: 0;
+}
+
+.security-section form {
+  display: grid;
+  gap: 12px;
+}
+
+.security-section form > button {
+  justify-self: start;
+}
+
+.security-field {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.security-field input {
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: white;
+}
+
+.security-field input[aria-invalid="true"] {
+  border-color: #b32d3b;
+  background: #fff1f3;
+}
+
+.security-field input:focus-visible,
+.security-visibility:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.security-password-input {
+  position: relative;
+}
+
+.security-password-input input {
+  padding-right: 52px;
+}
+
+.security-password-input .security-visibility {
+  position: absolute;
+  inset: 2px 2px 2px auto;
+  width: 44px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+}
+
+.profile-content .security-hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.security-feedback {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  min-height: 2lh;
+}
+
+.profile-content .security-feedback p {
+  margin: 0;
+  font-size: inherit;
+}
+
+.security-feedback [role="alert"] {
+  color: #b32d3b;
+}
+
+.security-account-actions {
+  border-top: 1px solid var(--line);
+  padding-top: 20px;
+  margin-top: 0;
+}
+
+.security-linked-account {
+  border-top: 1px solid var(--line);
+  padding: 20px 0;
+}
+
+.profile-content .security-linked-account p {
+  margin: 0;
+}
+
+.profile-content .security-delete-button {
+  background: var(--accent);
+  color: white;
+}
+
+.security-delete-button:hover {
+  background: #d63a45;
+}
+
+.security-delete-button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.security-account-actions .security-feedback {
+  margin-top: 12px;
+  min-height: 1lh;
+}
+
+.discover-dialog.security-delete-dialog {
+  width: min(560px, calc(100% - 32px));
+  padding: 32px;
+}
+
+.security-delete-dialog > p {
+  margin: 0 0 24px;
+  line-height: 1.6;
+}
+
+.security-delete-dialog > h2 {
+  margin-bottom: 16px;
+}
+
+.security-delete-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+@media (max-width: 600px) {
+  .security-content {
+    flex: none;
+  }
+
+  .security-section .security-feedback {
+    min-height: 4lh;
+  }
+}
