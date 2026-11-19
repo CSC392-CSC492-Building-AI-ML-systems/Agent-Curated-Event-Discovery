@@ -1,12 +1,17 @@
-from ..db.database_sync import SessionLocal
-from sqlalchemy import select, delete, func, union_all, literal, extract, text
-from sqlalchemy.orm import selectinload
+from uuid import UUID
+
+from api.models.friendships import Friendship
+from api.db.database_sync import SessionLocal
+from sqlalchemy import case, or_, select, delete, func, union_all, literal, \
+    extract, \
+    text
+from sqlalchemy.orm import Session, selectinload
 from sqlalchemy.dialects.postgresql import insert
-from ..models.event import Event, Tag, Venue
-from ..models.user_actions import EventLiked, EventSaved
-from ..models.analytics import EventClicked, EventPopular, EventTrending
-from ..models.preferences import UserPreferences
-from ..models.recommendations import UserRecommendedEvent
+from api.models.event import Event, Tag, Venue
+from api.models.user_actions import EventLiked, EventSaved
+from api.models.analytics import EventClicked, EventPopular, EventTrending
+from api.models.preferences import UserPreferences
+from api.models.recommendations import UserRecommendedEvent
 from typesafe_sdk import TypeSafeClient, Score
 
 def update_trends(number: int = 50) -> None:
@@ -150,8 +155,8 @@ def retrieve(user_id: str, number: int=50, location: int=None) -> list[dict]:
     DISTANCE = 10 #filter events by km away from user, if location is not None
     HALF_LIFE_DAYS = 7
     # LOW_DATA: weights when we don't know lots about the user - prioritise current trends
-    WEIGHTS_LOW_DATA = {"trending": 0.3, "recency": 0.3, "tag": 0.3, "popularity": 0, "price": 0.1 }
-    WEIGHTS = {"tag": 0.4, "recency": 0.2, "trending": 0.1, "popularity": 0.1, "price": 0.1 }
+    WEIGHTS_LOW_DATA = {"trending": 0.3, "recency": 0.3, "tag": 0.3, "popularity": 0, "price": 0.1, "social": 0.1 }
+    WEIGHTS = {"tag": 0.4, "recency": 0.2, "trending": 0.1, "popularity": 0.1, "price": 0.1, "social": 0.1 }
     filtered_events = (
         select(Event)
         .where(Event.enddate >= func.now(), Event.startdate < func.now() + text(f"INTERVAL '{INTERVAL} days'"))
@@ -187,6 +192,36 @@ def retrieve(user_id: str, number: int=50, location: int=None) -> list[dict]:
         .group_by(Event.id)
         .subquery("event_tag_scores")
     )
+    user_uuid = UUID(str(user_id))
+
+    friend_id = case(
+        (Friendship.user_low_id == user_uuid, Friendship.user_high_id),
+        else_=Friendship.user_low_id,
+    ).label("friend_id")
+
+    friends = (
+        select(friend_id)
+        .where(
+            Friendship.status == "accepted",
+            or_(
+                Friendship.user_low_id == user_uuid,
+                Friendship.user_high_id == user_uuid,
+                ),
+            )
+        .subquery("friends")
+    )
+
+    friend_save_counts = (
+        select(
+            EventSaved.event_id,
+            func.count(func.distinct(EventSaved.user_id)).label("friend_saves"),
+        )
+        .join(friends, EventSaved.user_id == friends.c.friend_id)
+        .group_by(EventSaved.event_id)
+        .subquery("friend_save_counts")
+    )
+
+    social_score = (1 - func.exp(-func.coalesce(friend_save_counts.c.friend_saves, 0) / 2.0))
     tag_score = func.coalesce(event_tag_scores.c.score, 0)
     popularity_score = func.coalesce(EventPopular.score, 0)
     trending_score = func.coalesce(EventTrending.score, 0)
@@ -195,10 +230,10 @@ def retrieve(user_id: str, number: int=50, location: int=None) -> list[dict]:
     price_score = func.greatest(1 - Event.price*0.1, 0)
 
     if total_interactions > 10:
-        total_score = (tag_score*WEIGHTS["tag"] + popularity_score*WEIGHTS["popularity"] +
+        total_score = (tag_score*WEIGHTS["tag"] + popularity_score*WEIGHTS["popularity"] + social_score*WEIGHTS["social"] +
                     recency_score*WEIGHTS["recency"] + trending_score*WEIGHTS["trending"] + price_score*WEIGHTS["price"]).label("total_score")
     else:
-        total_score = (tag_score*WEIGHTS_LOW_DATA["tag"] + popularity_score*WEIGHTS_LOW_DATA["popularity"] +
+        total_score = (tag_score*WEIGHTS_LOW_DATA["tag"] + popularity_score*WEIGHTS_LOW_DATA["popularity"] + social_score*WEIGHTS_LOW_DATA["social"] +
                     recency_score*WEIGHTS_LOW_DATA["recency"] + trending_score*WEIGHTS_LOW_DATA["trending"] + price_score*WEIGHTS_LOW_DATA["price"]).label("total_score")
     query = (
         select(
@@ -209,6 +244,10 @@ def retrieve(user_id: str, number: int=50, location: int=None) -> list[dict]:
             # trending_score.label("trending_score"),
             # price_score.label("price_score"),
             total_score,
+            func.coalesce(
+                friend_save_counts.c.friend_saves, 0
+            ).label("friend_saves"),
+            social_score.label("social_score"),
         )
         .join(
             filtered_events,
@@ -217,6 +256,10 @@ def retrieve(user_id: str, number: int=50, location: int=None) -> list[dict]:
         .outerjoin(event_tag_scores, event_tag_scores.c.event_id == Event.id)
         .outerjoin(EventPopular, EventPopular.event_id == Event.id)
         .outerjoin(EventTrending, EventTrending.event_id == Event.id)
+        .outerjoin(
+            friend_save_counts,
+            friend_save_counts.c.event_id == Event.id,
+            )
         .order_by(total_score.desc(), Event.id)
     )
 
@@ -226,7 +269,13 @@ def retrieve(user_id: str, number: int=50, location: int=None) -> list[dict]:
         results = session.execute(query).all()
     events = []
     for result in results:
-        events.append({"id": result[0], "score": result[1]})
+        events.append({
+            "id": result[0],
+            "score": float(result[1]),
+            "friend_saves": result[2],
+            "social_score": float(result[3]),
+        })
+
     return events
 
 def rank(events: list[dict], user_id: str, number: int) -> list[dict]:
@@ -307,6 +356,8 @@ def insert_recommendations_for_user(user_id: str, num_retrieved: int=50, num_ran
                         } for event in rows]
         ranked = rank(events, USER_ID, number=num_ranked)
         print(f"ranked: {ranked}")
+        for event in event_scores:
+            print(event)
         session.execute(delete(UserRecommendedEvent).where(UserRecommendedEvent.user_id == USER_ID))
         for event in ranked:
             stmt = insert(UserRecommendedEvent).values(user_id=USER_ID, event_id = event["id"])
