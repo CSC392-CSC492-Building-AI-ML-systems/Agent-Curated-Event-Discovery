@@ -1,10 +1,8 @@
 import TagLink from "./TagLink";
 import CalendarEventButton from "./CalendarEventButton";
 import type { EventideEvent } from "../interfaces/interfaces";
-import SaveIcon from "../assets/images/save-icon.svg?react";
-import SaveIconFilled from "../assets/images/save-icon-filled.svg?react";
-import HeartIcon from "../assets/images/heart-icon.svg?react";
-import HeartIconFilled from "../assets/images/heart-icon-filled.svg?react";
+import SaveIconFilled from '../assets/images/save-icon-filled.svg?react';
+import HeartIconFilled from '../assets/images/heart-icon-filled.svg?react';
 import { useAnalytics } from "../hooks/useAnalytics";
 
 import { formatEventDate } from "../utils/eventDate";
@@ -30,7 +28,7 @@ export default function DiscoverEventCard({
   compact = false,
   saved,
   onSave,
-  liked,
+  liked, 
   onLike,
   onOpen,
   onReject,
@@ -57,6 +55,8 @@ export default function DiscoverEventCard({
       onOpen(event);
     }
   };
+  const price_not_found = event.price == null
+  const free = event.price == 0
   return (
     <article
       className={`event-card ${compact ? "event-card-compact" : "event-card-large"}`}
@@ -70,6 +70,17 @@ export default function DiscoverEventCard({
           <img src={event.imageUrl} alt="" loading="lazy" />
         ) : (
           <span className="event-image-placeholder" aria-hidden="true">
+            {!compact?
+            <div className="row tiny-gap" style={{position: "absolute", left: 10, top: 10}}>
+              { event.eighteenPlus?
+                <span className="pill2invert">
+                  18+
+                </span>: <></>
+              }
+              <span className="pill2" >
+                {price_not_found? "Price unavailable": free? "Free": `$${event.price}`}
+              </span>
+            </div>: <></>}
             ✦
           </span>
         )}
@@ -87,6 +98,17 @@ export default function DiscoverEventCard({
             </span>
           )}
         </div>
+        {compact?
+        <div className="row tiny-gap" style={{position: "absolute", right: 10, bottom: 10}}>
+          { event.eighteenPlus?
+            <span className="pill2invert" style={{fontSize: "11px", lineHeight: "11px"}}>
+              18+
+            </span>: <></>
+          }
+          <span className="pill2" style={{fontSize: "11px", lineHeight: "11px"}}>
+            {price_not_found? "Price unavailable": free? "Free": `$${event.price}`}
+          </span>
+        </div>: <></>}
       </button>
       {!compact && (
         <div className="event-card-footer">
@@ -105,41 +127,19 @@ export default function DiscoverEventCard({
             className="event-like"
             aria-label={`${liked ? "Unlike" : "Like"} ${event.title}`}
             aria-pressed={liked}
-            onClick={() => {
-              if (session?.access_token) {
-                onLike(event.id);
-              } else {
-                navigate("/login");
-              }
-            }}
+            onClick={() => {if (session?.access_token) {onLike(event.id)} else {navigate("/login")}}}
           >
-            {liked ? (
-              <HeartIconFilled color="#f6545c" className="icon" />
-            ) : (
-              <HeartIcon color="#f6545c" className="icon" />
-            )}
+            {liked? <HeartIconFilled fill="#f6545c" stroke="#f6545c" className="icon"/>: <HeartIconFilled fill="white" stroke="#f6545c" className="icon"/>}
           </button>
-          {!compact && event.likes > 0 && (
-            <p className="mini-text">{event.likes}</p>
-          )}
+          {!compact && event.likes > 0 && <p className="mini-text">{event.likes}</p>}
         </div>
         <button
           className="event-save"
           aria-label={`${saved ? "Unsave" : "Save"} ${event.title}`}
           aria-pressed={saved}
-          onClick={() => {
-            if (session?.access_token) {
-              onSave(event.id);
-            } else {
-              navigate("/login");
-            }
-          }}
+          onClick={() => {if (session?.access_token) {onSave(event.id)} else {navigate("/login")}}}
         >
-          {saved ? (
-            <SaveIconFilled color="#f6545c" className="icon" />
-          ) : (
-            <SaveIcon color="#f6545c" className="icon" />
-          )}
+          {saved? <SaveIconFilled fill="#f6545c" stroke="#f6545c" className="icon"/>: <SaveIconFilled fill="white" stroke="#f6545c" className="icon"/>}
         </button>
         <CalendarEventButton event={event} />
         {onReject && (

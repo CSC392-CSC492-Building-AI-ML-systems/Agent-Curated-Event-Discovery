@@ -8,7 +8,7 @@ import HeartIcon from '../assets/images/heart-icon.svg?react';
 import CalendarIcon from '../assets/images/calendar-icon.svg?react';
 import { Bookmark, CalendarDays, Clock, Heart, Shield, UserRound, Users } from "lucide-react";
 
-export default function NavBar({ savedCount }: { savedCount?: number }) {
+export default function NavBar() {
   const location = useLocation();
   const { session } = useAuth();
   return (
@@ -32,7 +32,7 @@ export default function NavBar({ savedCount }: { savedCount?: number }) {
               : ""
           }
           >
-          Your Events{savedCount ? ` (${savedCount})` : ""}
+          Your Events
         </NavLink>: 
         <NavLink 
           to="/login"
@@ -61,7 +61,7 @@ export function Header({ savedCount }: { savedCount?: number }) {
   return (
     <header className="discover-header">
       <EventideLogo />
-      <NavBar savedCount={savedCount} />{" "}
+      <NavBar/>{" "}
       <div className="header-account">
         {loading ? <span role="status">Checking login…</span> : session ? <>
           <Link className="discover-auth-button" to="/profile">Profile</Link>

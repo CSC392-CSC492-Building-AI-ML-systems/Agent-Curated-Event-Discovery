@@ -75,7 +75,7 @@ async def put_preferences(
         unknown = sorted(set(payload.interest_tag_ids) - set(result.scalars().all()))
         if unknown:
             raise HTTPException(status_code=422, detail=f"Unknown interest tag IDs: {unknown}")
-
+        
         values = {
             "age_group": payload.age_group,
             "budget": payload.budget,
