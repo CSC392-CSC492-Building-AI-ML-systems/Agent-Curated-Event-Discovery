@@ -2,8 +2,7 @@ from uuid import UUID
 
 from sqlalchemy import Boolean, CheckConstraint, ForeignKey, String, Uuid
 from sqlalchemy.orm import Mapped, mapped_column
-
-from .event import Base
+from .base import Base
 
 
 class UserPreferences(Base):
@@ -11,7 +10,7 @@ class UserPreferences(Base):
     __table_args__ = (
         CheckConstraint(
             "age_group IS NULL OR age_group IN "
-            "('20_29', '30_39', '40_49', '50_59', '60_69', '70_79', '80_plus')",
+            "('under_20', '20_29', '30_39', '40_49', '50_59', '60_69', '70_79', '80_plus')",
             name="user_preferences_age_group_check",
         ),
         CheckConstraint(

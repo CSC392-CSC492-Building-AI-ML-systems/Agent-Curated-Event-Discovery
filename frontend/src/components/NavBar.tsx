@@ -1,16 +1,13 @@
-import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import EventideLogo from "./EventideLogo";
 import NotificationsPanel from "./NotificationsPanel";
 import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import SaveIcon from '../assets/images/save-icon.svg?react';
-import SaveIconFilled from '../assets/images/save-icon-filled.svg?react';
-import SettingIcon from '../assets/images/setting-icon.svg?react';
-import SettingIconFilled from '../assets/images/setting-icon-filled.svg?react';
 import CalendarIcon from '../assets/images/calendar-icon.svg?react';
-import { Clock } from "lucide-react";
+import { Bookmark, CalendarDays, Clock, Heart, Shield, UserRound, Users } from "lucide-react";
 
-export default function NavBar({ savedCount }: { savedCount?: number }) {
+export default function NavBar() {
   const location = useLocation();
   const { session } = useAuth();
   return (
@@ -34,7 +31,7 @@ export default function NavBar({ savedCount }: { savedCount?: number }) {
               : ""
           }
           >
-          Your Events{savedCount ? ` (${savedCount})` : ""}
+          Your Events
         </NavLink>: 
         <NavLink 
           to="/login"
@@ -63,7 +60,7 @@ export function Header({ savedCount }: { savedCount?: number }) {
   return (
     <header className="discover-header">
       <EventideLogo />
-      <NavBar savedCount={savedCount} />{" "}
+      <NavBar/>{" "}
       <div className="header-account">
         {loading ? <span role="status">Checking login…</span> : session ? <>
           <Link className="discover-auth-button" to="/profile">Profile</Link>
@@ -76,23 +73,30 @@ export function Header({ savedCount }: { savedCount?: number }) {
   );
 }
 
-export function ProfileNavBar ({ route }: { route: string }) {
-  return <div>
-            <nav aria-label="Profile navigation" className="profile-navbar">
-              <NavLink to="/profile" end aria-label="Profile settings" title="Profile settings">
-                {route == "settings" ? <SettingIconFilled className="setting-icon"/>: <SettingIcon className="setting-icon"/> }
-             </NavLink>
-              <NavLink to="/saves" aria-label="Saved events" title="Saved events">
-                {route == "saves" ? <SaveIconFilled className="save-icon"/>: <SaveIcon className="save-icon"/> }
-              </NavLink>
-              <NavLink to="/calendar" aria-label="Your Calendar" title="Your Calendar">
-                <CalendarIcon width="35px" height="35px" aria-hidden="true" />
-              </NavLink>
-              <NavLink to="/profile/availability" aria-label="Availability" title="Availability">
-                <Clock size={35} strokeWidth={2} aria-hidden="true" />
-              </NavLink>
-            </nav>
-          </div>
+export function ProfileNavBar() {
+  return <nav aria-label="Profile navigation" className="profile-navbar">
+    <NavLink to="/profile" end aria-label="Profile settings" title="Profile">
+      <UserRound size={35} aria-hidden="true" />
+    </NavLink>
+    <NavLink to="/profile/friends" aria-label="Friends" title="Friends">
+      <Users size={35} aria-hidden="true" />
+    </NavLink>
+    <NavLink to="/likes" aria-label="Liked events" title="Liked events">
+      <Heart size={35} aria-hidden="true" />
+    </NavLink>
+    <NavLink to="/saves" aria-label="Saved events" title="Saved events">
+      <Bookmark size={35} aria-hidden="true" />
+    </NavLink>
+    <NavLink to="/calendar" aria-label="Your Calendar" title="Your Calendar">
+      <CalendarDays size={35} aria-hidden="true" />
+    </NavLink>
+    <NavLink to="/profile/availability" aria-label="Availability" title="Availability">
+      <Clock size={35} aria-hidden="true" />
+    </NavLink>
+    <NavLink to="/profile/security" aria-label="Security" title="Security">
+      <Shield size={35} aria-hidden="true" />
+    </NavLink>
+  </nav>;
 }
 
 export function YourEventsNavBar ({ route }: { route: string }) {

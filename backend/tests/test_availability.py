@@ -3,7 +3,7 @@ import os
 import unittest
 from datetime import datetime, timedelta, timezone
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 from uuid import uuid4
 
 import jwt
@@ -31,6 +31,9 @@ MONDAY = {"day_of_week": 1, "start_minute": 540, "end_minute": 720}
 
 class AvailabilityTests(unittest.TestCase):
     def setUp(self):
+        active_session = patch.object(auth, "require_active_session", new=AsyncMock())
+        active_session.start()
+        self.addCleanup(active_session.stop)
         self.engine = create_engine("sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
         self.addCleanup(self.engine.dispose)
         self.lock_keys = []

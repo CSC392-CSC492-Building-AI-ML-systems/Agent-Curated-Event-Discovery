@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import "./App.css";
 import DiscoverPage from "./pages/DiscoverPage";
 import YourEventsPage from "./pages/YourEventsPage/YourEventsPage";
@@ -11,16 +11,18 @@ import OnboardingPage from "./pages/OnboardingPage";
 import ProfilePage from "./pages/ProfilePage/ProfilePage";
 
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
-import { PreferencesProvider } from "./contexts/PreferencesContext";
+import { PreferencesProvider, usePreferences } from "./contexts/PreferencesContext";
 import { SavedEventsProvider } from "./contexts/SavedEventsContext";
 import useEvents, { useEventsSaved } from "./hooks/useEvents";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import type { BrowseState, EventideTag } from "./interfaces/interfaces";
 import { eventSaved } from "./api/user_actions";
 import { createClient } from "./lib/supabase/client";
 import { ApiError } from "./api/client";
 import Popup from "./components/Popup";
 import CalendarProvider from "./contexts/CalendarProvider";
+import { useNavigate } from "react-router-dom";
+import { INITIAL_FILTERS } from "./interfaces/constants";
 
 function App() {
   return <AuthProvider><PreferencesProvider><BrowserRouter><SessionRoutes /></BrowserRouter></PreferencesProvider></AuthProvider>;
@@ -29,14 +31,22 @@ function App() {
 function SessionRoutes() {
   const { session } = useAuth();
   // Do not carry account-specific in-memory selections into a different login.
-  return <CalendarProvider key={session?.user.id ?? "guest"}><EventRoutes /></CalendarProvider>;
+  return (
+    <CalendarProvider key={session?.user.id ?? "guest"}>
+      <EventRoutes />
+    </CalendarProvider>
+  );
 }
 
 function EventRoutes() {
+  const navigate = useNavigate();
+  const pathname = useLocation()
+  
+  const preferences = usePreferences().preferences
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
   const handlePopupClose = useCallback(() => setShowPopup(false), []);
-  <button onClick={() => setShowPopup(true)}>Save</button>
+  <button onClick={() => setShowPopup(true)}>Save</button>;
 
   const { events, loading, error, retry } = useEvents();
   const {session} = useAuth();
@@ -45,12 +55,7 @@ function EventRoutes() {
   
   
   const [followed, setFollowed] = useState<EventideTag[]>([]);
-  const [browse, setBrowse] = useState<BrowseState>({
-    search: "",
-    range: "30",
-    sort: "upcoming",
-    tags: [] as EventideTag[],
-  });
+  const [browse, setBrowse] = useState<BrowseState>(INITIAL_FILTERS);
 
   const onFollow = (tag: EventideTag) =>
     setFollowed((current) =>
@@ -71,11 +76,9 @@ function EventRoutes() {
   useEffect(() => {
     if (storageKey) localStorage.setItem(storageKey, JSON.stringify(saved));
   }, [storageKey, saved]);
-  const onSave = async(id: number) => {
-    console.log(`run this!: ${id}`)
+  const onSave = async (id: number) => {
     const save = !saved.includes(id);
-    setSaved(save ? [...saved, id]: saved.filter((value) => value !== id)
-    );
+    setSaved(save ? [...saved, id] : saved.filter((value) => value !== id));
     const event = events.find((event) => event.id === id);
     if (event ) {if (save) {event.saves +=1} else{event.saves -= 1} }
     const controller = new AbortController();
@@ -99,7 +102,7 @@ function EventRoutes() {
   useEffect(()=>{
     const saved = savedInfo.events.map((e) => e.id);
     setSaved(saved);
-  }, [savedInfo.events])
+  }, [savedInfo.events]);
 
   const eventProps = {
     events,
@@ -126,6 +129,13 @@ function EventRoutes() {
     browse,
     setBrowse,
   };
+
+
+  useEffect(() => {
+  if (preferences?.onboarding_completed === false && pathname.pathname !== "/onboarding") {
+    navigate("/onboarding", { replace: true });
+  }
+}, [preferences, pathname, navigate]);
   return (
     <>
     <SavedEventsProvider events={events} saved={saved} onSave={onSave}>

@@ -85,3 +85,17 @@ CREATE TABLE IF NOT EXISTS user_recommended_events (
 	FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE,
 	FOREIGN KEY (event_id) REFERENCES Event(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS event_trending (
+	event_id INTEGER NOT NULL,
+	score FLOAT NOT NULL,
+	updated_at DATE DEFAULT CURRENT_DATE,
+	FOREIGN KEY (event_id) REFERENCES Event(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS event_popular (
+	event_id INTEGER NOT NULL,
+	score FLOAT NOT NULL,
+	updated_at DATE DEFAULT CURRENT_DATE,
+	FOREIGN KEY (event_id) REFERENCES Event(id) ON DELETE CASCADE
+);

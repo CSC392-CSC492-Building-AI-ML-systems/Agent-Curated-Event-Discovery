@@ -35,8 +35,13 @@ function getErrorMessage(body: unknown, status: number): string {
 
 export async function requestJson<T>(
   path: string,
-  { signal, method = "GET", body, accessToken }: RequestOptions & {
-    method?: "GET" | "POST" | "PUT" | "DELETE";
+  {
+    signal,
+    method = "GET",
+    body,
+    accessToken,
+  }: RequestOptions & {
+    method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
     body?: unknown;
     accessToken?: string;
   } = {},
@@ -56,16 +61,13 @@ export async function requestJson<T>(
     let body: unknown;
     try {
       body = await response.json();
-    } catch {
-      // Non-JSON error responses still retain their HTTP status.
-    }
+    } catch {}
     throw new ApiError(response.status, getErrorMessage(body, response.status));
   }
 
-  if (response.status === 204) return undefined as T;
+  const text = await response.text();
 
-  // These types describe the expected response; they don't validate JSON at runtime.
-  return response.json() as Promise<T>;
+  return (text ? JSON.parse(text) : undefined) as T;
 }
 
 export function getJson<T>(path: string, options: RequestOptions = {}): Promise<T> {
