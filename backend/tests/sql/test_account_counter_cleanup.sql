@@ -21,12 +21,7 @@ $$;
 
 CREATE SCHEMA IF NOT EXISTS auth;
 CREATE TABLE auth.users (id UUID PRIMARY KEY);
-CREATE TABLE public.event (id INTEGER PRIMARY KEY, likes INTEGER, saves INTEGER);
-CREATE TABLE public.event_liked (
-    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-    event_id INTEGER REFERENCES public.event(id) ON DELETE CASCADE,
-    PRIMARY KEY (user_id, event_id)
-);
+CREATE TABLE public.event (id INTEGER PRIMARY KEY, saves INTEGER);
 CREATE TABLE public.event_saved (
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
     event_id INTEGER REFERENCES public.event(id) ON DELETE CASCADE,
@@ -41,15 +36,15 @@ GRANT SELECT, DELETE ON auth.users TO eventide_test_auth_admin;
 
 BEGIN;
 CREATE TEMP TABLE counter_cleanup_test_session (id INTEGER);
-CREATE FUNCTION pg_temp.assert_counts(event_id INTEGER, expected_likes INTEGER, expected_saves INTEGER)
+CREATE FUNCTION pg_temp.assert_counts(event_id INTEGER, expected_saves INTEGER)
 RETURNS void LANGUAGE plpgsql AS $$
 DECLARE
     actual RECORD;
 BEGIN
-    SELECT likes, saves INTO STRICT actual FROM public.event WHERE id = event_id;
-    IF actual.likes IS DISTINCT FROM expected_likes OR actual.saves IS DISTINCT FROM expected_saves THEN
+    SELECT saves INTO STRICT actual FROM public.event WHERE id = event_id;
+    IF actual.saves IS DISTINCT FROM expected_saves THEN
         RAISE EXCEPTION 'Event %: expected (%, %), got (%, %)',
-            event_id, expected_likes, expected_saves, actual.likes, actual.saves;
+            event_id, expected_saves, actual.saves;
     END IF;
 END;
 $$;
@@ -59,11 +54,6 @@ INSERT INTO auth.users VALUES
     ('10000000-0000-4000-8000-000000000002'),
     ('10000000-0000-4000-8000-000000000003');
 INSERT INTO public.event VALUES (1, 2, 2), (2, 1, 0), (3, 0, 1), (4, 17, 23), (5, 0, NULL);
-INSERT INTO public.event_liked VALUES
-    ('10000000-0000-4000-8000-000000000001', 1),
-    ('10000000-0000-4000-8000-000000000001', 2),
-    ('10000000-0000-4000-8000-000000000001', 5),
-    ('10000000-0000-4000-8000-000000000002', 1);
 INSERT INTO public.event_saved VALUES
     ('10000000-0000-4000-8000-000000000001', 1),
     ('10000000-0000-4000-8000-000000000001', 5),
@@ -71,10 +61,8 @@ INSERT INTO public.event_saved VALUES
     ('10000000-0000-4000-8000-000000000002', 3);
 COMMIT;
 
--- An ordinary unlike/unsave remains API-managed, without double subtraction.
+-- An ordinary unsave remains API-managed, without double subtraction.
 BEGIN;
-DELETE FROM public.event_liked WHERE user_id = '10000000-0000-4000-8000-000000000001' AND event_id = 1;
-UPDATE public.event SET likes = likes - 1 WHERE id = 1;
 DELETE FROM public.event_saved WHERE user_id = '10000000-0000-4000-8000-000000000001' AND event_id = 1;
 UPDATE public.event SET saves = saves - 1 WHERE id = 1;
 SELECT pg_temp.assert_counts(1, 1, 1);
@@ -96,8 +84,7 @@ DELETE FROM auth.users WHERE id = '10000000-0000-4000-8000-000000000001';
 SELECT pg_temp.assert_counts(1, 1, 1);
 DO $$
 BEGIN
-    IF EXISTS (SELECT 1 FROM public.event_liked WHERE user_id = '10000000-0000-4000-8000-000000000001')
-       OR EXISTS (SELECT 1 FROM public.event_saved WHERE user_id = '10000000-0000-4000-8000-000000000001') THEN
+    IF EXISTS (SELECT 1 FROM public.event_saved WHERE user_id = '10000000-0000-4000-8000-000000000001') THEN
         RAISE EXCEPTION 'Deleted account action rows did not cascade';
     END IF;
     IF (SELECT COUNT(*) FROM public.event_saved WHERE user_id = '10000000-0000-4000-8000-000000000002') <> 2 THEN
@@ -114,7 +101,7 @@ SELECT pg_temp.assert_counts(5, 0, NULL);
 DO $$
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM auth.users WHERE id = '10000000-0000-4000-8000-000000000001')
-       OR (SELECT COUNT(*) FROM public.event_liked WHERE user_id = '10000000-0000-4000-8000-000000000001') <> 3 THEN
+        THEN
         RAISE EXCEPTION 'Rollback did not restore the account and actions';
     END IF;
 END;

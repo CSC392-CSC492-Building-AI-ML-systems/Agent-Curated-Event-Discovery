@@ -62,7 +62,7 @@ export default function DeleteAccountDialog({ onClose }: { onClose: () => void }
   return <dialog ref={dialog} className="discover-dialog security-delete-dialog" aria-labelledby={`${descriptionId}-title`}
     aria-describedby={descriptionId} onCancel={event => { event.preventDefault(); if (!busy && !deleted) onClose(); }}>
     <h2 id={`${descriptionId}-title`}>Delete account</h2>
-    <p id={descriptionId}>Deleting your account will permanently remove your profile, preferences, availability, liked and saved events, calendar entries, and calendar subscription. This cannot be undone.</p>
+    <p id={descriptionId}>Deleting your account will permanently remove your profile, preferences, availability, saved events, calendar entries, and calendar subscription. This cannot be undone.</p>
     <div className="security-delete-dialog-actions">
       <button type="button" className="pill security-delete-button" disabled={busy} aria-busy={busy}
         onClick={() => { void confirm(); }}>{deleted ? "Finish signing out" : "Delete account"}</button>
