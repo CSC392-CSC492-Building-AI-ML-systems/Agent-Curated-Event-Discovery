@@ -89,7 +89,7 @@ The authenticated API is:
 - `DELETE /users/me/calendar` with `{ "id": 123 }` — remove an event, idempotently.
 
 All requests require `Authorization: Bearer <Supabase access token>`; the user ID
-comes from the verified token. Calendar actions do not affect like/save counts.
+comes from the verified token. Calendar actions do not affect save counts.
 Calendar membership persists across reloads. Failed requests leave the calendar
 unchanged and display an error. The calendar screen supports retry if loading
 fails.
@@ -368,7 +368,7 @@ the form's draft and allow retry; changes appear only after a successful save.
 
 The preferences pencil opens the existing onboarding editor, which retains its
 current persistence behavior. Profile navigation includes availability, account
-security, liked/saved events, Your Calendar, and a Friends placeholder page.
+security, saved events, Your Calendar, and a Friends placeholder page.
 The Friends link opens `/profile/friends`; friendship functionality is not included yet.
 Security connects Change Email and Change Password directly to Supabase Auth using
 its browser SDK and the signed-in user's session. Passwords are never sent to the
@@ -412,10 +412,10 @@ within the past 10 minutes; refreshing an old token alone does not qualify. A
 403 asks the user to log in again, with a link back through the login page.
 
 Before deletion, the backend checks that profile, preferences, preference tags,
-availability, calendar membership/subscription, likes, and saves have the expected
+availability, calendar membership/subscription, and saves have the expected
 `ON DELETE CASCADE` user relationships and that the event-counter cleanup trigger
 is installed and enabled. Missing prerequisites return 503 before any deletion.
-Ensure migrations 001–006 and the team's likes/saves schema are
+Ensure migrations 001–006 and the team's saves schema are
 applied. No new table is added. Other user-related tables added later must also
 be reviewed for cleanup, and the preflight list updated as appropriate. Supabase
 Storage-owned objects must be removed/reassigned before Auth permits deletion;
@@ -423,13 +423,12 @@ photo uploads are not implemented here. Shared event/tag/venue data is retained.
 
 Apply `backend/database/migrations/006_account_counter_cleanup.sql` in the team's
 Supabase SQL editor as the database owner after the existing migrations and
-like/save tables. It installs `eventide_cleanup_deleted_user_counters`, a
+save tables. It installs `eventide_cleanup_deleted_user_counters`, a
 `BEFORE DELETE` trigger on `auth.users`. Its private, schema-qualified
-`SECURITY DEFINER` function subtracts that account's contributions to
-`event.likes` and `event.saves` before their rows cascade away. The action rows
+`SECURITY DEFINER` function subtracts that account's contributions to `event.saves` before their rows cascade away. The action rows
 are locked before counting; event counters are updated in event-ID order.
 The trigger's changes roll back if any part of the account deletion fails.
-Ordinary likes, saves, unlikes, and unsaves keep their existing API counter logic;
+Ordinary saves and unsaves keep their existing API counter logic;
 there are no additional counter triggers on those tables to double-subtract.
 The migration can be reapplied and does not expose a public RPC. It requires no
 new environment settings or application dependencies. It handles future account
@@ -472,7 +471,7 @@ psql "$ACCOUNT_COUNTER_TEST_DATABASE_URL" -X -v ON_ERROR_STOP=1 -f backend/tests
 
 The script refuses an existing application schema, creates minimal test tables,
 applies migration 006 twice, and checks counter cleanup, rollback, role permissions,
-normal unlike/unsave behavior, and bulk deletion. It leaves its fixtures in the
+normal unsave behavior, and bulk deletion. It leaves its fixtures in the
 disposable test database. The Python account tests check that missing/disabled
 counter cleanup blocks the Auth request before any deletion.
 

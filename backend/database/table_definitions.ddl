@@ -53,6 +53,8 @@ CREATE TABLE IF NOT EXISTS Event (
 	price DECIMAL(6, 2),
 	link TEXT NOT NULL,
 	eighteenPlus BOOLEAN NOT NULL,
+	saves INTEGER,
+	clicks INTEGER,
 	PRIMARY KEY(id),
 	FOREIGN KEY (venue) REFERENCES Venue(id) ON DELETE RESTRICT,
 	FOREIGN KEY (organizer) REFERENCES Organizer(id) ON DELETE RESTRICT
@@ -64,16 +66,6 @@ CREATE TABLE IF NOT EXISTS EventTags (
 	PRIMARY KEY(eventId, tagId),
 	FOREIGN KEY (eventId) REFERENCES Event(id) ON DELETE CASCADE,
 	FOREIGN KEY (tagId) REFERENCES Tag(id) ON DELETE CASCADE
-);
-
-
-CREATE TABLE event_liked (
-    user_id UUID NOT NULL,
-    event_id INTEGER NOT NULL,
-    timestamp TIMESTAMP NOT NULL DEFAULT now(),
-    PRIMARY KEY(user_id, event_id),
-    FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE,
-    FOREIGN KEY (event_id) REFERENCES Event(id) ON DELETE CASCADE
 );
 
 CREATE TABLE event_saved (

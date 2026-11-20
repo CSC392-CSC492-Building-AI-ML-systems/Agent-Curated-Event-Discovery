@@ -3,8 +3,6 @@ import CloseIcon from "../assets/images/close-icon.svg?react";
 
 function Popup({message, duration=5000, onClose, visible}: {message: string, duration?: number, onClose?: () => void, visible?: boolean}) {
     const [internalVisible, setInternalVisible] = useState(true);
-    console.log(`visibility: ${visible !==undefined && !visible}`)
-    console.log(`visible: ${visible}`)
     useEffect(() => {
     const timer = setTimeout(() => {
         if (visible === undefined) setInternalVisible(false);

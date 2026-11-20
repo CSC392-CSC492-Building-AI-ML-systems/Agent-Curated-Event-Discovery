@@ -801,13 +801,13 @@ label {
   top: 5px;
 }
 
-.event-like-wrap {
+.event-save-wrap {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
 }
-.event-save, .event-like{
+.event-save{
   border: 0;
   line-height: 1;
   background: none;
@@ -818,7 +818,7 @@ label {
   padding: 0;
 }
 
-:is(.event-like, .event-save)[aria-pressed="false"]:is(:hover, :focus-visible):not(:disabled) svg {
+:is(.event-save)[aria-pressed="false"]:is(:hover, :focus-visible):not(:disabled) svg {
   fill: #ffe3e6;
 }
 
@@ -1075,7 +1075,9 @@ label {
   border-radius: 40px;
   background-color: rgba(0, 0, 0, 0.7);
   box-shadow: 1px 1px 10px rgba(150, 150, 150, 0.2);
-
+  justify-content: center;
+  align-items: center;
+  
   opacity: 0;
   pointer-events: none;
   transform: translate(-50%, 100%);

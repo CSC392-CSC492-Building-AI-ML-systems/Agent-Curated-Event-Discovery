@@ -12,10 +12,8 @@ import EventRequestState from "../../components/EventRequestState";
 type CalendarPageProps = {
     saved: number[];
     onSave: (id: number) => void;
-    liked: number[];
-    onLike: (id: number) => void;
 }
-function CalendarPage({saved, onSave, liked, onLike}: CalendarPageProps){
+function CalendarPage({saved, onSave}: CalendarPageProps){
     const calendar = useCalendar();
     const [calendarMonth, setCalendarMonth] = useState<Date | null>(null);
     const [selectedDay, setSelectedDay] = useState<string | null>(null);
@@ -159,8 +157,6 @@ function CalendarPage({saved, onSave, liked, onLike}: CalendarPageProps){
                 event.startDate && eventDayKey(event.startDate) === selectedDay,
             )}
             saved={saved}
-            liked={liked}
-            onLike={onLike}
             onSave={onSave}
             onClose={() => setSelectedDay(null)}
             onOpen={(event) => {
@@ -174,8 +170,6 @@ function CalendarPage({saved, onSave, liked, onLike}: CalendarPageProps){
             event={selected}
             saved={saved.includes(selected.id)}
             onSave={onSave}
-            liked={liked.includes(selected.id)}
-            onLike={onLike}
             onClose={() => setSelected(null)}
           />
         )}

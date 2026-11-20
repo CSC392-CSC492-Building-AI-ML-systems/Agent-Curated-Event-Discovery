@@ -2,7 +2,6 @@ import TagLink from "./TagLink";
 import CalendarEventButton from "./CalendarEventButton";
 import type { EventideEvent } from "../interfaces/interfaces";
 import SaveIconFilled from '../assets/images/save-icon-filled.svg?react';
-import HeartIconFilled from '../assets/images/heart-icon-filled.svg?react';
 import { useAnalytics } from "../hooks/useAnalytics";
 
 import { formatEventDate } from "../utils/eventDate";
@@ -14,8 +13,6 @@ type Props = {
   compact?: boolean;
   saved: boolean;
   onSave: (id: number) => void;
-  liked: boolean;
-  onLike: (id: number) => void;
   onOpen: (event: EventideEvent) => void;
   // Only recommended events pass this so the reject button not on regular upcoming section events
   onReject?: (id: number) => void;
@@ -28,8 +25,6 @@ export default function DiscoverEventCard({
   compact = false,
   saved,
   onSave,
-  liked, 
-  onLike,
   onOpen,
   onReject,
   isRecommended,
@@ -122,25 +117,17 @@ export default function DiscoverEventCard({
         </div>
       )}
       <div className="event-actions">
-        <div className="event-like-wrap">
+        <div className="event-save-wrap">
           <button
-            className="event-like"
-            aria-label={`${liked ? "Unlike" : "Like"} ${event.title}`}
-            aria-pressed={liked}
-            onClick={() => {if (session?.access_token) {onLike(event.id)} else {navigate("/login")}}}
+            className="event-save"
+            aria-label={`${saved ? "Unsave" : "Save"} ${event.title}`}
+            aria-pressed={saved}
+            onClick={() => {if (session?.access_token) {onSave(event.id)} else {navigate("/login")}}}
           >
-            {liked? <HeartIconFilled fill="#f6545c" stroke="#f6545c" className="icon"/>: <HeartIconFilled fill="white" stroke="#f6545c" className="icon"/>}
+            {saved? <SaveIconFilled fill="#f6545c" stroke="#f6545c" className="icon"/>: <SaveIconFilled fill="white" stroke="#f6545c" className="icon"/>}
           </button>
-          {!compact && event.likes > 0 && <p className="mini-text">{event.likes}</p>}
+          {!compact && event.saves > 0 && <p className="mini-text">{event.saves}</p>}
         </div>
-        <button
-          className="event-save"
-          aria-label={`${saved ? "Unsave" : "Save"} ${event.title}`}
-          aria-pressed={saved}
-          onClick={() => {if (session?.access_token) {onSave(event.id)} else {navigate("/login")}}}
-        >
-          {saved? <SaveIconFilled fill="#f6545c" stroke="#f6545c" className="icon"/>: <SaveIconFilled fill="white" stroke="#f6545c" className="icon"/>}
-        </button>
         <CalendarEventButton event={event} />
         {onReject && (
           <button

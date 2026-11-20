@@ -4,9 +4,8 @@ import NotificationsPanel from "./NotificationsPanel";
 import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import SaveIcon from '../assets/images/save-icon.svg?react';
-import HeartIcon from '../assets/images/heart-icon.svg?react';
 import CalendarIcon from '../assets/images/calendar-icon.svg?react';
-import { Bookmark, CalendarDays, Clock, Heart, Shield, UserRound, Users } from "lucide-react";
+import { Bookmark, CalendarDays, Clock, Shield, UserRound, Users } from "lucide-react";
 
 export default function NavBar() {
   const location = useLocation();
@@ -27,7 +26,7 @@ export default function NavBar() {
         {session?.access_token? <NavLink 
           to="/saves"
           className={
-            location.pathname === "/likes" || location.pathname === "/calendar"
+            location.pathname === "/calendar"
               ? "active"
               : ""
           }
@@ -82,9 +81,6 @@ export function ProfileNavBar() {
     <NavLink to="/profile/friends" aria-label="Friends" title="Friends">
       <Users size={35} aria-hidden="true" />
     </NavLink>
-    <NavLink to="/likes" aria-label="Liked events" title="Liked events">
-      <Heart size={35} aria-hidden="true" />
-    </NavLink>
     <NavLink to="/saves" aria-label="Saved events" title="Saved events">
       <Bookmark size={35} aria-hidden="true" />
     </NavLink>
@@ -105,9 +101,6 @@ export function YourEventsNavBar ({ route }: { route: string }) {
             <nav aria-label="Main navigation" className="your-events-switch">
               <NavLink to="/saves" className={`pill ${route === "saves" ? "active" : ""}`} aria-pressed={route === "saves"}>
                 <SaveIcon width="20px" height="20px" color={route === "saves" ? "white": "black"}  className="save-icon"/><p>Saved</p>
-              </NavLink>
-              <NavLink to="/likes" className={`pill ${route === "likes" ? "active" : ""}`} aria-pressed={route === "likes"}>
-                <HeartIcon  width="20px" height="20px" color={route === "likes" ? "white": "black"} className="heart-icon"/><p>Liked</p>
               </NavLink>
               <NavLink to="/calendar" className={`pill ${route === "calendar" ? "active" : ""}`} aria-pressed={route === "calendar"}>
                 <CalendarIcon  width="20px" height="20px" color={route === "calendar" ? "white": "black"}  className="save-icon"/><p>Your Calendar</p>

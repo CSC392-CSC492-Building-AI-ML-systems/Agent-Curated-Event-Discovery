@@ -23,8 +23,6 @@ export default function DiscoverPage({
   events,
   saved,
   onSave,
-  liked,
-  onLike,
   followed,
   browse,
   setBrowse,
@@ -44,12 +42,15 @@ export default function DiscoverPage({
 
   useEffect(() => {
     let updatedMaxPrice = 0;
-    for (const event of events){
-      if (event.price && event.price > updatedMaxPrice){
-        updatedMaxPrice = event.price;
+    if (events.length > 0){
+      for (const event of events){
+        if (event.price && event.price > updatedMaxPrice){
+          updatedMaxPrice = event.price;
+        }
       }
+      setMaxPrice(updatedMaxPrice);
+      setTempMax(updatedMaxPrice)
     }
-    setMaxPrice(updatedMaxPrice);
   }, [events]);
 
   useEffect(() => {
@@ -77,13 +78,10 @@ export default function DiscoverPage({
       compact={compact}
       saved={saved.includes(event.id)}
       onSave={onSave}
-      liked={liked.includes(event.id)}
-      onLike={onLike}
       onOpen={setSelected}
       redirect={true}
     />
   );
-
   return (
     <div className="discover-page">
       <div className="discover-wrap">
@@ -169,7 +167,7 @@ export default function DiscoverPage({
             />
           </div>
 
-          <ForYouSection saved={saved} onSave={onSave} liked={liked} onLike={onLike} />  {/*Need to display the star and its current state*/}
+          <ForYouSection events={events} saved={saved} onSave={onSave}/>  {/*Need to display the star and its current state*/}
           <EventRequestState loading={loading} error={error} retry={retry} />
 
           {!loading && !error && (
@@ -266,8 +264,6 @@ export default function DiscoverPage({
             event={selected}
             saved={saved.includes(selected.id)}
             onSave={onSave}
-            liked={liked.includes(selected.id)}
-            onLike={onLike}
             onClose={() => setSelected(null)}
           />
         )}

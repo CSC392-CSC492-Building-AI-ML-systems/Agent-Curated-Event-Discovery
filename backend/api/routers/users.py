@@ -1,6 +1,5 @@
 import logging
 from uuid import UUID
-from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func, delete, select, update
@@ -13,10 +12,10 @@ from ..db.database import get_db
 from ..models.event import Event, Tag, Venue
 
 from ..models.preferences import UserPreferences, UserPreferenceTag
-from ..models.user_actions import EventLiked, EventSaved
+from ..models.user_actions import EventSaved
 from ..models.recommendations import UserRecommendedEvent
 from ..schemas.preferences import PreferencesResponse, PreferencesUpdate
-from ..schemas.user_actions import LikeOrSaveUpdate, LikeOrSaveResponse
+from ..schemas.user_actions import SaveUpdate, SaveResponse
 from ..utils.auth import get_current_user
 from ..utils.constructors import build_event
 
@@ -149,92 +148,7 @@ async def reject_recommended_event(
     return {"event_id": event_id, "rejected": True}
 
 
-# USER LIKES AND SAVES
-@router.get("/me/likes")
-async def get_likes(
-    skip: int = Query(0, ge=0),
-    limit: int = Query(50, ge=1, le=100),
-    user: dict = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
-):
-    result = await db.execute(
-        select(Event,
-            func.ST_AsGeoJSON(Venue.coordinates).label("coordinates_geojson"))
-        .select_from(EventLiked)
-        .join(EventLiked.event_obj)
-        .join(Event.venue_obj)
-        .options(selectinload(Event.tags), selectinload(Event.organizer_obj), selectinload(Event.venue_obj))
-        .where(EventLiked.user_id == UUID(user["sub"]))
-        .order_by(EventLiked.timestamp.desc(), Event.id)
-        .offset(skip)
-        .limit(limit)
-    )
-
-    rows = result.all()
-    return [
-            build_event(event, coordinates_geojson)
-            for event, coordinates_geojson in rows
-        ]
-
-@router.put("/me/like", response_model=LikeOrSaveResponse)
-async def put_like(
-    payload: LikeOrSaveUpdate,
-    user: dict = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
-):
-    try:
-        db.add(EventLiked(user_id=UUID(user["sub"]), event_id=payload.id))
-        await db.flush() #raise integrity error if alr liked
-        await db.execute(
-            update(Event)
-            .where(Event.id == payload.id)
-            .values(likes=Event.likes + 1)
-        )
-        await db.commit()
-    except HTTPException:
-        await db.rollback()
-        raise
-    except IntegrityError:
-        await db.rollback()
-        raise HTTPException(status_code=422, detail="Error liking event, please reload")
-    except SQLAlchemyError:
-        await db.rollback()
-        raise HTTPException(status_code=500, detail="Unable to like event; please retry") from None
-
-    return LikeOrSaveResponse(message="Successfully liked", id=payload.id)
-
-@router.delete("/me/like", response_model=LikeOrSaveResponse)
-async def delete_like(
-    payload: LikeOrSaveUpdate,
-    user: dict = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
-):
-    try:
-            res = await db.execute(
-                delete(EventLiked).where(
-                    EventLiked.user_id == UUID(user["sub"]),
-                    EventLiked.event_id == payload.id,
-                )
-            )
-            if res.rowcount:
-                await db.execute(
-                    update(Event)
-                    .where(Event.id == payload.id)
-                    .values(likes=Event.likes - 1)
-                )
-            await db.commit()
-    except HTTPException:
-        await db.rollback()
-        raise
-    except IntegrityError:
-        await db.rollback()
-        raise HTTPException(status_code=422, detail="Error unliking event, please reload")
-    except SQLAlchemyError:
-        await db.rollback()
-        raise HTTPException(status_code=500, detail="Unable to unlike event; please retry") from None
-
-    return LikeOrSaveResponse(message="Successfully unliked", id=payload.id)
-
+# USER SAVES
 @router.get("/me/saves")
 async def get_saves(
     skip: int = Query(0, ge=0),
@@ -261,9 +175,9 @@ async def get_saves(
             for event, coordinates_geojson in rows
         ]
 
-@router.put("/me/save", response_model=LikeOrSaveResponse)
+@router.put("/me/save", response_model=SaveResponse)
 async def put_save(
-    payload: LikeOrSaveUpdate,
+    payload: SaveUpdate,
     user: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
@@ -287,11 +201,11 @@ async def put_save(
         await db.rollback()
         raise HTTPException(status_code=500, detail="Unable to save event; please retry") from None
 
-    return LikeOrSaveResponse(message="Successfully saved", id=payload.id)
+    return SaveResponse(message="Successfully saved", id=payload.id)
 
-@router.delete("/me/save", response_model=LikeOrSaveResponse)
+@router.delete("/me/save", response_model=SaveResponse)
 async def delete_save(
-    payload: LikeOrSaveUpdate,
+    payload: SaveUpdate,
     user: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
@@ -319,4 +233,4 @@ async def delete_save(
         await db.rollback()
         raise HTTPException(status_code=500, detail="Unable to unsave event; please retry") from None
 
-    return LikeOrSaveResponse(message="Successfully unsaved", id=payload.id)
+    return SaveResponse(message="Successfully unsaved", id=payload.id)

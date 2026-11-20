@@ -14,7 +14,6 @@ CASCADE_TARGETS = {
     "user_availability": "auth.users",
     "event_calendar": "auth.users",
     "calendar_subscription": "auth.users",
-    "event_liked": "auth.users",
     "event_saved": "auth.users",
 }
 
