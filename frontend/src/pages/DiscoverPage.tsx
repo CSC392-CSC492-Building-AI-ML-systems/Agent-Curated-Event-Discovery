@@ -42,12 +42,15 @@ export default function DiscoverPage({
 
   useEffect(() => {
     let updatedMaxPrice = 0;
-    for (const event of events){
-      if (event.price && event.price > updatedMaxPrice){
-        updatedMaxPrice = event.price;
+    if (events.length > 0){
+      for (const event of events){
+        if (event.price && event.price > updatedMaxPrice){
+          updatedMaxPrice = event.price;
+        }
       }
+      setMaxPrice(updatedMaxPrice);
+      setTempMax(updatedMaxPrice)
     }
-    setMaxPrice(updatedMaxPrice);
   }, [events]);
 
   useEffect(() => {
@@ -79,7 +82,6 @@ export default function DiscoverPage({
       redirect={true}
     />
   );
-
   return (
     <div className="discover-page">
       <div className="discover-wrap">

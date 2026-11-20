@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { Header, YourEventsNavBar } from "../../components/NavBar";
 import EventRequestState from "../../components/EventRequestState";
 import SavesPage from "./SavesPage";
@@ -28,8 +28,10 @@ events,
   retrySaved,
   route
 }: YourEventsPageProps) {
+  
   const {session} = useAuth();
   const accessToken = session?.access_token;
+  const navigate = useNavigate();
   function routePage(route: string){
     if (route === "saves") {
         return <SavesPage events={events} saved={saved} onSave={onSave}/>
@@ -37,6 +39,11 @@ events,
         return <CalendarPage saved={saved} onSave={onSave}/>
     }
   }
+
+  useEffect(()=>{
+    if (!session || !session.access_token) {navigate("/login", { replace: true });}
+  }, [session])
+
   const location = useLocation();
   useEffect(() => {
     const frame = requestAnimationFrame(() =>
@@ -47,7 +54,16 @@ events,
   
   const error = route === "calendar" ? null : errorSaved;
   const loading = route === "calendar" ? false : loadingSaved;
-
+  if (!session || !session.access_token){
+    return <div className="discover-page">
+            <div className="discover-wrap">
+              <Header savedCount={saved.length} />
+              <main>
+                <p>Log in to view your events. <Link to="/login" state={{ returnTo: "/saves" }}>Log in</Link></p>
+              </main>
+          </div>
+        </div>
+  }  
   return (
     <div className="discover-page">
       <div className="discover-wrap">

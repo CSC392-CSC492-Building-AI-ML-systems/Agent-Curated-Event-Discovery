@@ -124,7 +124,7 @@ export default function DiscoverEventCard({
             aria-pressed={saved}
             onClick={() => {if (session?.access_token) {onSave(event.id)} else {navigate("/login")}}}
           >
-            {saved? <SaveIconFilled color="#f6545c" className="icon"/>: <SaveIconFilled fill="white" stroke="#f6545c" className="icon"/>}
+            {saved? <SaveIconFilled fill="#f6545c" stroke="#f6545c" className="icon"/>: <SaveIconFilled fill="white" stroke="#f6545c" className="icon"/>}
           </button>
           {!compact && event.saves > 0 && <p className="mini-text">{event.saves}</p>}
         </div>

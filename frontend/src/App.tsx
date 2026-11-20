@@ -146,18 +146,23 @@ function EventRoutes() {
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/onboarding" element={<OnboardingPage />} />
-        <Route path="/profile" element={<ProfilePage route="settings"/>} />
         <Route
           path="/events/:eventId"
-          element={
-            <EventPage
-              saved={saved}
-              onSave={onSave}
-            />
-          }
+          element={<EventPage saved={saved} onSave={onSave} />}
         />
         <Route path="/profile" element={<ProfilePage route="settings" />} />
-        <Route path="/profile/availability" element={<ProfilePage route="availability" />} />
+        <Route
+          path="/profile/friends"
+          element={<ProfilePage route="friends" />}
+        />
+        <Route
+          path="/profile/availability"
+          element={<ProfilePage route="availability" />}
+        />
+        <Route
+          path="/profile/security"
+          element={<ProfilePage route="security" />}
+        />
         <Route path="/saves" element={<YourEventsPage {...savedEventProps} route="saves"/>}/>
         <Route path="/calendar" element={<YourEventsPage {...savedEventProps} route="calendar"/>}/>
       </Routes>
