@@ -1,6 +1,6 @@
 from sqlalchemy import Boolean, Column, Date, ForeignKey, Integer, Numeric, \
     String, \
-    Table, Text, Time
+    Table, Text, Time, Float
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from datetime import datetime, date
 from decimal import Decimal
@@ -20,9 +20,13 @@ class TogatherEvent(Base):
     startdate: Mapped[str] = mapped_column(Text)
     enddate: Mapped[str] = mapped_column(Text)
     locationname: Mapped[str] = mapped_column(Text)
+    locationaddress: Mapped[str] = mapped_column(Text)
+    city: Mapped[str] = mapped_column(Text)
+    locationpostalcode: Mapped[str] = mapped_column(Text)
+    latitude: Mapped[float] = mapped_column(Float)
+    longitude: Mapped[float] = mapped_column(Float)
     inserteddate: Mapped[date] = mapped_column(Date)
     scrapeddate: Mapped[date] = mapped_column(Date)
-
 
 class Venue(Base):
     __tablename__ = "venue"
