@@ -15,10 +15,20 @@ type Props = {
   events: EventideEvent[];
   saved: number[];
   onSave: (id: number) => void;
+  variant?: "strip" | "full";
+  limit?: number;
+  onMore?: () => void;
 };
 
 
-export default function ForYouSection({ events, saved, onSave }: Props) {
+export default function ForYouSection({
+  events,
+  saved,
+  onSave,
+  variant = "strip",
+  limit = 15,
+  onMore,
+}: Props) {
   const { session, loading: checkingSession } = useAuth();
   const { preferences, loading, error, retry } = usePreferences();
   const token = session?.access_token;
@@ -66,6 +76,19 @@ export default function ForYouSection({ events, saved, onSave }: Props) {
     void rejectRecommendedEvent(id, token).catch(() => {});
   }
 
+  const renderRec = (event: EventideEvent) => (
+    <DiscoverEventCard
+      key={event.id}
+      event={event}
+      saved={saved.includes(event.id)}
+      onSave={onSave}
+      onOpen={setSelected}
+      onReject={onReject}
+      isRecommended={true}
+      redirect={true}
+    />
+  );
+
   if (checkingSession || !session) return null;
   return (
     <>
@@ -86,20 +109,22 @@ export default function ForYouSection({ events, saved, onSave }: Props) {
         </p>
       ) : preferences?.onboarding_completed ? (
         recommended.length ? (
-          <div className="discover-list">
-            {recommended.map((event) => (
-              <DiscoverEventCard
-                key={event.id}
-                event={event}
-                saved={saved.includes(event.id)}
-                onSave={onSave}
-                onOpen={setSelected}
-                onReject={onReject}
-                isRecommended={true}
-                redirect={true}
-              />
-            ))}
-          </div>
+          variant === "full" ? (
+            <div className="discover-list">{recommended.map(renderRec)}</div>
+          ) : (
+            <div className="discover-strip">
+              {recommended.slice(0, limit).map(renderRec)}
+              {recommended.length > limit && onMore && (
+                <button
+                  type="button"
+                  className="discover-more"
+                  onClick={onMore}
+                >
+                  → More
+                </button>
+              )}
+            </div>
+          )
         ) : (
           <div className="discover-empty">
             <p>

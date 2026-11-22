@@ -15,6 +15,9 @@ import { useSearchTracking } from "../hooks/useSearchTracking";
 import { INITIAL_FILTERS, MAX_PRICE, MIN_PRICE } from "../interfaces/constants";
 
 const TRENDING_COUNT = 25;  // Change to modify the maximum number of trending events displayed
+const STRIP_LIMIT = 15;  // 15 events displayed before "-> More" button
+
+type DiscoverTab = "overview" | "trending" | "foryou" | "all";
 
 const handlePosition = (value: number, maxPrice: number) => {
   const pct = (value - MIN_PRICE) / (maxPrice - MIN_PRICE);
@@ -39,6 +42,7 @@ export default function DiscoverPage({
   const [tempMax, setTempMax] = useState(MAX_PRICE)
   const [maxPrice, setMaxPrice] = useState(MAX_PRICE)
   const [selected, setSelected] = useState<EventideEvent | null>(null);
+  const [tab, setTab] = useState<DiscoverTab>("overview");
   const [now] = useState(() => Date.now());
   const { track } = useSearchTracking(search);
 
@@ -95,6 +99,22 @@ export default function DiscoverPage({
       redirect={true}
     />
   );
+
+  const renderStrip = (list: EventideEvent[], more: DiscoverTab) => (
+    <div className="discover-strip">
+      {list.slice(0, STRIP_LIMIT).map((event) => renderCard(event))}
+      {list.length > STRIP_LIMIT && (
+        <button
+          type="button"
+          className="discover-more"
+          onClick={() => setTab(more)}
+        >
+          → More
+        </button>
+      )}
+    </div>
+  );
+
   return (
     <div className="discover-page">
       <div className="discover-wrap">
@@ -180,68 +200,111 @@ export default function DiscoverPage({
             />
           </div>
 
-          <ForYouSection events={events} saved={saved} onSave={onSave}/>  {/*Need to display the star and its current state*/}
+          <div className="discover-tabs" role="tablist" aria-label="Discover sections">
+            {(
+              [
+                ["overview", "Home"],
+                ["trending", "Trending"],
+                ["foryou", "For You"],
+                ["all", range === "all-dates" ? "All Events" : "Upcoming"],
+              ] as [DiscoverTab, string][]
+            ).map(([key, label]) => (
+              <button
+                key={key}
+                type="button"
+                role="tab"
+                aria-selected={tab === key}
+                className={`discover-tab ${tab === key ? "active" : ""}`}
+                onClick={() => setTab(key)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
           <EventRequestState loading={loading} error={error} retry={retry} />
 
           {!loading && !error && (
             <>
-              {trending.length > 0 && (
-                <section aria-labelledby="discover-trending">
-                  <h2 id="discover-trending">
-                    Trending <span>✦ Most saved</span>
-                  </h2>
-                  <div className="discover-list">
-                    {trending.map((event) => renderCard(event))}
+              {(tab === "overview" || tab === "trending") &&
+                trending.length > 0 && (
+                  <section aria-labelledby="discover-trending">
+                    <h2 id="discover-trending">
+                      Trending <span>✦ Most saved</span>
+                    </h2>
+                    {tab === "overview" ? (
+                      renderStrip(trending, "trending")
+                    ) : (
+                      <div className="discover-list">
+                        {trending.map((event) => renderCard(event))}
+                      </div>
+                    )}
+                  </section>
+                )}
+
+              {(tab === "overview" || tab === "foryou") && (
+                <ForYouSection
+                  events={events}
+                  saved={saved}
+                  onSave={onSave}
+                  variant={tab === "foryou" ? "full" : "strip"}
+                  limit={STRIP_LIMIT}
+                  onMore={() => setTab("foryou")}
+                />
+              )}
+
+              {(tab === "overview" || tab === "all") && (
+                <section aria-labelledby="discover-upcoming">
+                  <div className="discover-section-heading">
+                    <h2 id="discover-upcoming">
+                      {query
+                        ? `Results for “${search.trim()}”`
+                        : range === "all-dates"
+                          ? "All events"
+                          : "Upcoming"}
+                    </h2>
+
+                    <span role="status">
+                      {visible.length} {visible.length === 1 ? "event" : "events"}
+                    </span>
                   </div>
+
+                  {visible.length > 0 ? (
+                    tab === "overview" ? (
+                      renderStrip(visible, "all")
+                    ) : (
+                      <div className="discover-list">
+                        {visible.map((event) => renderCard(event))}
+                      </div>
+                    )
+                  ) : (
+                    <div className="discover-empty">
+                      <h3>
+                        {events.length
+                          ? "No events match"
+                          : "No events available"}
+                      </h3>
+
+                      <p>
+                        {events.length
+                          ? "Try a wider date range, a different search, or fewer topics."
+                          : "There are no events to display yet."}
+                      </p>
+
+                      <button
+                        className="pill"
+                        onClick={() => {
+                          setBrowse(INITIAL_FILTERS);
+                        }}
+                      >
+                        Browse all events
+                      </button>
+                    </div>
+                  )}
                 </section>
               )}
 
-              <section aria-labelledby="discover-upcoming">
-                <div className="discover-section-heading">
-                  <h2 id="discover-upcoming">
-                    {query
-                      ? `Results for “${search.trim()}”`
-                      : range === "all-dates"
-                        ? "All events"
-                        : "Upcoming"}
-                  </h2>
-
-                  <span role="status">
-                    {visible.length} {visible.length === 1 ? "event" : "events"}
-                  </span>
-                </div>
-
-                {visible.length > 0 ? (
-                  <div className="discover-list">
-                    {visible.map((event) => renderCard(event))}
-                  </div>
-                ) : (
-                  <div className="discover-empty">
-                    <h3>
-                      {events.length
-                        ? "No events match"
-                        : "No events available"}
-                    </h3>
-
-                    <p>
-                      {events.length
-                        ? "Try a wider date range, a different search, or fewer topics."
-                        : "There are no events to display yet."}
-                    </p>
-
-                    <button
-                      className="pill"
-                      onClick={() => {
-                        setBrowse(INITIAL_FILTERS);
-                      }}
-                    >
-                      Browse all events
-                    </button>
-                  </div>
-                )}
-              </section>
-
-              {!query && (
+              {tab === "overview" && !query && (
                 <section aria-labelledby="discover-following">
                   <h2 id="discover-following">
                     Following{" "}

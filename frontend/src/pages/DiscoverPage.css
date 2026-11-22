@@ -54,6 +54,22 @@
 .discover-chip.active { background: #f6545c; color: white; }
 .discover-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
 .discover-list { display: grid; gap: 14px; }
+
+/* A section preview that scrolls sideways instead of lengthening the page. */
+.discover-strip { display: flex; gap: 14px; overflow-x: scroll; padding-bottom: 10px; scroll-snap-type: x proximity; }
+.discover-strip::-webkit-scrollbar { height: 10px; }
+.discover-strip::-webkit-scrollbar-track { background: #f2cdd2; border-radius: 99px; }
+.discover-strip::-webkit-scrollbar-thumb { background: #f6545c; border-radius: 99px; }
+/* Two cards share a row and the section scrolls sideways. */
+.discover-strip > * { flex: 0 0 calc(50% - 7px); scroll-snap-align: start; }
+.discover-strip .event-card-large .event-card-copy { padding-left: 14px; text-align: left; }
+.discover-strip .event-card-large .event-card-copy h3 { width: calc(100% - 120px); }
+.discover-strip .event-card-large .event-card-copy p { min-height: 6em; }
+.discover-more { flex: 0 0 auto; align-self: stretch; min-width: 130px; border: 1px dashed var(--discover-line); border-radius: 20px; background: #ffffffa0; color: #d63a45; font: inherit; font-size: 16px; cursor: pointer; }
+.discover-more:hover { border-color: #f6545c; }
+.discover-tabs { display: flex; gap: 22px; margin-top: 4px; border-bottom: 1px solid var(--discover-line); }
+.discover-tab { border: 0; background: transparent; padding: 8px 2px; margin-bottom: -1px; font: inherit; font-size: 16px; color: inherit; cursor: pointer; border-bottom: 3px solid transparent; }
+.discover-tab.active { border-bottom-color: #f6545c; color: #d63a45; }
 .discover-section-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
 .discover-section-heading > span { color: var(--discover-muted); font-size: 14px; }
 .discover-empty { padding: 28px; background: #ffffffa0; border: 1px dashed var(--discover-line); border-radius: 20px; text-align: center; }
