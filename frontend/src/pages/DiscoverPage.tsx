@@ -14,6 +14,8 @@ import TagFilters from "../components/TagFilters";
 import { useSearchTracking } from "../hooks/useSearchTracking";
 import { INITIAL_FILTERS, MAX_PRICE, MIN_PRICE } from "../interfaces/constants";
 
+const TRENDING_COUNT = 25;  // Change to modify the maximum number of trending events displayed
+
 const handlePosition = (value: number, maxPrice: number) => {
   const pct = (value - MIN_PRICE) / (maxPrice - MIN_PRICE);
   return `calc(${pct * 100}% + ${(0.5 - pct) * 18}px)`;
@@ -70,6 +72,17 @@ export default function DiscoverPage({
   const query = search.trim().toLowerCase();
 
   const visible = filterEvents(events, browse, now);
+
+  // Events are already available and includes event save count.
+  // Trending sorts these events. Past events and unsaved events are dropped.
+  const trending = events
+    .filter(
+      (event) =>
+        event.saves >= 1 &&
+        (!event.startDate || Date.parse(event.startDate) >= now),
+    )
+    .sort((a, b) => b.saves - a.saves)
+    .slice(0, TRENDING_COUNT);
 
   const renderCard = (event: EventideEvent, compact = false) => (
     <DiscoverEventCard
@@ -172,6 +185,17 @@ export default function DiscoverPage({
 
           {!loading && !error && (
             <>
+              {trending.length > 0 && (
+                <section aria-labelledby="discover-trending">
+                  <h2 id="discover-trending">
+                    Trending <span>✦ Most saved</span>
+                  </h2>
+                  <div className="discover-list">
+                    {trending.map((event) => renderCard(event))}
+                  </div>
+                </section>
+              )}
+
               <section aria-labelledby="discover-upcoming">
                 <div className="discover-section-heading">
                   <h2 id="discover-upcoming">
