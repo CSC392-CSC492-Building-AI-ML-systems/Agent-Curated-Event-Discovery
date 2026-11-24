@@ -7,6 +7,7 @@ from ..models.user_actions import EventLiked, EventSaved
 from ..models.analytics import EventClicked, EventPopular, EventTrending
 from ..models.preferences import UserPreferences
 from ..models.recommendations import UserRecommendedEvent
+from .recommended_event_description import generate_description_for_recommended_event
 from typesafe_sdk import TypeSafeClient, Score
 
 def update_trends(number: int = 50) -> None:
@@ -309,7 +310,9 @@ def insert_recommendations_for_user(user_id: str, num_retrieved: int=50, num_ran
         print(f"ranked: {ranked}")
         session.execute(delete(UserRecommendedEvent).where(UserRecommendedEvent.user_id == USER_ID))
         for event in ranked:
-            stmt = insert(UserRecommendedEvent).values(user_id=USER_ID, event_id = event["id"])
+            # call helper function to generate description and insert that into the database as well
+            description = generate_description_for_recommended_event(event["id"], USER_ID)
+            stmt = insert(UserRecommendedEvent).values(user_id=USER_ID, event_id = event["id"], description=description)
             session.execute(stmt)
         session.commit()
 
