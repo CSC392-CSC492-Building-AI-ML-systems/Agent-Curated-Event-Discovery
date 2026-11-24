@@ -9,12 +9,14 @@ import {
 import { toEventideEvent } from "../api/adapters";
 import DiscoverEventCard from "./DiscoverEventCard";
 import EventDetails from "./EventDetails";
-import type { EventideEvent } from "../interfaces/interfaces";
+import filterEvents from "../utils/filterEvents";
+import type { EventideEvent, BrowseState } from "../interfaces/interfaces";
 
 type Props = {
   events: EventideEvent[];
   saved: number[];
   onSave: (id: number) => void;
+  browse: BrowseState;
   variant?: "strip" | "full";
   limit?: number;
   onMore?: () => void;
@@ -25,6 +27,7 @@ export default function ForYouSection({
   events,
   saved,
   onSave,
+  browse,
   variant = "strip",
   limit = 15,
   onMore,
@@ -89,6 +92,8 @@ export default function ForYouSection({
     />
   );
 
+  const visibleRecs = filterEvents(recommended, browse);
+
   if (checkingSession || !session) return null;
   return (
     <>
@@ -108,13 +113,13 @@ export default function ForYouSection({
           Loading your preferences…
         </p>
       ) : preferences?.onboarding_completed ? (
-        recommended.length ? (
+        visibleRecs.length ? (
           variant === "full" ? (
-            <div className="discover-list">{recommended.map(renderRec)}</div>
+            <div className="discover-list">{visibleRecs.map(renderRec)}</div>
           ) : (
             <div className="discover-strip">
-              {recommended.slice(0, limit).map(renderRec)}
-              {recommended.length > limit && onMore && (
+              {visibleRecs.slice(0, limit).map(renderRec)}
+              {visibleRecs.length > limit && onMore && (
                 <button
                   type="button"
                   className="discover-more"

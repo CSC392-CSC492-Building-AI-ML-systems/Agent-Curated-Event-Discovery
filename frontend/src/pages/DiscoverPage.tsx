@@ -77,9 +77,7 @@ export default function DiscoverPage({
 
   const visible = filterEvents(events, browse, now);
 
-  // Events are already available and includes event save count.
-  // Trending sorts these events. Past events and unsaved events are dropped.
-  const trending = events
+  const trending = visible
     .filter(
       (event) =>
         event.saves >= 1 &&
@@ -226,27 +224,52 @@ export default function DiscoverPage({
 
           {!loading && !error && (
             <>
-              {(tab === "overview" || tab === "trending") &&
-                trending.length > 0 && (
-                  <section aria-labelledby="discover-trending">
-                    <h2 id="discover-trending">
-                      Trending <span>✦ Most saved</span>
-                    </h2>
-                    {tab === "overview" ? (
+              {(tab === "overview" || tab === "trending") && (
+                <section aria-labelledby="discover-trending">
+                  <h2 id="discover-trending">
+                    Trending <span>✦ Most saved</span>
+                  </h2>
+                  {trending.length > 0 ? (
+                    tab === "overview" ? (
                       renderStrip(trending, "trending")
                     ) : (
                       <div className="discover-list">
                         {trending.map((event) => renderCard(event))}
                       </div>
-                    )}
-                  </section>
-                )}
+                    )
+                  ) : (
+                    <div className="discover-empty">
+                      <h3>
+                        {events.length
+                          ? "No trending events match"
+                          : "No events available"}
+                      </h3>
+
+                      <p>
+                        {events.length
+                          ? "An event needs at least one save to trend. Try a wider date range, a different search, or fewer topics."
+                          : "There are no events to display yet."}
+                      </p>
+
+                      <button
+                        className="pill"
+                        onClick={() => {
+                          setBrowse(INITIAL_FILTERS);
+                        }}
+                      >
+                        Browse all events
+                      </button>
+                    </div>
+                  )}
+                </section>
+              )}
 
               <div hidden={tab !== "overview" && tab !== "foryou"}>
                 <ForYouSection
                   events={events}
                   saved={saved}
                   onSave={onSave}
+                  browse={browse}
                   variant={tab === "foryou" ? "full" : "strip"}
                   limit={STRIP_LIMIT}
                   onMore={() => setTab("foryou")}
