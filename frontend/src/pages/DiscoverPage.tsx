@@ -242,7 +242,7 @@ export default function DiscoverPage({
                   </section>
                 )}
 
-              {(tab === "overview" || tab === "foryou") && (
+              <div hidden={tab !== "overview" && tab !== "foryou"}>
                 <ForYouSection
                   events={events}
                   saved={saved}
@@ -251,7 +251,7 @@ export default function DiscoverPage({
                   limit={STRIP_LIMIT}
                   onMore={() => setTab("foryou")}
                 />
-              )}
+              </div>
 
               {(tab === "overview" || tab === "all") && (
                 <section aria-labelledby="discover-upcoming">
