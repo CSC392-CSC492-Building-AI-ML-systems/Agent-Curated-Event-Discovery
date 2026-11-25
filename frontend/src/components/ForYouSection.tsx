@@ -9,16 +9,29 @@ import {
 import { toEventideEvent } from "../api/adapters";
 import DiscoverEventCard from "./DiscoverEventCard";
 import EventDetails from "./EventDetails";
-import type { EventideEvent } from "../interfaces/interfaces";
+import filterEvents from "../utils/filterEvents";
+import type { EventideEvent, BrowseState } from "../interfaces/interfaces";
 
 type Props = {
   events: EventideEvent[];
   saved: number[];
   onSave: (id: number) => void;
+  browse: BrowseState;
+  variant?: "strip" | "full";
+  limit?: number;
+  onMore?: () => void;
 };
 
 
-export default function ForYouSection({ events, saved, onSave }: Props) {
+export default function ForYouSection({
+  events,
+  saved,
+  onSave,
+  browse,
+  variant = "strip",
+  limit = 15,
+  onMore,
+}: Props) {
   const { session, loading: checkingSession } = useAuth();
   const { preferences, loading, error, retry } = usePreferences();
   const token = session?.access_token;
@@ -66,6 +79,21 @@ export default function ForYouSection({ events, saved, onSave }: Props) {
     void rejectRecommendedEvent(id, token).catch(() => {});
   }
 
+  const renderRec = (event: EventideEvent) => (
+    <DiscoverEventCard
+      key={event.id}
+      event={event}
+      saved={saved.includes(event.id)}
+      onSave={onSave}
+      onOpen={setSelected}
+      onReject={onReject}
+      isRecommended={true}
+      redirect={true}
+    />
+  );
+
+  const visibleRecs = filterEvents(recommended, browse);
+
   if (checkingSession || !session) return null;
   return (
     <>
@@ -85,21 +113,23 @@ export default function ForYouSection({ events, saved, onSave }: Props) {
           Loading your preferences…
         </p>
       ) : preferences?.onboarding_completed ? (
-        recommended.length ? (
-          <div className="discover-list">
-            {recommended.map((event) => (
-              <DiscoverEventCard
-                key={event.id}
-                event={event}
-                saved={saved.includes(event.id)}
-                onSave={onSave}
-                onOpen={setSelected}
-                onReject={onReject}
-                isRecommended={true}
-                redirect={true}
-              />
-            ))}
-          </div>
+        visibleRecs.length ? (
+          variant === "full" ? (
+            <div className="discover-list">{visibleRecs.map(renderRec)}</div>
+          ) : (
+            <div className="discover-strip">
+              {visibleRecs.slice(0, limit).map(renderRec)}
+              {visibleRecs.length > limit && onMore && (
+                <button
+                  type="button"
+                  className="discover-more"
+                  onClick={onMore}
+                >
+                  → More
+                </button>
+              )}
+            </div>
+          )
         ) : (
           <div className="discover-empty">
             <p>

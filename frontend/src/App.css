@@ -832,8 +832,12 @@ label {
 
 .event-card-large .event-card-open {
   display: grid;
-  grid-template-columns: 240px 1fr;
+  grid-template-columns: 1fr;
   gap: 12px 18px;
+}
+/* The image column only exists when there is an image to put in it. */
+.event-card-large .event-card-open:has(img) {
+  grid-template-columns: 240px 1fr;
 }
 
 .event-card-large img,
@@ -1178,4 +1182,5 @@ input:checked + .slider:before {
 
 .mini-text {
   font-size: 10px;
+  margin-top: -2px;
 }

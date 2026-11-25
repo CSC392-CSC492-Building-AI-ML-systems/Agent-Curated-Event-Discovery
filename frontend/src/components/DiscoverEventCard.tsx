@@ -63,22 +63,9 @@ export default function DiscoverEventCard({
       >
         {event.imageUrl ? (
           <img src={event.imageUrl} alt="" loading="lazy" />
-        ) : (
-          <span className="event-image-placeholder" aria-hidden="true">
-            {!compact?
-            <div className="row tiny-gap" style={{position: "absolute", left: 10, top: 10}}>
-              { event.eighteenPlus?
-                <span className="pill2invert">
-                  18+
-                </span>: <></>
-              }
-              <span className="pill2" >
-                {price_not_found? "Price unavailable": free? "Free": `$${event.price}`}
-              </span>
-            </div>: <></>}
-            ✦
-          </span>
-        )}
+        ) : compact ? (
+          <span className="event-image-placeholder" aria-hidden="true">✦</span>
+        ) : null}
         <div className="event-card-copy">
           {compact && (
             <span className="event-date">
@@ -107,6 +94,12 @@ export default function DiscoverEventCard({
       </button>
       {!compact && (
         <div className="event-card-footer">
+          <div className="row tiny-gap">
+            {event.eighteenPlus && <span className="pill2invert">18+</span>}
+            <span className="pill2">
+              {price_not_found ? "Price unavailable" : free ? "Free" : `$${event.price}`}
+            </span>
+          </div>
           <span>{formatEventDate(event.startDate, event.startTimeKnown)}</span>
           <span>{event.venue.name || "Location to be announced"}</span>
           <div className="event-tags row small-gap">
