@@ -45,6 +45,7 @@ export interface ApiEvent {
   venue: ApiVenue;
   likes: number;
   saves: number
+  recommendation?: string;
   // The tag-events route does not currently eagerly load event tags.
 }
 

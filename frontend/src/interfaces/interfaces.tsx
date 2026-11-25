@@ -54,6 +54,7 @@ export interface EventideEvent {
   imageUrl?: string;
   likes: number;
   saves: number;
+  recommendation?: string | null;
 }
 
 export interface EventideFilters {

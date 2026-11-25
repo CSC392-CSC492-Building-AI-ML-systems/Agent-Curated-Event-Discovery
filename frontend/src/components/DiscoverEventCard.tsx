@@ -91,7 +91,7 @@ export default function DiscoverEventCard({
             </span>
           )}
           {<h3>{event.title}</h3>}
-          {!compact && <p>{event.description}</p>}
+          {!compact && <p>{isRecommended ? event.recommendation : event.description}</p>}
           {compact && (
             <span className="event-location">
               {event.venue.name || "Location to be announced"}

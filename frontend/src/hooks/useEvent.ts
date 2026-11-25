@@ -19,7 +19,7 @@ type RequestState =
       message: string;
     };
 
-export default function useEvent(eventId: number | null) {
+export default function useEvent(eventId: number | null, accessToken?: string) {
   const [state, setState] = useState<RequestState>({
     status: "idle",
   });
@@ -33,7 +33,7 @@ export default function useEvent(eventId: number | null) {
 
     async function load() {
       try {
-        const event = await getEvent(eventId!, controller.signal);
+        const event = await getEvent(eventId!, controller.signal, accessToken);
 
         if (controller.signal.aborted) return;
 

@@ -1,13 +1,16 @@
 import json
 
 from fastapi import APIRouter, HTTPException, Depends, Query
-from sqlalchemy import func, select
+from sqlalchemy import func, select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from ..db.database import get_db
 from ..models.event import Event, Venue
+from ..models.recommendations import UserRecommendedEvent
 from ..utils.constructors import build_event
+from ..utils.auth import get_optional_current_user
+from uuid import UUID
 
 router = APIRouter(prefix="/events")
 
@@ -41,7 +44,7 @@ async def get_events(skip: int = Query(0, ge=0),
 
 
 @router.get("/{event_id}")
-async def get_event(event_id: int, db: AsyncSession = Depends(get_db)):
+async def get_event(event_id: int, db: AsyncSession = Depends(get_db), user: dict | None = Depends(get_optional_current_user)):
     result = await db.execute(
         select(
             Event,
@@ -62,5 +65,20 @@ async def get_event(event_id: int, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Event not found")
 
     event, coordinates_geojson = row
+    event_obj = build_event(event, coordinates_geojson)
 
-    return build_event(event, coordinates_geojson)
+    if user is not None:
+        recommendation = await db.execute(
+            select(UserRecommendedEvent.description)
+            .where(
+                and_(
+                    UserRecommendedEvent.event_id == event_id,
+                    UserRecommendedEvent.user_id == UUID(user["sub"]),
+                    UserRecommendedEvent.rejected.is_(False),
+                )
+            )
+        )
+        row = recommendation.one_or_none()
+        if row is not None:
+            event_obj["recommendation"] = row.description
+    return event_obj

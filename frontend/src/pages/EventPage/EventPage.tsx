@@ -53,7 +53,7 @@ export default function EventPage({ saved, onSave }: Props) {
 
   const validId = Number.isSafeInteger(id) && id > 0;
   const location = useLocation();
-  const isRecommended = location.state?.isRecommended === true;
+  // const isRecommended = location.state?.isRecommended === true;
   const navigate = useNavigate();
   const origin = location.state?.origin;
   const { session, loading: checkingSession } = useAuth();
@@ -63,36 +63,37 @@ export default function EventPage({ saved, onSave }: Props) {
 
   const token = session?.access_token;
 
-  const { event, loading, error } = useEvent(id);
-
+  const { event, loading, error } = useEvent(id, token);
+  const isRecommended = event?.recommendation != null;
+  
   async function onReject(id: number) {
-  if (!token || isRejected || isRejecting) return;
+    if (!token || isRejected || isRejecting) return;
 
-  setIsRejecting(true);
-  setRejectNotification("");
-
-   if (!token) return;
-   try {
-    void rejectRecommendedEvent(id, token).catch(() => {});
-    setIsRejected(true);
-    setRejectNotification("Event successfully rejected");
-  } catch (error) {
-    console.error("Failed to reject event:", error);
-    setRejectNotification("Failed to reject event. Please try again.");
-  } finally {
-    setIsRejecting(false);
-  }
-}
-
-useEffect(() => {
-  if (!rejectNotification) return;
-
-  const timer = setTimeout(() => {
+    setIsRejecting(true);
     setRejectNotification("");
-  }, 3000);
 
-  return () => clearTimeout(timer);
-}, [rejectNotification]);
+    if (!token) return;
+    try {
+      void rejectRecommendedEvent(id, token).catch(() => {});
+      setIsRejected(true);
+      setRejectNotification("Event successfully rejected");
+    } catch (error) {
+      console.error("Failed to reject event:", error);
+      setRejectNotification("Failed to reject event. Please try again.");
+    } finally {
+      setIsRejecting(false);
+    }
+  }
+
+  useEffect(() => {
+    if (!rejectNotification) return;
+
+    const timer = setTimeout(() => {
+      setRejectNotification("");
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, [rejectNotification]);
 
   function handleBack() {
     if (origin?.path) {
@@ -147,7 +148,14 @@ useEffect(() => {
                   {event.eighteenPlus && (
                     <span className="event-page-age">18+ event</span>
                   )}
-
+                  {isRecommended && (
+                    <section className="event-page-section">
+                      <h2>Why we recommend this event</h2>
+                      <p className="event-page-description">
+                        {event.recommendation || "No recommendation available."}
+                      </p>
+                    </section>
+                  )}
                   <section className="event-page-section">
                     <h2>About this event</h2>
                     <p className="event-page-description">
@@ -225,33 +233,33 @@ useEffect(() => {
                       {saved.includes(event.id) ? "★ Saved" : "☆ Save event"}
                     </button>
                     {isRecommended && (
-  <>
-    <button
-      type="button"
-      className="event-page-save event-page-reject"
-      aria-label={`Not interested in ${event.title}`}
-      onClick={() => onReject(event.id)}
-      disabled={isRejected || isRejecting}
-    >
-      {isRejecting
-        ? "Rejecting..."
-        : isRejected
-          ? "✓ Event rejected"
-          : "✕ Reject event"}
-    </button>
+                      <>
+                        <button
+                          type="button"
+                          className="event-page-save event-page-reject"
+                          aria-label={`Not interested in ${event.title}`}
+                          onClick={() => onReject(event.id)}
+                          disabled={isRejected || isRejecting}
+                        >
+                          {isRejecting
+                            ? "Rejecting..."
+                            : isRejected
+                              ? "✓ Event rejected"
+                              : "✕ Reject event"}
+                        </button>
 
-    {rejectNotification && (
-      <div
-        className={`event-page-notification ${
-          isRejected ? "success" : "error"
-        }`}
-        role="status"
-      >
-        {rejectNotification}
-      </div>
-    )}
-  </>
-)}
+                        {rejectNotification && (
+                          <div
+                            className={`event-page-notification ${
+                              isRejected ? "success" : "error"
+                            }`}
+                            role="status"
+                          >
+                            {rejectNotification}
+                          </div>
+                        )}
+                      </>
+                    )}
 
                     {event.link && (
                       <a

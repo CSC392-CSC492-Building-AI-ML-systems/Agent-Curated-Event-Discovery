@@ -111,7 +111,7 @@ async def get_recommended_events(
     db: AsyncSession = Depends(get_db),
 ):
     rec_events = await db.execute(
-        select(Event, func.ST_AsGeoJSON(Venue.coordinates).label("coordinates_geojson"))
+        select(Event, func.ST_AsGeoJSON(Venue.coordinates).label("coordinates_geojson"), UserRecommendedEvent.description)
         .join(Event.venue_obj)
         .join(UserRecommendedEvent, UserRecommendedEvent.event_id == Event.id)
         .options(selectinload(Event.tags), selectinload(Event.organizer_obj), selectinload(Event.venue_obj))
@@ -119,7 +119,13 @@ async def get_recommended_events(
         .order_by(Event.id)
     )
 
-    return [build_event(event, coordinates_geojson) for event, coordinates_geojson in rec_events.all()]
+    recommended_events = []
+    for event, coordinates_geojson, description in rec_events.all():
+        temp = build_event(event, coordinates_geojson)
+        temp["recommendation"] = description
+        recommended_events.append(temp)
+
+    return recommended_events
 
 
 @router.put("/me/recommended-events/{event_id}/rejected")

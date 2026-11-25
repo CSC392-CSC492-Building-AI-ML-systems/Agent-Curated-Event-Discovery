@@ -70,6 +70,6 @@ export async function requestJson<T>(
   return (text ? JSON.parse(text) : undefined) as T;
 }
 
-export function getJson<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  return requestJson<T>(path, options);
+export function getJson<T>(path: string, options: RequestOptions = {}, accessToken?: string): Promise<T> {
+  return requestJson<T>(path, { ...options, accessToken });
 }

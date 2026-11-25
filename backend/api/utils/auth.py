@@ -18,6 +18,8 @@ ISSUER=f"{SUPABASE_URL}/auth/v1"
 JWKS_URL=f"{ISSUER}/.well-known/jwks.json"
 
 jwks_client = PyJWKClient(JWKS_URL, cache_jwk_set=True, lifespan=600)
+optional_bearer = HTTPBearer(auto_error=False)
+
 
 
 def verify_token(token: str) -> dict:
@@ -49,3 +51,11 @@ async def get_current_user(
         raise
     except (jwt.InvalidTokenError, jwt.PyJWKClientError, ValueError):
         raise HTTPException(status_code=401, detail="Invalid or expired token")
+
+async def get_optional_current_user(
+    credentials: HTTPAuthorizationCredentials | None = Depends(optional_bearer), db: AsyncSession = Depends(get_db)
+) -> dict | None:
+    if credentials is None:
+        return None
+
+    return await get_current_user(credentials=credentials, db=db)
