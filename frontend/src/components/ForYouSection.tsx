@@ -6,7 +6,7 @@ import {
   getRecommendedEvents,
   rejectRecommendedEvent,
 } from "../api/recommendedEvents";
-import { toEventideRecommendedEvent } from "../api/adapters";
+import { toEventideEvent } from "../api/adapters";
 import DiscoverEventCard from "./DiscoverEventCard";
 import EventDetails from "./EventDetails";
 import type { EventideEvent } from "../interfaces/interfaces";
@@ -22,7 +22,7 @@ export default function ForYouSection({ events, saved, onSave }: Props) {
   const { session, loading: checkingSession } = useAuth();
   const { preferences, loading, error, retry } = usePreferences();
   const token = session?.access_token;
-  const [recommended, setRecommended] = useState<EventideEvent[]>([]);
+  const [recommended, setRecommended] = useState<(EventideEvent)[]>([]);
   const [selected, setSelected] = useState<EventideEvent | null>(null);
   useEffect(() => {
     // No one logged in
@@ -38,18 +38,19 @@ export default function ForYouSection({ events, saved, onSave }: Props) {
     void getRecommendedEvents(token, { signal: controller.signal })
       .then((eventsRecommended) => {
         // load the recommended events
-        const recommended = eventsRecommended.map(toEventideRecommendedEvent);
-        const recommendedMerged: EventideEvent[] = []; //recommended events merged with events from the DiscoverPage.tsx
+        const recommended = eventsRecommended.map(toEventideEvent);
+        const recommendedMerged: (EventideEvent)[] = []; //recommended events merged with events from the DiscoverPage.tsx
         for (const event of recommended){
           const existingEvent = eventsDict?.get(event.id);
           
           if (existingEvent){
+            existingEvent.recommendedReason = event.recommendedReason
+            existingEvent.recommendedReasonDetail = event.recommendedReasonDetail
             recommendedMerged.push(existingEvent);
           }else{
             recommendedMerged.push(event);
           }
         } 
-        console.log(`result: ${eventsRecommended}`)
         if (!controller.signal.aborted) setRecommended(recommendedMerged);
       })
       .catch(() => {
@@ -98,6 +99,8 @@ export default function ForYouSection({ events, saved, onSave }: Props) {
                 onReject={onReject}
                 isRecommended={true}
                 redirect={true}
+                recommendedReason={event.recommendedReason ?? undefined}
+                recommendedReasonDetail={event.recommendedReasonDetail ?? undefined}
               />
             ))}
           </div>

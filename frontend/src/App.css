@@ -797,6 +797,9 @@ label {
   color: var(--accent);
   font-style: italic;
 }
+.event-recommended-reason-container {
+  width: calc(100% - 90px);
+}
 
 .event-card-large .event-actions {
   right: 20px;

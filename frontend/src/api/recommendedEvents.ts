@@ -1,8 +1,8 @@
 import { requestJson } from "./client";
-import type { ApiRecommendedEvent, RequestOptions } from "./types";
+import type { ApiEvent, RequestOptions } from "./types";
 
 export function getRecommendedEvents(accessToken: string, options: RequestOptions = {}) {
-  return requestJson<ApiRecommendedEvent[]>("/users/me/recommended-events", { ...options, accessToken });
+  return requestJson<ApiEvent[]>("/users/me/recommended-events", { ...options, accessToken });
 }
 
 export function rejectRecommendedEvent(eventId: number, accessToken: string, options: RequestOptions = {}) {

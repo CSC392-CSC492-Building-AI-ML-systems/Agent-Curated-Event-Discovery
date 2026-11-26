@@ -12,33 +12,33 @@ import { useNavigate } from "react-router-dom";
 const formatRecommendedReason = (recommendedReason: string, recommendedReasonDetail: string | null) =>{
   let recommendedExplanation = "";
   if (recommendedReason == "tag"){
-    if (recommendedExplanation == null){
+    if (!recommendedReasonDetail || recommendedReasonDetail === ""){
       recommendedExplanation = "At a good time for you"
     }else{
       recommendedExplanation = `Because you like #${recommendedReasonDetail}`
     }
   }else if (recommendedReason == "location"){
-    if (recommendedExplanation == null){
-      recommendedExplanation = "At a good spot for you"
+    if (!recommendedReasonDetail || recommendedReasonDetail === ""){
+      recommendedExplanation = "At a good location for you"
     }else{
       recommendedExplanation = `For when you're in ${recommendedReasonDetail}`
     }
   }else if (recommendedReason == "budget"){
-    if (recommendedExplanation == null){
+    if (!recommendedReasonDetail || recommendedReasonDetail === ""){
       recommendedExplanation = "Within your budget"
     }
   }else if (recommendedReason == "pastevents"){
-    if (recommendedExplanation == null){
+    if (!recommendedReasonDetail || recommendedReasonDetail === ""){
       recommendedExplanation = "Similar to past saved events"
     } else {
       recommendedExplanation = `Similar to ${recommendedReasonDetail}`
     }
   }else if (recommendedReason == "age"){
-    if (recommendedExplanation == null){
+    if (!recommendedReasonDetail || recommendedReasonDetail === ""){
       recommendedExplanation = "Others your age liked"
     } 
   }else if (recommendedReason == "time"){
-    if (recommendedExplanation == null){
+    if (!recommendedReasonDetail || recommendedReasonDetail === ""){
       recommendedExplanation = "At a good time for you"
     } 
   }
@@ -93,6 +93,7 @@ export default function DiscoverEventCard({
   };
   const price_not_found = event.price == null
   const free = event.price == 0
+  console.log(`reason: ${recommendedReason}`)
   return (
     <article
       className={`event-card ${compact ? "event-card-compact" : "event-card-large"}`}
@@ -123,9 +124,11 @@ export default function DiscoverEventCard({
         )}
         <div className="event-card-copy">
           {recommendedReason && (
-            <span className="event-recommended-reason">
-              {formatRecommendedReason(recommendedReason, recommendedReasonDetail ?? null)}
-            </span>
+            <div className="event-recommended-reason-container">
+              <span className="event-recommended-reason">
+                {formatRecommendedReason(recommendedReason, recommendedReasonDetail ?? null)}
+              </span>
+            </div>
           )}
           {compact && (
             <span className="event-date">

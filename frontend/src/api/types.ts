@@ -44,26 +44,9 @@ export interface ApiEvent {
   organizer: ApiOrganizer | null;
   venue: ApiVenue;
   saves: number
+  reason?: string | null,
+  reason_detail?: string | null
   // The tag-events route does not currently eagerly load event tags.
-}
-
-export interface ApiRecommendedEvent {
-  id: number;
-  name: string;
-  description: string;
-  startdate: string | null;
-  starttime: string | null;
-  enddate: string | null;
-  endtime: string | null;
-  price: number | null;
-  link: string;
-  eighteenplus: boolean;
-  tags: ApiTag[];
-  organizer: ApiOrganizer | null;
-  venue: ApiVenue;
-  saves: number;
-  reason: string; 
-  reason_detail: string;
 }
 
 export interface RequestOptions {
