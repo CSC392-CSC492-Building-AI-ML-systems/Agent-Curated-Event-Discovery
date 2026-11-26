@@ -8,6 +8,43 @@ import { formatEventDate } from "../utils/eventDate";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 
+
+const formatRecommendedReason = (recommendedReason: string, recommendedReasonDetail: string | null) =>{
+  let recommendedExplanation = "";
+  if (recommendedReason == "tag"){
+    if (recommendedExplanation == null){
+      recommendedExplanation = "At a good time for you"
+    }else{
+      recommendedExplanation = `Because you like #${recommendedReasonDetail}`
+    }
+  }else if (recommendedReason == "location"){
+    if (recommendedExplanation == null){
+      recommendedExplanation = "At a good spot for you"
+    }else{
+      recommendedExplanation = `For when you're in ${recommendedReasonDetail}`
+    }
+  }else if (recommendedReason == "budget"){
+    if (recommendedExplanation == null){
+      recommendedExplanation = "Within your budget"
+    }
+  }else if (recommendedReason == "pastevents"){
+    if (recommendedExplanation == null){
+      recommendedExplanation = "Similar to past saved events"
+    } else {
+      recommendedExplanation = `Similar to ${recommendedReasonDetail}`
+    }
+  }else if (recommendedReason == "age"){
+    if (recommendedExplanation == null){
+      recommendedExplanation = "Others your age liked"
+    } 
+  }else if (recommendedReason == "time"){
+    if (recommendedExplanation == null){
+      recommendedExplanation = "At a good time for you"
+    } 
+  }
+  return recommendedExplanation;
+}
+
 type Props = {
   event: EventideEvent;
   compact?: boolean;
@@ -18,6 +55,8 @@ type Props = {
   onReject?: (id: number) => void;
   isRecommended?: boolean;
   redirect: boolean;
+  recommendedReason?: string;
+  recommendedReasonDetail?: string;
 };
 
 export default function DiscoverEventCard({
@@ -29,6 +68,8 @@ export default function DiscoverEventCard({
   onReject,
   isRecommended,
   redirect,
+  recommendedReason,
+  recommendedReasonDetail
 }: Props) {
   const { logEventClick } = useAnalytics();
   const { session } = useAuth();
@@ -55,7 +96,8 @@ export default function DiscoverEventCard({
   return (
     <article
       className={`event-card ${compact ? "event-card-compact" : "event-card-large"}`}
-    >
+    > 
+    
       <button
         className="event-card-open"
         onClick={navigateToEvent}
@@ -80,6 +122,11 @@ export default function DiscoverEventCard({
           </span>
         )}
         <div className="event-card-copy">
+          {recommendedReason && (
+            <span className="event-recommended-reason">
+              {formatRecommendedReason(recommendedReason, recommendedReasonDetail ?? null)}
+            </span>
+          )}
           {compact && (
             <span className="event-date">
               {formatEventDate(event.startDate, event.startTimeKnown)}

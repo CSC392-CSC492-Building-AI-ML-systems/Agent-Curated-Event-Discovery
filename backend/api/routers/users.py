@@ -110,14 +110,14 @@ async def get_recommended_events(
     db: AsyncSession = Depends(get_db),
 ):
     rec_events = await db.execute(
-        select(Event, func.ST_AsGeoJSON(Venue.coordinates).label("coordinates_geojson"), UserRecommendedEvent.reason, UserRecommendedEvent.reason_detail)
+        select(Event, func.ST_AsGeoJSON(Venue.coordinates).label("coordinates_geojson"))
         .join(Event.venue_obj)
         .join(UserRecommendedEvent, UserRecommendedEvent.event_id == Event.id)
         .options(selectinload(Event.tags), selectinload(Event.organizer_obj), selectinload(Event.venue_obj))
         .where(UserRecommendedEvent.user_id == UUID(user["sub"]), UserRecommendedEvent.rejected.is_(False))
         .order_by(Event.id)
     )
-
+    
     print([build_recommended_event(event, coordinates_geojson, reason, reason_detail) for event, coordinates_geojson, reason, reason_detail in rec_events.all()])
     return [build_recommended_event(event, coordinates_geojson, reason, reason_detail) for event, coordinates_geojson, reason, reason_detail in rec_events.all()]
 

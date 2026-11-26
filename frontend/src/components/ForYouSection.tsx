@@ -6,7 +6,7 @@ import {
   getRecommendedEvents,
   rejectRecommendedEvent,
 } from "../api/recommendedEvents";
-import { toEventideEvent } from "../api/adapters";
+import { toEventideRecommendedEvent } from "../api/adapters";
 import DiscoverEventCard from "./DiscoverEventCard";
 import EventDetails from "./EventDetails";
 import type { EventideEvent } from "../interfaces/interfaces";
@@ -38,7 +38,7 @@ export default function ForYouSection({ events, saved, onSave }: Props) {
     void getRecommendedEvents(token, { signal: controller.signal })
       .then((eventsRecommended) => {
         // load the recommended events
-        const recommended = eventsRecommended.map(toEventideEvent);
+        const recommended = eventsRecommended.map(toEventideRecommendedEvent);
         const recommendedMerged: EventideEvent[] = []; //recommended events merged with events from the DiscoverPage.tsx
         for (const event of recommended){
           const existingEvent = eventsDict?.get(event.id);
@@ -49,6 +49,7 @@ export default function ForYouSection({ events, saved, onSave }: Props) {
             recommendedMerged.push(event);
           }
         } 
+        console.log(`result: ${eventsRecommended}`)
         if (!controller.signal.aborted) setRecommended(recommendedMerged);
       })
       .catch(() => {

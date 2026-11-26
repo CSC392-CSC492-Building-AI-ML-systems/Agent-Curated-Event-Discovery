@@ -55,6 +55,35 @@ export interface EventideEvent {
   saves: number;
 }
 
+export interface EventideRecommendedEvent {
+  key: number;
+  id: number;
+  title: string;
+  description: string;
+  longitude?: number;
+  latitude?: number;
+  // Names without #, retained for existing card, filter, and map components.
+  // Keep IDs as well as names for API requests and tag following.
+  tags: EventideTag[];
+  // ISO timestamps with Z or an explicit offset; display in America/Toronto.
+  // Toronto observes daylight saving time, so don't assume a fixed UTC offset.
+  startDate?: string;
+  endDate?: string;
+  // False when only a calendar date is supplied, rather than an actual time.
+  startTimeKnown?: boolean;
+  endTimeKnown?: boolean;
+  venue: EventideVenue;
+  organizer?: EventideOrganizer | null;
+  // Preserve the API's numeric or decimal-string representation.
+  price?: number | null;
+  link: string;
+  eighteenPlus: boolean;
+  imageUrl?: string;
+  saves: number;
+  reason: string;
+  reasonDetail: string
+}
+
 export interface EventideFilters {
   search: string;
   tags: Set<string>;

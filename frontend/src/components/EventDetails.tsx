@@ -7,8 +7,6 @@ import { useNavigate } from "react-router-dom";
 import closeIcon from "../assets/images/close-icon.svg";
 import SaveIcon from '../assets/images/save-icon.svg?react';
 import SaveIconFilled from '../assets/images/save-icon-filled.svg?react';
-import HeartIcon from '../assets/images/heart-icon.svg?react';
-import HeartIconFilled from '../assets/images/heart-icon-filled.svg?react';
 
 export default function EventDetails({
   event,

@@ -792,6 +792,12 @@ label {
   font-size: 25px !important;
   gap: 5px;
 }
+
+.event-recommended-reason {
+  color: var(--accent);
+  font-style: italic;
+}
+
 .event-card-large .event-actions {
   right: 20px;
   top: 20px;

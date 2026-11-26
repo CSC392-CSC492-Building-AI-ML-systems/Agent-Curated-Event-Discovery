@@ -1,6 +1,6 @@
-import type { EventideEvent } from "../interfaces/interfaces";
+import type { EventideEvent, EventideRecommendedEvent } from "../interfaces/interfaces";
 import { toTorontoTimestamp } from "../utils/torontoTime";
-import type { ApiEvent } from "./types";
+import type { ApiEvent, ApiRecommendedEvent } from "./types";
 
 function combineDateAndTime(
   date: string | null,
@@ -42,3 +42,35 @@ export function toEventideEvent(event: ApiEvent): EventideEvent {
     // Address, image, and coordinates aren't supplied by these endpoints yet.
   };
 }
+
+export function toEventideRecommendedEvent(event: ApiRecommendedEvent): EventideRecommendedEvent {
+  return {
+    key: event.id,
+    id: event.id,
+    title: event.name,
+    description: event.description,
+
+    startDate: combineDateAndTime(event.startdate, event.starttime),
+    endDate: combineDateAndTime(event.enddate, event.endtime),
+    startTimeKnown: event.starttime != null,
+    endTimeKnown: event.endtime != null,
+
+    venue: event.venue,
+    organizer: event.organizer,
+    price: event.price == null? null: Number(event.price),
+    link: event.link,
+    eighteenPlus: event.eighteenplus,
+
+    tags: event.tags,
+
+    latitude: event.venue.coordinates?.coordinates[1],
+    longitude: event.venue.coordinates?.coordinates[0],
+
+    saves: event.saves,
+    reason: event.reason,
+    reasonDetail: event.reason_detail
+    // Address, image, and coordinates aren't supplied by these endpoints yet.
+  };
+}
+
+
