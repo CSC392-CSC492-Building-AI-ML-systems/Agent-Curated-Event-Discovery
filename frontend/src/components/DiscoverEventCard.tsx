@@ -26,6 +26,8 @@ const formatRecommendedReason = (recommendedReason: string, recommendedReasonDet
   }else if (recommendedReason == "budget"){
     if (!recommendedReasonDetail || recommendedReasonDetail === ""){
       recommendedExplanation = "Within your budget"
+    }else{
+      recommendedExplanation = "Within your budget"
     }
   }else if (recommendedReason == "pastevents"){
     if (!recommendedReasonDetail || recommendedReasonDetail === ""){
@@ -36,11 +38,15 @@ const formatRecommendedReason = (recommendedReason: string, recommendedReasonDet
   }else if (recommendedReason == "age"){
     if (!recommendedReasonDetail || recommendedReasonDetail === ""){
       recommendedExplanation = "Others your age liked"
+    }else{
+      recommendedExplanation = "Others your age liked"
     } 
   }else if (recommendedReason == "time"){
     if (!recommendedReasonDetail || recommendedReasonDetail === ""){
       recommendedExplanation = "At a good time for you"
-    } 
+    } else{
+      recommendedExplanation = "At a good time for you"
+    }
   }
   return recommendedExplanation;
 }
