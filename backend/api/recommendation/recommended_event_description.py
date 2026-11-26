@@ -20,8 +20,6 @@ def generate_description(event: dict, data: dict):
     """
     This function takes the event details as well as user data, and calls gemini to generate a
     description of why the user would like the event based on the information given.
-
-    Return:
     """
     prompt = f"""Here is information about this event which was recommended for the user {event}. Here is some data 
     about the user {data}. Keep in mind that friends saved event gives the user's friends who have saved the event.
@@ -32,7 +30,7 @@ def generate_description(event: dict, data: dict):
 
     # argument 3 forces gemini to return a valid and parseable JSON string over text or markdown
     response = gemini.models.generate_content(
-        model="gemini-3.6-flash",
+        model="gemini-3.5-flash-lite",
         contents=prompt,
         config=types.GenerateContentConfig(response_mime_type="application/json")
     )
@@ -122,8 +120,9 @@ def generate_description_for_recommended_event(event_id, user_id):
                  "recently saved events": recently_saved_events, "recent most clicked events": recently_clicked_events,
                  "friends saved event": friends_saved}
     description = generate_description(event, user_data)
-    print(description.get("description", ""))
-    return description.get("description", "")
+    if description:
+        return description.get("description", "")
+    return ""
 
 if __name__ == '__main__':
     # about this event:

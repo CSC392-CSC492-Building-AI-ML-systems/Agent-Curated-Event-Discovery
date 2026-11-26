@@ -311,13 +311,16 @@ def insert_recommendations_for_user(user_id: str, num_retrieved: int=50, num_ran
         session.execute(delete(UserRecommendedEvent).where(UserRecommendedEvent.user_id == USER_ID))
         for event in ranked:
             # call helper function to generate description and insert that into the database as well
-            description = generate_description_for_recommended_event(event["id"], USER_ID)
-            stmt = insert(UserRecommendedEvent).values(user_id=USER_ID, event_id = event["id"], description=description)
+            try:
+                description = generate_description_for_recommended_event(event["id"], USER_ID)
+                stmt = insert(UserRecommendedEvent).values(user_id=USER_ID, event_id = event["id"], description=description)
+            except Exception as e:
+                stmt = insert(UserRecommendedEvent).values(user_id=USER_ID, event_id=event["id"])
             session.execute(stmt)
         session.commit()
 
 if __name__ == "__main__":
-    USER_ID = "6a383d0b-7fbf-481d-877a-607fb78fa8a2"
+    USER_ID = "3954c72a-307e-4e17-bd12-87aaf17513ad"
     insert_recommendations_for_user(USER_ID)
 
     # Run update_trends() daily, to update event_popular and event_trending tables

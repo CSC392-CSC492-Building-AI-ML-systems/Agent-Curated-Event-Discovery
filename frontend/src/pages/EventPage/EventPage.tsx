@@ -53,7 +53,6 @@ export default function EventPage({ saved, onSave }: Props) {
 
   const validId = Number.isSafeInteger(id) && id > 0;
   const location = useLocation();
-  // const isRecommended = location.state?.isRecommended === true;
   const navigate = useNavigate();
   const origin = location.state?.origin;
   const { session, loading: checkingSession } = useAuth();
@@ -65,7 +64,7 @@ export default function EventPage({ saved, onSave }: Props) {
 
   const { event, loading, error } = useEvent(id, token);
   const isRecommended = event?.recommendation != null;
-  
+
   async function onReject(id: number) {
     if (!token || isRejected || isRejecting) return;
 
