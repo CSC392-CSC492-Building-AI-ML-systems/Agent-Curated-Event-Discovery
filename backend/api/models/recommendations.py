@@ -11,4 +11,5 @@ class UserRecommendedEvent(Base):
     event_id: Mapped[int] = mapped_column(ForeignKey("event.id", ondelete="CASCADE"), primary_key=True)
     rejected: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     description: Mapped[str | None] = mapped_column(Text)
-
+    reason: Mapped[str | None] = mapped_column(Text)
+    reason_detail: Mapped[str | None] = mapped_column(Text)

@@ -81,6 +81,8 @@ CREATE TABLE IF NOT EXISTS user_recommended_events (
 	event_id INTEGER NOT NULL,
 	rejected BOOLEAN NOT NULL DEFAULT FALSE,
 	description TEXT,
+	reason TEXT,
+	reason_detail TEXT,
 	PRIMARY KEY(user_id, event_id),
 	FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE,
 	FOREIGN KEY (event_id) REFERENCES Event(id) ON DELETE CASCADE

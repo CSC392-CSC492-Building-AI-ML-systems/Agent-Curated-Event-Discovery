@@ -17,7 +17,7 @@ from ..models.recommendations import UserRecommendedEvent
 from ..schemas.preferences import PreferencesResponse, PreferencesUpdate
 from ..schemas.user_actions import SaveUpdate, SaveResponse
 from ..utils.auth import get_current_user
-from ..utils.constructors import build_event
+from ..utils.constructors import build_event, build_recommended_event
 
 router = APIRouter(prefix="/users", tags=["Users"])
 logger = logging.getLogger(__name__)
@@ -110,7 +110,7 @@ async def get_recommended_events(
     db: AsyncSession = Depends(get_db),
 ):
     rec_events = await db.execute(
-        select(Event, func.ST_AsGeoJSON(Venue.coordinates).label("coordinates_geojson"))
+        select(Event, func.ST_AsGeoJSON(Venue.coordinates).label("coordinates_geojson"), UserRecommendedEvent.reason, UserRecommendedEvent.reason_detail)
         .join(Event.venue_obj)
         .join(UserRecommendedEvent, UserRecommendedEvent.event_id == Event.id)
         .options(selectinload(Event.tags), selectinload(Event.organizer_obj), selectinload(Event.venue_obj))
@@ -118,7 +118,8 @@ async def get_recommended_events(
         .order_by(Event.id)
     )
 
-    return [build_event(event, coordinates_geojson) for event, coordinates_geojson in rec_events.all()]
+    print([build_recommended_event(event, coordinates_geojson, reason, reason_detail) for event, coordinates_geojson, reason, reason_detail in rec_events.all()])
+    return [build_recommended_event(event, coordinates_geojson, reason, reason_detail) for event, coordinates_geojson, reason, reason_detail in rec_events.all()]
 
 
 @router.put("/me/recommended-events/{event_id}/rejected")
