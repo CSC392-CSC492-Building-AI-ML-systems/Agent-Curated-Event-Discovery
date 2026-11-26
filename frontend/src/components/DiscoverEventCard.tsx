@@ -13,7 +13,7 @@ const formatRecommendedReason = (recommendedReason: string, recommendedReasonDet
   let recommendedExplanation = "";
   if (recommendedReason == "tag"){
     if (!recommendedReasonDetail || recommendedReasonDetail === ""){
-      recommendedExplanation = "At a good time for you"
+      recommendedExplanation = "Based on your interests"
     }else{
       recommendedExplanation = `Because you like #${recommendedReasonDetail}`
     }
