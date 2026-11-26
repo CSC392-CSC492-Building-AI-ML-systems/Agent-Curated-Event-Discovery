@@ -20,7 +20,6 @@ export function makeEvent(id: number, overrides: Partial<ApiEvent> = {}): ApiEve
     tags: [],
     organizer: null,
     venue: { id: 1, name: "Test venue", address: "Toronto", coordinates: null },
-    likes: 0,
     saves: 0,
     ...overrides,
   };
@@ -199,7 +198,7 @@ export async function setupScheduling(page: Page, context: BrowserContext, optio
       } });
     }
     if (path === "/events") return route.fulfill({ json: state.events });
-    if (path === "/tags" || path === "/users/me/likes") {
+    if (path === "/tags") {
       return route.fulfill({ json: [] });
     }
     if (path === "/users/me/saves") {

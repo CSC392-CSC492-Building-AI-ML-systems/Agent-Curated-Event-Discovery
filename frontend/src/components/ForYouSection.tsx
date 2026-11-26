@@ -12,40 +12,53 @@ import EventDetails from "./EventDetails";
 import type { EventideEvent } from "../interfaces/interfaces";
 
 type Props = {
-  liked: number[];
-  onLike: (id: number) => void;
+  events: EventideEvent[];
   saved: number[];
   onSave: (id: number) => void;
-  liked: number[];
-  onLike: (id: number) => void;
 };
 
 
-export default function ForYouSection({ saved, onSave, liked, onLike }: Props) {
+export default function ForYouSection({ events, saved, onSave }: Props) {
   const { session, loading: checkingSession } = useAuth();
   const { preferences, loading, error, retry } = usePreferences();
   const token = session?.access_token;
-  const [recommended, setRecommended] = useState<EventideEvent[]>([]);
+  const [recommended, setRecommended] = useState<(EventideEvent)[]>([]);
   const [selected, setSelected] = useState<EventideEvent | null>(null);
-
   useEffect(() => {
     // No one logged in
     if (!token) {
       setRecommended([]);
       return;
     }
+    const eventsDict: Map<number, EventideEvent> = new Map();
+    for (const event of events){
+      eventsDict.set(event.id, event)
+    }
     const controller = new AbortController();
     void getRecommendedEvents(token, { signal: controller.signal })
-      .then((events) => {
+      .then((eventsRecommended) => {
         // load the recommended events
-        if (!controller.signal.aborted) setRecommended(events.map(toEventideEvent));
+        const recommended = eventsRecommended.map(toEventideEvent);
+        const recommendedMerged: (EventideEvent)[] = []; //recommended events merged with events from the DiscoverPage.tsx
+        for (const event of recommended){
+          const existingEvent = eventsDict?.get(event.id);
+          
+          if (existingEvent){
+            existingEvent.recommendedReason = event.recommendedReason
+            existingEvent.recommendedReasonDetail = event.recommendedReasonDetail
+            recommendedMerged.push(existingEvent);
+          }else{
+            recommendedMerged.push(event);
+          }
+        } 
+        if (!controller.signal.aborted) setRecommended(recommendedMerged);
       })
       .catch(() => {
         // Failed load leaves the section empty
       });
 
     return () => controller.abort();
-  }, [token]);
+  }, [token, events]);
 
   function onReject(id: number) {
     if (!token) return;
@@ -80,16 +93,14 @@ export default function ForYouSection({ saved, onSave, liked, onLike }: Props) {
               <DiscoverEventCard
                 key={event.id}
                 event={event}
-                liked={liked.includes(event.id)}
-                onLike={onLike}
                 saved={saved.includes(event.id)}
                 onSave={onSave}
-                liked={liked.includes(event.id)}
-                onLike={onLike}
                 onOpen={setSelected}
                 onReject={onReject}
                 isRecommended={true}
                 redirect={true}
+                recommendedReason={event.recommendedReason ?? undefined}
+                recommendedReasonDetail={event.recommendedReasonDetail ?? undefined}
               />
             ))}
           </div>
@@ -116,12 +127,8 @@ export default function ForYouSection({ saved, onSave, liked, onLike }: Props) {
     {selected && (
       <EventDetails
         event={selected}
-        liked= {liked.includes(selected.id)}
-        onLike={onLike}
         saved={saved.includes(selected.id)}
         onSave={onSave}
-        liked={liked.includes(selected.id)}
-        onLike={onLike}
         onReject={onReject}
         onClose={() => setSelected(null)}
       />

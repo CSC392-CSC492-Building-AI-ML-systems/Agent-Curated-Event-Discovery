@@ -3,7 +3,7 @@ from sqlalchemy import select, delete, func, union_all, literal, extract, text
 from sqlalchemy.orm import selectinload
 from sqlalchemy.dialects.postgresql import insert
 from ..models.event import Event, Tag, Venue
-from ..models.user_actions import EventLiked, EventSaved
+from ..models.user_actions import EventSaved
 from ..models.analytics import EventClicked, EventPopular, EventTrending
 from ..models.preferences import UserPreferences
 from ..models.recommendations import UserRecommendedEvent
@@ -13,11 +13,11 @@ def update_trends(number: int = 50) -> None:
     """
     Update the 'event_trending' and 'event_popular' tables with a given <number> of events.
 
-    Popularity is calculated by summing up all event saves, likes and clicks.
-    So popularity_score = saves*3 + likes*2 + clicks.
+    Popularity is calculated by summing up all event saves, and clicks.
+    So popularity_score = saves*2 + clicks.
     Trending is calculated by the same weighted score as popularity but with an added 'recency bias',
     a decay function with a half-life of 3 days.
-    So trending_score = sum(save*0.5^(age/3))*3 + sum(like*0.5^(age/3))*3 + sum(click*0.5^(age/3))*3
+    So trending_score = sum(save*0.5^(age/3))*2 + sum(click*0.5^(age/3))*3
     """
     HALF_LIFE_DAYS = 3
 
@@ -25,8 +25,7 @@ def update_trends(number: int = 50) -> None:
     with SessionLocal() as session:
         # update popular
         interactions = union_all(
-            select(EventSaved.event_id, EventSaved.timestamp, literal(3).label("w")),
-            select(EventLiked.event_id, EventLiked.timestamp, literal(2).label("w")),
+            select(EventSaved.event_id, EventSaved.timestamp, literal(2).label("w")),
             select(EventClicked.event_id, EventClicked.last_clicked.label("timestamp"), literal(1).label("w")),
         ).subquery("interactions")
 
@@ -90,14 +89,8 @@ def get_event_scores(user_id: str, number: int = None) -> any:
         select(
             EventSaved.event_id,
             EventSaved.timestamp,
-            literal(3).label("w"),
-        ).where(EventSaved.user_id == user_id),
-
-        select(
-            EventLiked.event_id,
-            EventLiked.timestamp,
             literal(2).label("w"),
-        ).where(EventLiked.user_id == user_id),
+        ).where(EventSaved.user_id == user_id),
 
         select(
             EventClicked.event_id,
@@ -231,7 +224,7 @@ def retrieve(user_id: str, number: int=50, location: int=None) -> list[dict]:
 
 def rank(events: list[dict], user_id: str, number: int) -> list[dict]:
     """
-    Rank the given <events> for the user <user_id>, from most likely to save/like to least likely to save/like.
+    Rank the given <events> for the user <user_id>, from most likely to save/click to least likely to save/click.
     Return a list of the top <number> of ranked events.
     """
     scores = [] #tuples, (id, score)
@@ -296,14 +289,14 @@ def insert_recommendations_for_user(user_id: str, num_retrieved: int=50, num_ran
     Get <number> of ranked, top recommendations for the user <user_id>.
     Populate the recommended_events table in PostgreSQL accordingly.
     """
-    event_scores = retrieve(USER_ID, number=num_retrieved)
+    event_scores = retrieve(user_id, number=num_retrieved)
     events = []
     with SessionLocal() as session:
         rows = session.scalars(select(Event).options(selectinload(Event.tags)).where(Event.id.in_([event["id"] for event in event_scores]))).all()
         events = [{"id": event.id, "name": event.name, "description": event.description,
                         "startdate": event.startdate, "enddate": event.enddate, "price": event.price,
                         "eighteenplus": event.eighteenplus, "tags": event.tags, "clicks": event.clicks,
-                        "likes": event.likes, "saves": event.saves
+                        "saves": event.saves
                         } for event in rows]
         ranked = rank(events, USER_ID, number=num_ranked)
         print(f"ranked: {ranked}")

@@ -7,7 +7,8 @@ import "./EventPage.css";
 import { rejectRecommendedEvent } from "../../api/recommendedEvents";
 import { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
-
+import SaveIconFilled from '../../assets/images/save-icon-filled.svg?react';
+ 
 type Props = {
   saved: number[];
   onSave: (id: number) => void;
@@ -34,7 +35,7 @@ function formatDate(value: string | undefined, timeKnown = true): string {
 }
 
 function formatPrice(price: EventideEvent["price"]): string {
-  if (price == null || price === "") return "Price not listed";
+  if (price == null) return "Price not listed";
 
   const amount = Number(price);
   if (!Number.isFinite(amount)) return String(price);
@@ -221,8 +222,9 @@ useEffect(() => {
                       className="event-page-save"
                       aria-pressed={saved.includes(event.id)}
                       onClick={() => onSave(event.id)}
-                    >
-                      {saved.includes(event.id) ? "★ Saved" : "☆ Save event"}
+                    > 
+                      {saved.includes(event.id)? <SaveIconFilled fill="#f6545c" stroke="#f6545c" className="icon"/>: <SaveIconFilled fill="white" stroke="#f6545c" className="icon"/>}
+                      {saved.includes(event.id) ? "Saved" : "Save event"}
                     </button>
                     {isRecommended && (
   <>

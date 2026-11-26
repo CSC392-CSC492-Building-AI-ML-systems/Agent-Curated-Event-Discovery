@@ -56,7 +56,7 @@ class CalendarTestCase(unittest.TestCase):
                     startdate=date(2026, 11, event_id), enddate=date(2026, 11, event_id),
                     starttime=time(10), endtime=time(12), venue_obj=venue,
                     link="https://example.com", eighteenplus=False,
-                    togathereventid=f"source-{event_id}", likes=0, saves=0,
+                    togathereventid=f"source-{event_id}", saves=0,
                 ))
             db.commit()
 

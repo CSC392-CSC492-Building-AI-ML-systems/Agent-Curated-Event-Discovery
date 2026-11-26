@@ -2,25 +2,67 @@ import TagLink from "./TagLink";
 import CalendarEventButton from "./CalendarEventButton";
 import type { EventideEvent } from "../interfaces/interfaces";
 import SaveIconFilled from '../assets/images/save-icon-filled.svg?react';
-import HeartIconFilled from '../assets/images/heart-icon-filled.svg?react';
 import { useAnalytics } from "../hooks/useAnalytics";
 
 import { formatEventDate } from "../utils/eventDate";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 
+
+const formatRecommendedReason = (recommendedReason: string, recommendedReasonDetail: string | null) =>{
+  let recommendedExplanation = "";
+  if (recommendedReason == "tag"){
+    if (!recommendedReasonDetail || recommendedReasonDetail === ""){
+      recommendedExplanation = "Based on your interests"
+    }else{
+      recommendedExplanation = `Because you like #${recommendedReasonDetail}`
+    }
+  }else if (recommendedReason == "location"){
+    if (!recommendedReasonDetail || recommendedReasonDetail === ""){
+      recommendedExplanation = "At a good location for you"
+    }else{
+      recommendedExplanation = `For when you're in ${recommendedReasonDetail}`
+    }
+  }else if (recommendedReason == "budget"){
+    if (!recommendedReasonDetail || recommendedReasonDetail === ""){
+      recommendedExplanation = "Within your budget"
+    }else{
+      recommendedExplanation = "Within your budget"
+    }
+  }else if (recommendedReason == "pastevents"){
+    if (!recommendedReasonDetail || recommendedReasonDetail === ""){
+      recommendedExplanation = "Similar to past saved events"
+    } else {
+      recommendedExplanation = `Similar to ${recommendedReasonDetail}`
+    }
+  }else if (recommendedReason == "age"){
+    if (!recommendedReasonDetail || recommendedReasonDetail === ""){
+      recommendedExplanation = "Others your age liked"
+    }else{
+      recommendedExplanation = "Others your age liked"
+    } 
+  }else if (recommendedReason == "time"){
+    if (!recommendedReasonDetail || recommendedReasonDetail === ""){
+      recommendedExplanation = "At a good time for you"
+    } else{
+      recommendedExplanation = "At a good time for you"
+    }
+  }
+  return recommendedExplanation;
+}
+
 type Props = {
   event: EventideEvent;
   compact?: boolean;
   saved: boolean;
   onSave: (id: number) => void;
-  liked: boolean;
-  onLike: (id: number) => void;
   onOpen: (event: EventideEvent) => void;
   // Only recommended events pass this so the reject button not on regular upcoming section events
   onReject?: (id: number) => void;
   isRecommended?: boolean;
   redirect: boolean;
+  recommendedReason?: string;
+  recommendedReasonDetail?: string;
 };
 
 export default function DiscoverEventCard({
@@ -28,12 +70,12 @@ export default function DiscoverEventCard({
   compact = false,
   saved,
   onSave,
-  liked, 
-  onLike,
   onOpen,
   onReject,
   isRecommended,
   redirect,
+  recommendedReason,
+  recommendedReasonDetail
 }: Props) {
   const { logEventClick } = useAnalytics();
   const { session } = useAuth();
@@ -57,10 +99,12 @@ export default function DiscoverEventCard({
   };
   const price_not_found = event.price == null
   const free = event.price == 0
+  console.log(`reason: ${recommendedReason}`)
   return (
     <article
       className={`event-card ${compact ? "event-card-compact" : "event-card-large"}`}
-    >
+    > 
+    
       <button
         className="event-card-open"
         onClick={navigateToEvent}
@@ -85,6 +129,13 @@ export default function DiscoverEventCard({
           </span>
         )}
         <div className="event-card-copy">
+          {recommendedReason && (
+            <div className="event-recommended-reason-container">
+              <span className="event-recommended-reason">
+                {formatRecommendedReason(recommendedReason, recommendedReasonDetail ?? null)}
+              </span>
+            </div>
+          )}
           {compact && (
             <span className="event-date">
               {formatEventDate(event.startDate, event.startTimeKnown)}
@@ -122,25 +173,17 @@ export default function DiscoverEventCard({
         </div>
       )}
       <div className="event-actions">
-        <div className="event-like-wrap">
+        <div className="event-save-wrap">
           <button
-            className="event-like"
-            aria-label={`${liked ? "Unlike" : "Like"} ${event.title}`}
-            aria-pressed={liked}
-            onClick={() => {if (session?.access_token) {onLike(event.id)} else {navigate("/login")}}}
+            className="event-save"
+            aria-label={`${saved ? "Unsave" : "Save"} ${event.title}`}
+            aria-pressed={saved}
+            onClick={() => {if (session?.access_token) {onSave(event.id)} else {navigate("/login")}}}
           >
-            {liked? <HeartIconFilled fill="#f6545c" stroke="#f6545c" className="icon"/>: <HeartIconFilled fill="white" stroke="#f6545c" className="icon"/>}
+            {saved? <SaveIconFilled fill="#f6545c" stroke="#f6545c" className="icon"/>: <SaveIconFilled fill="white" stroke="#f6545c" className="icon"/>}
           </button>
-          {!compact && event.likes > 0 && <p className="mini-text">{event.likes}</p>}
+          {!compact && event.saves > 0 && <p className="mini-text">{event.saves}</p>}
         </div>
-        <button
-          className="event-save"
-          aria-label={`${saved ? "Unsave" : "Save"} ${event.title}`}
-          aria-pressed={saved}
-          onClick={() => {if (session?.access_token) {onSave(event.id)} else {navigate("/login")}}}
-        >
-          {saved? <SaveIconFilled fill="#f6545c" stroke="#f6545c" className="icon"/>: <SaveIconFilled fill="white" stroke="#f6545c" className="icon"/>}
-        </button>
         <CalendarEventButton event={event} />
         {onReject && (
           <button

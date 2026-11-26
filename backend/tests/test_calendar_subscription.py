@@ -114,7 +114,7 @@ class CalendarSubscriptionTests(CalendarTestCase):
                     startdate=source.startdate, enddate=source.enddate,
                     starttime=source.starttime, endtime=source.endtime,
                     venue=1, link="https://example.com", eighteenplus=False,
-                    togathereventid=f"source-{event_id}", likes=0, saves=0,
+                    togathereventid=f"source-{event_id}", saves=0,
                 ))
                 db.add(CalendarEvent(user_id=UUID(self.user_id), event_id=event_id))
             db.commit()

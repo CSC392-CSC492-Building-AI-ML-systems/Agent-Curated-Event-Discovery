@@ -1,6 +1,5 @@
 import { Header, ProfileNavBar } from "../../components/NavBar";
 import SettingsPage from "./SettingsPage";
-import LikesPage from "./LikesPage";
 import SavesPage from "./SavesPage";
 import AvailabilityPage from "./AvailabilityPage";
 import SecurityPage from "./SecurityPage";
@@ -9,8 +8,6 @@ import FriendsPage from "./FriendsPage";
 function routePage(route: string){
     if (route === "settings") {
         return <SettingsPage/>
-    }else if (route === "likes") {
-        return <LikesPage/>
     }else if (route === "saves") {
         return <SavesPage/>
     }else if (route === "availability") {

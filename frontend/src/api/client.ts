@@ -46,6 +46,7 @@ export async function requestJson<T>(
     accessToken?: string;
   } = {},
 ): Promise<T> {
+  console.log(`token: ${accessToken}`)
   const response = await fetch(`${API_BASE_URL}${path}`, {
     method,
     headers: {

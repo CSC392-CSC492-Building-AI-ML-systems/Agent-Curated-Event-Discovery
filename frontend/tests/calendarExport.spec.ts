@@ -15,7 +15,6 @@ const base: EventideEvent = {
   venue: { id: 1, name: "Town Hall", address: "Toronto, ON", coordinates: null },
   link: "",
   eighteenPlus: false,
-  likes: 0,
   saves: 0,
 };
 
